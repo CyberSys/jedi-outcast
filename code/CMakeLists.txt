@@ -53,6 +53,8 @@ if (cxx_has_unused_but_set)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable")
 endif()
 
+set (OpenGL_GL_PREFERENCE GLVND)
+
 add_definitions( -D_M_IX86=1 )	# tested to mean little endian...
 add_definitions( -D_IMMERSION_DISABLE )
 add_definitions( -DNDEBUG )
@@ -61,7 +63,7 @@ add_definitions( -DFINAL_BUILD )
 find_package (SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
 
-find_package(OpenGL REQUIRED)
+find_package(OpenGL COMPONENTS OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 find_package(OpenAL REQUIRED)
@@ -309,8 +311,9 @@ set_target_properties(jk2sp PROPERTIES COMPILE_DEFINITIONS "_JK2EXE;_FF_DISABLE"
 target_link_libraries(jk2sp
 	m pthread
 	${SDL_LIBRARY}
-	${OPENGL_gl_LIBRARY}
+	${OPENGL_LIBRARIES}
 	${OPENAL_LIBRARY}
+	${OPENGL_glx_LIBRARY}
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
