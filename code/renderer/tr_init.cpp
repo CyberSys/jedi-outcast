@@ -11,6 +11,9 @@
 #include "tr_jpeg_interface.h"
 #include "tr_font.h"
 
+#define Com_Memset memset
+#define Com_Memcpy memcpy
+
 glconfig_t	glConfig;
 glstate_t	glState;
 
@@ -239,6 +242,8 @@ static void InitOpenGL( void )
 	//		- r_gamma
 	//
 
+    ri.Printf( PRINT_DEVELOPER, "InitOpenGL( )\n" );
+    
 	if ( glConfig.vidWidth == 0 )
 	{		
 		GLimp_Init();
@@ -1284,6 +1289,9 @@ void RE_Shutdown( qboolean destroyWindow ) {
 	// shut down platform specific OpenGL stuff
 	if ( destroyWindow ) {
 		GLimp_Shutdown();
+
+		Com_Memset( &glConfig, 0, sizeof( glConfig ) );
+		Com_Memset( &glState, 0, sizeof( glState ) );
 	}
 	tr.registered = qfalse;
 }
