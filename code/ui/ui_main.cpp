@@ -22,11 +22,11 @@ USER INTERFACE MAIN
 
 #define LISTBUFSIZE 10240
 
-static struct 
+static struct
 {
 	char	listBuf[LISTBUFSIZE];			//	The list of file names read in
 
-	// For scrolling through file names 
+	// For scrolling through file names
 	int				currentLine;		//	Index to currentSaveFileComments[] currently highlighted
 	int				saveFileCnt;		//	Number of save files read in
 
@@ -41,7 +41,7 @@ static struct
 
 byte screenShotBuf[SG_SCR_WIDTH * SG_SCR_HEIGHT * 4];
 
-typedef struct 
+typedef struct
 {
 	char *currentSaveFileName;						// file name of savegame
 	char currentSaveFileComments[iSG_COMMENT_SIZE];	// file comment
@@ -97,7 +97,7 @@ vmCvar_t	ui_smallFont;
 vmCvar_t	ui_bigFont;
 vmCvar_t	ui_hudFiles;
 
-cvarTable_t		cvarTable[] = 
+cvarTable_t		cvarTableUI[] =
 {
 	{ &ui_drawCrosshair,		"cg_drawCrosshair",		"1",			CVAR_ARCHIVE },
 	{ &ui_marks,				"cg_marks",				"1",			CVAR_ARCHIVE },
@@ -105,10 +105,10 @@ cvarTable_t		cvarTable[] =
 	{ &ui_menuFiles,			"ui_menuFiles",			"ui/menus.txt", CVAR_ARCHIVE },
 	{ &ui_smallFont,			"ui_smallFont",			"0.25",			CVAR_ARCHIVE},
 	{ &ui_bigFont,				"ui_bigFont",			"0.4",			CVAR_ARCHIVE},
-	{ &ui_hudFiles,				"cg_hudFiles",			"ui/jk2hud.txt",CVAR_ARCHIVE}, 
+	{ &ui_hudFiles,				"cg_hudFiles",			"ui/jk2hud.txt",CVAR_ARCHIVE},
 };
 
-int		cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
+int		cvarTableUISize = sizeof(cvarTableUI) / sizeof(cvarTableUI[0]);
 
 void Text_Paint(float x, float y, float scale, vec4_t color, const char *text, int iMaxPixelWidth, int style, int iFontIndex);
 int Key_GetCatcher( void );
@@ -119,7 +119,7 @@ void _UI_Refresh( int realtime )
 	static int index;
 	static int	previousTimes[UI_FPS_FRAMES];
 
-	if ( !( Key_GetCatcher() & KEYCATCH_UI ) ) 
+	if ( !( Key_GetCatcher() & KEYCATCH_UI ) )
 	{
 		return;
 	}
@@ -132,16 +132,16 @@ void _UI_Refresh( int realtime )
 
 	previousTimes[index % UI_FPS_FRAMES] = uiInfo.uiDC.frameTime;
 	index++;
-	if ( index > UI_FPS_FRAMES ) 
+	if ( index > UI_FPS_FRAMES )
 	{
 		int i, total;
 		// average multiple frames together to smooth changes out a bit
 		total = 0;
-		for ( i = 0 ; i < UI_FPS_FRAMES ; i++ ) 
+		for ( i = 0 ; i < UI_FPS_FRAMES ; i++ )
 		{
 			total += previousTimes[i];
 		}
-		if ( !total ) 
+		if ( !total )
 		{
 			total = 1;
 		}
@@ -152,7 +152,7 @@ void _UI_Refresh( int realtime )
 
 	UI_UpdateCvars();
 
-	if (Menu_Count() > 0) 
+	if (Menu_Count() > 0)
 	{
 		// paint all the menus
 		Menu_PaintAll();
@@ -162,8 +162,8 @@ void _UI_Refresh( int realtime )
 //		UI_BuildServerStatus(qfalse);
 		// refresh find player list
 //		UI_BuildFindPlayerList(qfalse);
-	} 
-	
+	}
+
 	// draw cursor
 	UI_SetColor( NULL );
 	if (Menu_Count() > 0)
@@ -215,7 +215,7 @@ This must be the very first function compiled into the .qvm file
 */
 intptr_t vmMain( intptr_t command, intptr_t arg0, intptr_t arg1, intptr_t arg2,
     intptr_t arg3, intptr_t arg4, intptr_t arg5, intptr_t arg6, intptr_t arg7,
-    intptr_t arg8, intptr_t arg9, intptr_t arg10, intptr_t arg11  ) 
+    intptr_t arg8, intptr_t arg9, intptr_t arg10, intptr_t arg11  )
 {
 	return 0;
 }
@@ -228,7 +228,7 @@ Text_PaintChar
 ================
 */
 /*
-static void Text_PaintChar(float x, float y, float width, float height, float scale, float s, float t, float s2, float t2, qhandle_t hShader) 
+static void Text_PaintChar(float x, float y, float width, float height, float scale, float s, float t, float s2, float t2, qhandle_t hShader)
 {
 	float w, h;
 
@@ -282,7 +282,7 @@ Text_PaintWithCursor
 ================
 */
 // iMaxPixelWidth is 0 here for no-limit
-void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const char *text, int cursorPos, char cursor, int iMaxPixelWidth, int style, int iFontIndex) 
+void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const char *text, int cursorPos, char cursor, int iMaxPixelWidth, int style, int iFontIndex)
 {
 	Text_Paint(x, y, scale, color, text, iMaxPixelWidth, style, iFontIndex);
 
@@ -296,18 +296,18 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const cha
 	//
 	strncpy(sTemp,text,iCopyCount);
 			sTemp[iCopyCount] = '\0';
-	
+
 	int iNextXpos  = ui.R_Font_StrLenPixels(sTemp, iFontIndex, scale );
 
 	Text_Paint(x+iNextXpos, y, scale, color, va("%c",cursor), iMaxPixelWidth, style|ITEM_TEXTSTYLE_BLINK, iFontIndex);
 }
 
 
-const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *handle) 
+const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *handle)
 {
 	*handle = -1;
 
-	if (feederID == FEEDER_SAVEGAMES) 
+	if (feederID == FEEDER_SAVEGAMES)
 	{
 		if (column==0)
 		{
@@ -318,30 +318,30 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 			return s_savedata[index].currentSaveFileDateTimeString;
 		}
 	}
-/*	if (feederID == FEEDER_MAPS) 
+/*	if (feederID == FEEDER_MAPS)
 	{
 		int actual;
 		return UI_SelectedMap(index, &actual);
-	} 
-	else 
-*/	if (feederID == FEEDER_MODS) 
+	}
+	else
+*/	if (feederID == FEEDER_MODS)
 	{
-		if (index >= 0 && index < uiInfo.modCount) 
+		if (index >= 0 && index < uiInfo.modCount)
 		{
-			if (uiInfo.modList[index].modDescr && *uiInfo.modList[index].modDescr) 
+			if (uiInfo.modList[index].modDescr && *uiInfo.modList[index].modDescr)
 			{
 				return uiInfo.modList[index].modDescr;
-			} 
-			else 
+			}
+			else
 			{
 				return uiInfo.modList[index].modName;
 			}
 		}
-	} 
+	}
 /*
-	else if (feederID == FEEDER_DEMOS) 
+	else if (feederID == FEEDER_DEMOS)
 	{
-		if (index >= 0 && index < uiInfo.demoCount) 
+		if (index >= 0 && index < uiInfo.demoCount)
 		{
 			return uiInfo.demoList[index];
 		}
@@ -350,36 +350,36 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 	return "";
 }
 
-qhandle_t UI_FeederItemImage(float feederID, int index) 
+qhandle_t UI_FeederItemImage(float feederID, int index)
 {
-	if (feederID == FEEDER_SAVEGAMES) 
+	if (feederID == FEEDER_SAVEGAMES)
 	{
 		/*
-		if (index >= 0 && index < uiInfo.characterCount) 
+		if (index >= 0 && index < uiInfo.characterCount)
 		{
-			if (uiInfo.characterList[index].headImage == -1) 
+			if (uiInfo.characterList[index].headImage == -1)
 			{
 				uiInfo.characterList[index].headImage = trap_R_RegisterShaderNoMip(uiInfo.characterList[index].imageName);
 			}
 
 			return uiInfo.characterList[index].headImage;
 		}*/
-	} 
-/*	else if (feederID == FEEDER_Q3HEADS) 
+	}
+/*	else if (feederID == FEEDER_Q3HEADS)
 	{
-		if (index >= 0 && index < uiInfo.q3HeadCount) 
+		if (index >= 0 && index < uiInfo.q3HeadCount)
 		{
 			return uiInfo.q3HeadIcons[index];
 		}
-	} 
-	else if (feederID == FEEDER_ALLMAPS || feederID == FEEDER_MAPS) 
+	}
+	else if (feederID == FEEDER_ALLMAPS || feederID == FEEDER_MAPS)
 	{
 		int actual;
 		UI_SelectedMap(index, &actual);
 		index = actual;
-		if (index >= 0 && index < uiInfo.mapCount) 
+		if (index >= 0 && index < uiInfo.mapCount)
 		{
-			if (uiInfo.mapList[index].levelShot == -1) 
+			if (uiInfo.mapList[index].levelShot == -1)
 			{
 				uiInfo.mapList[index].levelShot = trap_R_RegisterShaderNoMip(uiInfo.mapList[index].imageName);
 			}
@@ -426,7 +426,7 @@ static qboolean UI_DeferMenuScript ( const char **args )
 	const char* name;
 
 	// Whats the reason for being deferred?
-	if (!String_Parse(args, &name)) 
+	if (!String_Parse(args, &name))
 	{
 		return qfalse;
 	}
@@ -463,39 +463,39 @@ static qboolean UI_DeferMenuScript ( const char **args )
 UI_RunMenuScript
 ===============
 */
-static qboolean UI_RunMenuScript ( const char **args ) 
+static qboolean UI_RunMenuScript ( const char **args )
 {
 	const char *name, *name2,*mapName,*menuName,*warningMenuName;
 
-	if (String_Parse(args, &name)) 
+	if (String_Parse(args, &name))
 	{
-		if (Q_stricmp(name, "resetdefaults") == 0)		
+		if (Q_stricmp(name, "resetdefaults") == 0)
 		{
 			UI_ResetDefaults();
 		}
-		else if (Q_stricmp(name, "saveControls") == 0) 
+		else if (Q_stricmp(name, "saveControls") == 0)
 		{
 			Controls_SetConfig(qtrue);
-		} 
-		else if (Q_stricmp(name, "loadControls") == 0) 
+		}
+		else if (Q_stricmp(name, "loadControls") == 0)
 		{
 			Controls_GetConfig();
-		} 
-		else if (Q_stricmp(name, "clearError") == 0) 
+		}
+		else if (Q_stricmp(name, "clearError") == 0)
 		{
 			Cvar_Set("com_errorMessage", "");
-		} 
-		else if (Q_stricmp(name, "ReadSaveDirectory") == 0) 
+		}
+		else if (Q_stricmp(name, "ReadSaveDirectory") == 0)
 		{
 			s_savegame.saveFileCnt = -1;	//force a refresh at drawtime
 //			ReadSaveDirectory();
-		} 
-		else if (Q_stricmp(name, "loadAuto") == 0) 
+		}
+		else if (Q_stricmp(name, "loadAuto") == 0)
 		{
 			Menus_CloseAll();
 			ui.Cmd_ExecuteText( EXEC_APPEND, "load auto\n");
 		}
-		else if (Q_stricmp(name, "loadgame") == 0) 
+		else if (Q_stricmp(name, "loadgame") == 0)
 		{
 			if (s_savedata[s_savegame.currentLine].currentSaveFileName)// && (*s_file_desc_field.field.buffer))
 			{
@@ -503,7 +503,7 @@ static qboolean UI_RunMenuScript ( const char **args )
 				ui.Cmd_ExecuteText( EXEC_APPEND, va("load %s\n", s_savedata[s_savegame.currentLine].currentSaveFileName));
 			}
 		}
-		else if (Q_stricmp(name, "deletegame") == 0) 
+		else if (Q_stricmp(name, "deletegame") == 0)
 		{
 			if (s_savedata[s_savegame.currentLine].currentSaveFileName)	// A line was chosen
 			{
@@ -515,7 +515,7 @@ static qboolean UI_RunMenuScript ( const char **args )
 
 			}
 		}
-		else if (Q_stricmp(name, "savegame") == 0) 
+		else if (Q_stricmp(name, "savegame") == 0)
 		{
 			char fileName[MAX_SAVELOADNAME];
 			char description[64];
@@ -542,43 +542,43 @@ static qboolean UI_RunMenuScript ( const char **args )
 			ui.Cmd_ExecuteText( EXEC_APPEND, va("save %s\n", fileName));
 			s_savegame.saveFileCnt = -1;	//force a refresh the next time around
 		}
-		else if (Q_stricmp(name, "LoadMods") == 0) 
+		else if (Q_stricmp(name, "LoadMods") == 0)
 		{
 			UI_LoadMods();
-		} 
-		else if (Q_stricmp(name, "RunMod") == 0) 
+		}
+		else if (Q_stricmp(name, "RunMod") == 0)
 		{
 			Cvar_Set( "fs_game", uiInfo.modList[uiInfo.modIndex].modName);
 extern	void FS_Restart( void );
 			FS_Restart();
 			Cbuf_ExecuteText( EXEC_APPEND, "vid_restart;" );
-		} 
+		}
 		// FIXME BOB - do we want this?
 		/*
-		else if (Q_stricmp(name, "RunDemo") == 0) 
+		else if (Q_stricmp(name, "RunDemo") == 0)
 		{
 			Cbuf_ExecuteText( EXEC_APPEND, va("demo %s\n", uiInfo.demoList[uiInfo.demoIndex]));
-		} 
+		}
 		*/
-		else if (Q_stricmp(name, "Quit") == 0) 
+		else if (Q_stricmp(name, "Quit") == 0)
 		{
 			Cbuf_ExecuteText( EXEC_NOW, "quit");
-		} 
-		else if (Q_stricmp(name, "Controls") == 0) 
+		}
+		else if (Q_stricmp(name, "Controls") == 0)
 		{
 			Cvar_Set( "cl_paused", "1" );
 			trap_Key_SetCatcher( KEYCATCH_UI );
 			Menus_CloseAll();
 			Menus_ActivateByName("setup_menu2");
-		} 
-		else if (Q_stricmp(name, "Leave") == 0) 
+		}
+		else if (Q_stricmp(name, "Leave") == 0)
 		{
 			Cbuf_ExecuteText( EXEC_APPEND, "disconnect\n" );
 			trap_Key_SetCatcher( KEYCATCH_UI );
 			Menus_CloseAll();
 			Menus_ActivateByName("mainMenu");
-		} 
-		else if (Q_stricmp(name, "getvideosetup") == 0) 
+		}
+		else if (Q_stricmp(name, "getvideosetup") == 0)
 		{
 			UI_GetVideoSetup ( );
 		}
@@ -586,27 +586,27 @@ extern	void FS_Restart( void );
 		{
 			UI_UpdateVideoSetup ( );
 		}
-		else if (Q_stricmp(name, "nextDataPadForcePower") == 0)		
+		else if (Q_stricmp(name, "nextDataPadForcePower") == 0)
 		{
 			ui.Cmd_ExecuteText( EXEC_APPEND, "dpforcenext\n");
 		}
-		else if (Q_stricmp(name, "prevDataPadForcePower") == 0)		
+		else if (Q_stricmp(name, "prevDataPadForcePower") == 0)
 		{
 			ui.Cmd_ExecuteText( EXEC_APPEND, "dpforceprev\n");
 		}
-		else if (Q_stricmp(name, "nextDataPadWeapon") == 0)		
+		else if (Q_stricmp(name, "nextDataPadWeapon") == 0)
 		{
 			ui.Cmd_ExecuteText( EXEC_APPEND, "dpweapnext\n");
 		}
-		else if (Q_stricmp(name, "prevDataPadWeapon") == 0)		
+		else if (Q_stricmp(name, "prevDataPadWeapon") == 0)
 		{
 			ui.Cmd_ExecuteText( EXEC_APPEND, "dpweapprev\n");
 		}
-		else if (Q_stricmp(name, "nextDataPadInventory") == 0)		
+		else if (Q_stricmp(name, "nextDataPadInventory") == 0)
 		{
 			ui.Cmd_ExecuteText( EXEC_APPEND, "dpinvnext\n");
 		}
-		else if (Q_stricmp(name, "prevDataPadInventory") == 0)		
+		else if (Q_stricmp(name, "prevDataPadInventory") == 0)
 		{
 			ui.Cmd_ExecuteText( EXEC_APPEND, "dpinvprev\n");
 		}
@@ -618,7 +618,7 @@ extern	void FS_Restart( void );
 
 			UI_CheckVid1Data(menuName,warningMenuName);
 		}
-		else if (Q_stricmp(name, "startgame") == 0) 
+		else if (Q_stricmp(name, "startgame") == 0)
 		{
 			Menus_CloseAll();
 			if ( Cvar_VariableIntegerValue("com_demo") )
@@ -637,24 +637,24 @@ extern	void FS_Restart( void );
 				ui.Cmd_ExecuteText( EXEC_APPEND, "devmap kejim_post\n");
 #endif
 			}
-		} 
-		else if (Q_stricmp(name, "startmap") == 0) 
+		}
+		else if (Q_stricmp(name, "startmap") == 0)
 		{
 			Menus_CloseAll();
 
 			String_Parse(args, &mapName);
 
 			ui.Cmd_ExecuteText( EXEC_APPEND, va("map %s\n",mapName));
-		} 
-		else if (Q_stricmp(name, "closeingame") == 0) 
+		}
+		else if (Q_stricmp(name, "closeingame") == 0)
 		{
 			trap_Key_SetCatcher( trap_Key_GetCatcher() & ~KEYCATCH_UI );
 			trap_Key_ClearStates();
 			Cvar_Set( "cl_paused", "0" );
 			Menus_CloseAll();
 			Menus_ActivateByName("mainhud");
-		} 
-		else if (Q_stricmp(name, "closedatapad") == 0) 
+		}
+		else if (Q_stricmp(name, "closedatapad") == 0)
 		{
 			trap_Key_SetCatcher( trap_Key_GetCatcher() & ~KEYCATCH_UI );
 			trap_Key_ClearStates();
@@ -666,23 +666,23 @@ extern	void FS_Restart( void );
 			Cvar_Set( "cg_updatedDataPadForcePower2", "0" );
 			Cvar_Set( "cg_updatedDataPadForcePower3", "0" );
 			Cvar_Set( "cg_updatedDataPadObjective", "0" );
-		} 
-		else if (Q_stricmp(name, "glCustom") == 0) 
+		}
+		else if (Q_stricmp(name, "glCustom") == 0)
 		{
 			Cvar_Set("ui_r_glCustom", "4");
-		} 
-		else if (Q_stricmp(name, "update") == 0) 
+		}
+		else if (Q_stricmp(name, "update") == 0)
 		{
-			if (String_Parse(args, &name2)) 
+			if (String_Parse(args, &name2))
 			{
 				UI_Update(name2);
 			}
-			else 
+			else
 			{
 				Com_Printf("update missing cmd\n");
 			}
 		}
-		else 
+		else
 		{
 			Com_Printf("unknown UI script %s\n", name);
 		}
@@ -696,7 +696,7 @@ extern	void FS_Restart( void );
 UI_GetValue
 =================
 */
-static float UI_GetValue(int ownerDraw) 
+static float UI_GetValue(int ownerDraw)
 {
   return 0;
 }
@@ -706,40 +706,40 @@ static float UI_GetValue(int ownerDraw)
 UI_StopCinematic
 =================
 */
-static void UI_StopCinematic(int handle) 
+static void UI_StopCinematic(int handle)
 {
-	if (handle >= 0) 
+	if (handle >= 0)
 	{
 		trap_CIN_StopCinematic(handle);
-	} 
-	else 
+	}
+	else
 	{
 		handle = abs(handle);
-		if (handle == UI_MAPCINEMATIC) 
+		if (handle == UI_MAPCINEMATIC)
 		{
 			// FIXME - BOB do we need this?
-//			if (uiInfo.mapList[ui_currentMap.integer].cinematic >= 0) 
+//			if (uiInfo.mapList[ui_currentMap.integer].cinematic >= 0)
 //			{
 //				trap_CIN_StopCinematic(uiInfo.mapList[ui_currentMap.integer].cinematic);
 //				uiInfo.mapList[ui_currentMap.integer].cinematic = -1;
 //			}
-		} 
-		else if (handle == UI_NETMAPCINEMATIC) 
+		}
+		else if (handle == UI_NETMAPCINEMATIC)
 		{
 			// FIXME - BOB do we need this?
-//			if (uiInfo.serverStatus.currentServerCinematic >= 0) 
+//			if (uiInfo.serverStatus.currentServerCinematic >= 0)
 //			{
 //				trap_CIN_StopCinematic(uiInfo.serverStatus.currentServerCinematic);
 //				uiInfo.serverStatus.currentServerCinematic = -1;
 //			}
-		} 
-		else if (handle == UI_CLANCINEMATIC) 
+		}
+		else if (handle == UI_CLANCINEMATIC)
 		{
 			// FIXME - BOB do we need this?
 //			int i = UI_TeamIndexFromName(UI_Cvar_VariableString("ui_teamName"));
-//			if (i >= 0 && i < uiInfo.teamCount) 
+//			if (i >= 0 && i < uiInfo.teamCount)
 //			{
-//				if (uiInfo.teamList[i].cinematic >= 0) 
+//				if (uiInfo.teamList[i].cinematic >= 0)
 //				{
 //					trap_CIN_StopCinematic(uiInfo.teamList[i].cinematic);
 //					uiInfo.teamList[i].cinematic = -1;
@@ -751,10 +751,10 @@ static void UI_StopCinematic(int handle)
 static void UI_HandleLoadSelection()
 {
 	Cvar_Set("ui_SelectionOK", va("%d",(s_savegame.currentLine < s_savegame.saveFileCnt)) );
-	Cvar_Set("ui_gameDesc", s_savedata[s_savegame.currentLine].currentSaveFileComments );	// set comment 
+	Cvar_Set("ui_gameDesc", s_savedata[s_savegame.currentLine].currentSaveFileComments );	// set comment
 	if (!ui.SG_GetSaveImage(s_savedata[s_savegame.currentLine].currentSaveFileName, &screenShotBuf))
 	{
-		memset( screenShotBuf,0,(SG_SCR_WIDTH * SG_SCR_HEIGHT * 4)); 
+		memset( screenShotBuf,0,(SG_SCR_WIDTH * SG_SCR_HEIGHT * 4));
 	}
 }
 
@@ -763,9 +763,9 @@ static void UI_HandleLoadSelection()
 UI_FeederCount
 =================
 */
-static int UI_FeederCount(float feederID) 
+static int UI_FeederCount(float feederID)
 {
-	if (feederID == FEEDER_SAVEGAMES) 
+	if (feederID == FEEDER_SAVEGAMES)
 	{
 		if (s_savegame.saveFileCnt == -1)
 		{
@@ -773,12 +773,12 @@ static int UI_FeederCount(float feederID)
 			UI_HandleLoadSelection();
 		}
 		return s_savegame.saveFileCnt;
-	} 
-	else if (feederID == FEEDER_MODS) 
+	}
+	else if (feederID == FEEDER_MODS)
 	{
 		return uiInfo.modCount;
-	} 
-	else if (feederID == FEEDER_DEMOS) 
+	}
+	else if (feederID == FEEDER_DEMOS)
 	{
 		return uiInfo.demoCount;
 	}
@@ -790,29 +790,29 @@ static int UI_FeederCount(float feederID)
 UI_FeederSelection
 =================
 */
-static void UI_FeederSelection(float feederID, int index) 
+static void UI_FeederSelection(float feederID, int index)
 {
 	static char info[MAX_STRING_CHARS];
 
-	if (feederID == FEEDER_SAVEGAMES) 
+	if (feederID == FEEDER_SAVEGAMES)
 	{
 		s_savegame.currentLine = index;
 		UI_HandleLoadSelection();
-	} 
-	else if (feederID == FEEDER_MODS) 
+	}
+	else if (feederID == FEEDER_MODS)
 	{
 		uiInfo.modIndex = index;
-	} 
-	else if (feederID == FEEDER_CINEMATICS) 
+	}
+	else if (feederID == FEEDER_CINEMATICS)
 	{
 		uiInfo.movieIndex = index;
-		if (uiInfo.previewMovie >= 0) 
+		if (uiInfo.previewMovie >= 0)
 		{
 			trap_CIN_StopCinematic(uiInfo.previewMovie);
 		}
 		uiInfo.previewMovie = -1;
-	} 
-	else if (feederID == FEEDER_DEMOS) 
+	}
+	else if (feederID == FEEDER_DEMOS)
 	{
 		uiInfo.demoIndex = index;
 	}
@@ -821,11 +821,11 @@ static void UI_FeederSelection(float feederID, int index)
 void Key_KeynumToStringBuf( int keynum, char *buf, int buflen );
 void Key_GetBindingBuf( int keynum, char *buf, int buflen );
 
-static qboolean UI_Crosshair_HandleKey(int flags, float *special, int key) 
+static qboolean UI_Crosshair_HandleKey(int flags, float *special, int key)
 {
-  if (key == A_MOUSE1 || key == A_MOUSE2 || key == A_ENTER || key == A_KP_ENTER) 
+  if (key == A_MOUSE1 || key == A_MOUSE2 || key == A_ENTER || key == A_KP_ENTER)
   {
-		if (key == A_MOUSE2) 
+		if (key == A_MOUSE2)
 		{
 			uiInfo.currentCrosshair--;
 		} else {
@@ -837,17 +837,17 @@ static qboolean UI_Crosshair_HandleKey(int flags, float *special, int key)
 		} else if (uiInfo.currentCrosshair < 0) {
 			uiInfo.currentCrosshair = NUM_CROSSHAIRS - 1;
 		}
-		Cvar_Set("cg_drawCrosshair", va("%d", uiInfo.currentCrosshair)); 
+		Cvar_Set("cg_drawCrosshair", va("%d", uiInfo.currentCrosshair));
 		return qtrue;
 	}
 	return qfalse;
 }
 
 
-static qboolean UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, int key) 
+static qboolean UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, int key)
 {
 
-	switch (ownerDraw) 
+	switch (ownerDraw)
 	{
 		case UI_CROSSHAIR:
 			UI_Crosshair_HandleKey(flags, special, key);
@@ -865,7 +865,7 @@ static qboolean UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, 
 UI_Init
 =================
 */
-void _UI_Init( qboolean inGameLoad ) 
+void _UI_Init( qboolean inGameLoad )
 {
 	int start;
 
@@ -879,12 +879,12 @@ void _UI_Init( qboolean inGameLoad )
 	// for 640x480 virtualized screen
 	uiInfo.uiDC.yscale = uiInfo.uiDC.glconfig.vidHeight * (1.0/480.0);
 	uiInfo.uiDC.xscale = uiInfo.uiDC.glconfig.vidWidth * (1.0/640.0);
-	if ( uiInfo.uiDC.glconfig.vidWidth * 480 > uiInfo.uiDC.glconfig.vidHeight * 640 ) 
+	if ( uiInfo.uiDC.glconfig.vidWidth * 480 > uiInfo.uiDC.glconfig.vidHeight * 640 )
 	{
 		// wide screen
 		uiInfo.uiDC.bias = 0.5 * ( uiInfo.uiDC.glconfig.vidWidth - ( uiInfo.uiDC.glconfig.vidHeight * (640.0/480.0) ) );
 	}
-	else 
+	else
 	{
 		// no wide screen
 		uiInfo.uiDC.bias = 0;
@@ -912,7 +912,7 @@ void _UI_Init( qboolean inGameLoad )
 	uiInfo.uiDC.ownerDrawVisible	= &UI_OwnerDrawVisible;
 	uiInfo.uiDC.ownerDrawWidth		= &UI_OwnerDrawWidth;
 	uiInfo.uiDC.ownerDrawItem		= &UI_OwnerDraw;
-	uiInfo.uiDC.Print				= &Com_Printf; 
+	uiInfo.uiDC.Print				= &Com_Printf;
 	uiInfo.uiDC.registerSound		= &trap_S_RegisterSound;
 	uiInfo.uiDC.registerModel		= ui.R_RegisterModel;
 	uiInfo.uiDC.clearScene			= &trap_R_ClearScene;
@@ -947,7 +947,7 @@ void _UI_Init( qboolean inGameLoad )
 	start = Sys_Milliseconds();
 
 	uis.debugMode = qfalse;
-	
+
 	Menus_CloseAll();
 
 	// sets defaults for ui temp cvars
@@ -970,12 +970,12 @@ void _UI_Init( qboolean inGameLoad )
 UI_RegisterCvars
 =================
 */
-static void UI_RegisterCvars( void ) 
+static void UI_RegisterCvars( void )
 {
 	int			i;
 	cvarTable_t	*cv;
 
-	for ( i = 0, cv = cvarTable ; i < cvarTableSize ; i++, cv++ ) 
+	for ( i = 0, cv = cvarTableUI ; i < cvarTableUISize ; i++, cv++ )
 	{
 		Cvar_Register( cv->vmCvar, cv->cvarName, cv->defaultString, cv->cvarFlags );
 	}
@@ -987,7 +987,7 @@ static void UI_RegisterCvars( void )
 UI_ParseMenu
 =================
 */
-void UI_ParseMenu(const char *menuFile) 
+void UI_ParseMenu(const char *menuFile)
 {
 	char	*buffer,*holdBuffer,*token2;
 	int len;
@@ -999,13 +999,13 @@ void UI_ParseMenu(const char *menuFile)
 
 	holdBuffer = buffer;
 
-	if (len<=0) 
+	if (len<=0)
 	{
 		Com_Printf("UI_ParseMenu: Unable to load menu %s\n", menuFile);
 		return;
 	}
 
-	while ( 1 ) 
+	while ( 1 )
 	{
 
 		token2 = PC_ParseExt();
@@ -1015,43 +1015,43 @@ void UI_ParseMenu(const char *menuFile)
 			break;
 		}
 /*
-		if ( menuCount == MAX_MENUS ) 
+		if ( menuCount == MAX_MENUS )
 		{
-			PC_ParseWarning("Too many menus!");		
+			PC_ParseWarning("Too many menus!");
 			break;
 		}
 */
-		if ( *token2 == '{') 
+		if ( *token2 == '{')
 		{
 			continue;
 		}
-		else if ( *token2 == '}' ) 
+		else if ( *token2 == '}' )
 		{
 			break;
 		}
-		else if (Q_stricmp(token2, "assetGlobalDef") == 0) 
+		else if (Q_stricmp(token2, "assetGlobalDef") == 0)
 		{
-			if (Asset_Parse(&holdBuffer)) 
+			if (Asset_Parse(&holdBuffer))
 			{
 				continue;
-			} 
-			else 
+			}
+			else
 			{
 				break;
 			}
 		}
-		else if (Q_stricmp(token2, "menudef") == 0) 
+		else if (Q_stricmp(token2, "menudef") == 0)
 		{
 			// start a new menu
 			Menu_New(holdBuffer);
 			continue;
 		}
 
-		PC_ParseWarning(va("Invalid keyword '%s'",token2));		
+		PC_ParseWarning(va("Invalid keyword '%s'",token2));
 	}
 
 	PC_EndParseSession(buffer);
-	
+
 }
 
 /*
@@ -1060,7 +1060,7 @@ Load_Menu
 	Load current menu file
 =================
 */
-qboolean Load_Menu(const char **holdBuffer) 
+qboolean Load_Menu(const char **holdBuffer)
 {
 	const char	*token2;
 
@@ -1071,12 +1071,12 @@ qboolean Load_Menu(const char **holdBuffer)
 		return qfalse;
 	}
 
-	if (*token2 != '{') 
+	if (*token2 != '{')
 	{
 		return qfalse;
 	}
 
-	while ( 1 ) 
+	while ( 1 )
 	{
 		token2 = COM_ParseExt( holdBuffer, qtrue );
 
@@ -1084,8 +1084,8 @@ qboolean Load_Menu(const char **holdBuffer)
 		{
 			return qfalse;
 		}
-			
-		if ( *token2 == '}' ) 
+
+		if ( *token2 == '}' )
 		{
 			return qtrue;
 		}
@@ -1094,7 +1094,7 @@ qboolean Load_Menu(const char **holdBuffer)
 //		extern void UI_Debug_AddMenuFilePath(const char *);
 //		UI_Debug_AddMenuFilePath(token2);
 //#endif
-		UI_ParseMenu(token2); 
+		UI_ParseMenu(token2);
 
 	}
 	return qfalse;
@@ -1106,7 +1106,7 @@ UI_LoadMenus
 	Load all menus based on the files listed in the data file in menuFile (default "ui/menus.txt")
 =================
 */
-void UI_LoadMenus(const char *menuFile, qboolean reset) 
+void UI_LoadMenus(const char *menuFile, qboolean reset)
 {
 //	pc_token_t token;
 //	int handle;
@@ -1120,26 +1120,26 @@ void UI_LoadMenus(const char *menuFile, qboolean reset)
 
 	len = ui.FS_ReadFile(menuFile,(void **) &buffer);
 
-	if (len<1) 
+	if (len<1)
 	{
 		Com_Printf( va( S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile ) );
 		len = ui.FS_ReadFile("ui/menus.txt",(void **) &buffer);
 
-		if (len<1) 
+		if (len<1)
 		{
 			Com_Error( ERR_FATAL, "%s", va("default menu file not found: ui/menus.txt, unable to continue!\n", menuFile ));
 			return;
 		}
 	}
 
-	if (reset) 
+	if (reset)
 	{
 		Menu_Reset();
 	}
 
 	const char	*token2;
 	holdBuffer = buffer;
-	while ( 1 ) 
+	while ( 1 )
 	{
 		token2 = COM_ParseExt( &holdBuffer, qtrue );
 		if (!*token2)
@@ -1147,30 +1147,30 @@ void UI_LoadMenus(const char *menuFile, qboolean reset)
 			break;
 		}
 
-		if( *token2 == 0 || *token2 == '}')			// End of the menus file 
+		if( *token2 == 0 || *token2 == '}')			// End of the menus file
 		{
 			break;
 		}
 
-		if (*token2 == '{') 
+		if (*token2 == '{')
 		{
 				continue;
 		}
-		else if (Q_stricmp(token2, "loadmenu") == 0) 
+		else if (Q_stricmp(token2, "loadmenu") == 0)
 		{
-			if (Load_Menu(&holdBuffer)) 
+			if (Load_Menu(&holdBuffer))
 			{
 				continue;
-			} 
-			else 
+			}
+			else
 			{
 				break;
 			}
-		} 
+		}
 		else
 		{
 			Com_Printf("Unknown keyword '%s' in menus file %s\n", token2, menuFile);
-		} 
+		}
 	}
 
 	Com_Printf("UI menu load time = %d milli seconds\n", Sys_Milliseconds() - start);
@@ -1183,7 +1183,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset)
 UI_Load
 =================
 */
-void UI_Load(void) 
+void UI_Load(void)
 {
 	char lastName[1024];
 	menuDef_t *menu = Menu_GetFocused();
@@ -1198,12 +1198,12 @@ void UI_Load(void)
 	}
 
 
-	if (menu && menu->window.name) 
+	if (menu && menu->window.name)
 	{
 		strcpy(lastName, menu->window.name);
 	}
 
-	if (menuSet == NULL || menuSet[0] == '\0') 
+	if (menuSet == NULL || menuSet[0] == '\0')
 	{
 		menuSet = "ui/menus.txt";
 	}
@@ -1224,7 +1224,7 @@ void UI_Load(void)
 Asset_Parse
 =================
 */
-qboolean Asset_Parse(char **buffer) 
+qboolean Asset_Parse(char **buffer)
 {
 	char		*token;
 	char		*tempStr;
@@ -1237,12 +1237,12 @@ qboolean Asset_Parse(char **buffer)
 		return qfalse;
 	}
 
-	if (*token != '{') 
+	if (*token != '{')
 	{
 		return qfalse;
 	}
-    
-	while ( 1 ) 
+
+	while ( 1 )
 	{
 
 		token = PC_ParseExt();
@@ -1252,13 +1252,13 @@ qboolean Asset_Parse(char **buffer)
 			return qfalse;
 		}
 
-		if (*token == '}') 
+		if (*token == '}')
 		{
 			return qtrue;
 		}
 
 		// font
-		if (Q_stricmp(token, "mediumFont") == 0) 
+		if (Q_stricmp(token, "mediumFont") == 0)
 		{
 			if (!PC_ParseStringMem(&uiInfo.uiDC.Assets.fontStr))
 			{
@@ -1277,7 +1277,7 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "smallFont") == 0) 
+		if (Q_stricmp(token, "smallFont") == 0)
 		{
 			if (!PC_ParseStringMem((const char **) &tempStr))
 			{
@@ -1295,7 +1295,7 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "bigFont") == 0) 
+		if (Q_stricmp(token, "bigFont") == 0)
 		{
 			if (!PC_ParseStringMem((const char **) &tempStr))
 			{
@@ -1315,7 +1315,7 @@ qboolean Asset_Parse(char **buffer)
 		}
 
 
-		if (Q_stricmp(token, "stripedFile") == 0) 
+		if (Q_stricmp(token, "stripedFile") == 0)
 		{
 			if (!PC_ParseStringMem((const char **) &tempStr))
 			{
@@ -1340,7 +1340,7 @@ qboolean Asset_Parse(char **buffer)
 		}
 
 		// gradientbar
-		if (Q_stricmp(token, "gradientbar") == 0) 
+		if (Q_stricmp(token, "gradientbar") == 0)
 		{
 			if (!PC_ParseStringMem((const char **)&tempStr))
 			{
@@ -1352,7 +1352,7 @@ qboolean Asset_Parse(char **buffer)
 		}
 
 		// enterMenuSound
-		if (Q_stricmp(token, "menuEnterSound") == 0) 
+		if (Q_stricmp(token, "menuEnterSound") == 0)
 		{
 			if (!PC_ParseStringMem((const char **)&tempStr))
 			{
@@ -1365,7 +1365,7 @@ qboolean Asset_Parse(char **buffer)
 		}
 
 		// exitMenuSound
-		if (Q_stricmp(token, "menuExitSound") == 0) 
+		if (Q_stricmp(token, "menuExitSound") == 0)
 		{
 			if (!PC_ParseStringMem((const char **) &tempStr))
 			{
@@ -1377,7 +1377,7 @@ qboolean Asset_Parse(char **buffer)
 		}
 
 		// itemFocusSound
-		if (Q_stricmp(token, "itemFocusSound") == 0) 
+		if (Q_stricmp(token, "itemFocusSound") == 0)
 		{
 			if (!PC_ParseStringMem((const char **) &tempStr))
 			{
@@ -1389,7 +1389,7 @@ qboolean Asset_Parse(char **buffer)
 		}
 
 		// menuBuzzSound
-		if (Q_stricmp(token, "menuBuzzSound") == 0) 
+		if (Q_stricmp(token, "menuBuzzSound") == 0)
 		{
 			if (!PC_ParseStringMem((const char **) &tempStr))
 			{
@@ -1447,7 +1447,7 @@ qboolean Asset_Parse(char **buffer)
 		}
 
 #endif // _IMMERSION
-		if (Q_stricmp(token, "cursor") == 0) 
+		if (Q_stricmp(token, "cursor") == 0)
 		{
 			if (!PC_ParseStringMem((const char **) &uiInfo.uiDC.Assets.cursorStr))
 			{
@@ -1458,7 +1458,7 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "fadeClamp") == 0) 
+		if (Q_stricmp(token, "fadeClamp") == 0)
 		{
 			if (PC_ParseFloat(&uiInfo.uiDC.Assets.fadeClamp))
 			{
@@ -1468,9 +1468,9 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "fadeCycle") == 0) 
+		if (Q_stricmp(token, "fadeCycle") == 0)
 		{
-			if (PC_ParseInt(&uiInfo.uiDC.Assets.fadeCycle)) 
+			if (PC_ParseInt(&uiInfo.uiDC.Assets.fadeCycle))
 			{
 				PC_ParseWarning("Bad 1st parameter for keyword 'fadeCycle'");
 				return qfalse;
@@ -1478,9 +1478,9 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "fadeAmount") == 0) 
+		if (Q_stricmp(token, "fadeAmount") == 0)
 		{
-			if (PC_ParseFloat(&uiInfo.uiDC.Assets.fadeAmount)) 
+			if (PC_ParseFloat(&uiInfo.uiDC.Assets.fadeAmount))
 			{
 				PC_ParseWarning("Bad 1st parameter for keyword 'fadeAmount'");
 				return qfalse;
@@ -1488,9 +1488,9 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "shadowX") == 0) 
+		if (Q_stricmp(token, "shadowX") == 0)
 		{
-			if (PC_ParseFloat(&uiInfo.uiDC.Assets.shadowX)) 
+			if (PC_ParseFloat(&uiInfo.uiDC.Assets.shadowX))
 			{
 				PC_ParseWarning("Bad 1st parameter for keyword 'shadowX'");
 				return qfalse;
@@ -1498,9 +1498,9 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "shadowY") == 0) 
+		if (Q_stricmp(token, "shadowY") == 0)
 		{
-			if (PC_ParseFloat(&uiInfo.uiDC.Assets.shadowY)) 
+			if (PC_ParseFloat(&uiInfo.uiDC.Assets.shadowY))
 			{
 				PC_ParseWarning("Bad 1st parameter for keyword 'shadowY'");
 				return qfalse;
@@ -1508,9 +1508,9 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
-		if (Q_stricmp(token, "shadowColor") == 0) 
+		if (Q_stricmp(token, "shadowColor") == 0)
 		{
-			if (PC_ParseColor(&uiInfo.uiDC.Assets.shadowColor)) 
+			if (PC_ParseColor(&uiInfo.uiDC.Assets.shadowColor))
 			{
 				PC_ParseWarning("Bad 1st parameter for keyword 'shadowColor'");
 				return qfalse;
@@ -1531,54 +1531,54 @@ qboolean Asset_Parse(char **buffer)
 UI_Update
 =================
 */
-static void UI_Update(const char *name) 
+static void UI_Update(const char *name)
 {
 	int	val = trap_Cvar_VariableValue(name);
 
 
-	if (Q_stricmp(name, "s_khz") == 0) 
+	if (Q_stricmp(name, "s_khz") == 0)
 	{
 		ui.Cmd_ExecuteText( EXEC_APPEND, "snd_restart\n" );
 		return;
 	}
 #ifdef _IMMERSION
-	if (Q_stricmp(name, "ff") == 0) 
+	if (Q_stricmp(name, "ff") == 0)
 	{
 		ui.Cmd_ExecuteText( EXEC_APPEND, "ff_restart\n");
 		return;
 	}
 #endif // _IMMERSION
 
-	if (Q_stricmp(name, "ui_SetName") == 0) 
+	if (Q_stricmp(name, "ui_SetName") == 0)
 	{
 		Cvar_Set( "name", UI_Cvar_VariableString("ui_Name"));
- 	} 
-	else if (Q_stricmp(name, "ui_setRate") == 0) 
+ 	}
+	else if (Q_stricmp(name, "ui_setRate") == 0)
 	{
 		float rate = trap_Cvar_VariableValue("rate");
-		if (rate >= 5000) 
+		if (rate >= 5000)
 		{
 			Cvar_Set("cl_maxpackets", "30");
 			Cvar_Set("cl_packetdup", "1");
-		} 
-		else if (rate >= 4000) 
+		}
+		else if (rate >= 4000)
 		{
 			Cvar_Set("cl_maxpackets", "15");
 			Cvar_Set("cl_packetdup", "2");		// favor less prediction errors when there's packet loss
-		} 
-		else 
+		}
+		else
 		{
 			Cvar_Set("cl_maxpackets", "15");
 			Cvar_Set("cl_packetdup", "1");		// favor lower bandwidth
 		}
-	} 
-	else if (Q_stricmp(name, "ui_GetName") == 0) 
+	}
+	else if (Q_stricmp(name, "ui_GetName") == 0)
 	{
 		Cvar_Set( "ui_Name", UI_Cvar_VariableString("name"));
- 	} 
-	else if (Q_stricmp(name, "ui_r_colorbits") == 0) 
+ 	}
+	else if (Q_stricmp(name, "ui_r_colorbits") == 0)
 	{
-		switch (val) 
+		switch (val)
 		{
 			case 0:
 				Cvar_SetValue( "ui_r_depthbits", 0 );
@@ -1592,10 +1592,10 @@ static void UI_Update(const char *name)
 				Cvar_SetValue( "ui_r_depthbits", 24 );
 				break;
 		}
-	} 
-	else if (Q_stricmp(name, "ui_r_lodbias") == 0) 
+	}
+	else if (Q_stricmp(name, "ui_r_lodbias") == 0)
 	{
-		switch (val) 
+		switch (val)
 		{
 			case 0:
 				Cvar_SetValue( "ui_r_subdivisions", 4 );
@@ -1608,10 +1608,10 @@ static void UI_Update(const char *name)
 				Cvar_SetValue( "ui_r_subdivisions", 20 );
 				break;
 		}
-	} 
-	else if (Q_stricmp(name, "ui_r_glCustom") == 0) 
+	}
+	else if (Q_stricmp(name, "ui_r_glCustom") == 0)
 	{
-		switch (val) 
+		switch (val)
 		{
 			case 0:	// high quality
 
@@ -1629,7 +1629,7 @@ static void UI_Update(const char *name)
 				Cvar_Set( "ui_r_texturemode", "GL_LINEAR_MIPMAP_LINEAR" );
 				break;
 
-			case 1: // normal 
+			case 1: // normal
 				Cvar_SetValue( "ui_r_fullScreen", 1 );
 				Cvar_SetValue( "ui_r_subdivisions", 4 );
 				Cvar_SetValue( "ui_r_lodbias", 0 );
@@ -1676,14 +1676,14 @@ static void UI_Update(const char *name)
 				Cvar_Set( "ui_r_texturemode", "GL_LINEAR_MIPMAP_NEAREST" );
 			break;
 		}
-	} 
-	else if (Q_stricmp(name, "ui_mousePitch") == 0) 
+	}
+	else if (Q_stricmp(name, "ui_mousePitch") == 0)
 	{
-		if (val == 0) 
+		if (val == 0)
 		{
 			Cvar_SetValue( "m_pitch", 0.022f );
-		} 
-		else 
+		}
+		else
 		{
 			Cvar_SetValue( "m_pitch", -0.022f );
 		}
@@ -1703,7 +1703,7 @@ static void UI_Update(const char *name)
 AssetCache
 =================
 */
-void AssetCache(void) 
+void AssetCache(void)
 {
 //	int n;
 	uiInfo.uiDC.Assets.scrollBar = ui.R_RegisterShaderNoMip( ASSET_SCROLLBAR );
@@ -1716,7 +1716,7 @@ void AssetCache(void)
 	uiInfo.uiDC.Assets.sliderBar = ui.R_RegisterShaderNoMip( "menu/new/slider" );
 	uiInfo.uiDC.Assets.sliderThumb = ui.R_RegisterShaderNoMip( "menu/new/sliderthumb");
 /*
-	for( n = 0; n < NUM_CROSSHAIRS; n++ ) 
+	for( n = 0; n < NUM_CROSSHAIRS; n++ )
 	{
 		uiInfo.uiDC.Assets.crosshairShader[n] = ui.R_RegisterShaderNoMip( va("gfx/2d/crosshair%c", 'a' + n ) );
 	}
@@ -1728,7 +1728,7 @@ void AssetCache(void)
 _UI_DrawSides
 =================
 */
-void _UI_DrawSides(float x, float y, float w, float h, float size) 
+void _UI_DrawSides(float x, float y, float w, float h, float size)
 {
 	size *= uiInfo.uiDC.xscale;
 	trap_R_DrawStretchPic( x, y, size, h, 0, 0, 0, 0, uiInfo.uiDC.whiteShader );
@@ -1740,7 +1740,7 @@ void _UI_DrawSides(float x, float y, float w, float h, float size)
 _UI_DrawTopBottom
 =================
 */
-void _UI_DrawTopBottom(float x, float y, float w, float h, float size) 
+void _UI_DrawTopBottom(float x, float y, float w, float h, float size)
 {
 	size *= uiInfo.uiDC.yscale;
 	trap_R_DrawStretchPic( x, y, w, size, 0, 0, 0, 0, uiInfo.uiDC.whiteShader );
@@ -1753,7 +1753,7 @@ UI_DrawRect
 Coordinates are 640*480 virtual values
 =================
 */
-void _UI_DrawRect( float x, float y, float width, float height, float size, const float *color ) 
+void _UI_DrawRect( float x, float y, float width, float height, float size, const float *color )
 {
 	trap_R_SetColor( color );
 
@@ -1768,12 +1768,12 @@ void _UI_DrawRect( float x, float y, float width, float height, float size, cons
 UI_UpdateCvars
 =================
 */
-void UI_UpdateCvars( void ) 
+void UI_UpdateCvars( void )
 {
 	int			i;
 	cvarTable_t	*cv;
 
-	for ( i = 0, cv = cvarTable ; i < cvarTableSize ; i++, cv++ ) 
+	for ( i = 0, cv = cvarTableUI ; i < cvarTableUISize ; i++, cv++ )
 	{
 		Cvar_Update( cv->vmCvar );
 	}
@@ -1784,7 +1784,7 @@ void UI_UpdateCvars( void )
 UI_DrawEffects
 =================
 */
-static void UI_DrawEffects(rectDef_t *rect, float scale, vec4_t color) 
+static void UI_DrawEffects(rectDef_t *rect, float scale, vec4_t color)
 {
 	UI_DrawHandlePic( rect->x, rect->y - 14, 128, 8, uiInfo.uiDC.Assets.fxBasePic );
 	UI_DrawHandlePic( rect->x + uiInfo.effectsColor * 16 + 8, rect->y - 16, 16, 12, uiInfo.uiDC.Assets.fxPic[uiInfo.effectsColor] );
@@ -1795,10 +1795,10 @@ static void UI_DrawEffects(rectDef_t *rect, float scale, vec4_t color)
 UI_Version
 =================
 */
-static void UI_Version(rectDef_t *rect, float scale, vec4_t color, int iFontIndex) 
+static void UI_Version(rectDef_t *rect, float scale, vec4_t color, int iFontIndex)
 {
 	int width;
-	
+
 	width = DC->textWidth(Q3_VERSION, scale, 0);
 
 	DC->drawText(rect->x - width, rect->y, scale, color, Q3_VERSION, 0, ITEM_TEXTSTYLE_SHADOWED, iFontIndex);
@@ -1809,13 +1809,13 @@ static void UI_Version(rectDef_t *rect, float scale, vec4_t color, int iFontInde
 UI_DrawKeyBindStatus
 =================
 */
-static void UI_DrawKeyBindStatus(rectDef_t *rect, float scale, vec4_t color, int textStyle, int iFontIndex) 
+static void UI_DrawKeyBindStatus(rectDef_t *rect, float scale, vec4_t color, int textStyle, int iFontIndex)
 {
-	if (Display_KeyBindPending()) 
+	if (Display_KeyBindPending())
 	{
 		Text_Paint(rect->x, rect->y, scale, color, ui.SP_GetStringTextString("MENUS_WAITINGFORKEY"), 0, textStyle, iFontIndex);
-	} 
-	else 
+	}
+	else
 	{
 //		Text_Paint(rect->x, rect->y, scale, color, ui.SP_GetStringTextString("MENUS_ENTERTOCHANGE"), 0, textStyle, iFontIndex);
 	}
@@ -1826,7 +1826,7 @@ static void UI_DrawKeyBindStatus(rectDef_t *rect, float scale, vec4_t color, int
 UI_DrawKeyBindStatus
 =================
 */
-static void UI_DrawGLInfo(rectDef_t *rect, float scale, vec4_t color, int textStyle, int iFontIndex) 
+static void UI_DrawGLInfo(rectDef_t *rect, float scale, vec4_t color, int textStyle, int iFontIndex)
 {
 #define MAX_LINES 64
 	char buff[4096];
@@ -1834,7 +1834,7 @@ static void UI_DrawGLInfo(rectDef_t *rect, float scale, vec4_t color, int textSt
 	const char *lines[MAX_LINES];
 	int y, numLines=0, i=0;
 
-	y = rect->y;	
+	y = rect->y;
 	Text_Paint(rect->x, y, scale, color, va("GL_VENDOR: %s",uiInfo.uiDC.glconfig.vendor_string), rect->w, textStyle, iFontIndex);
 	y += 15;
 	Text_Paint(rect->x, y, scale, color, va("GL_VERSION: %s: %s", uiInfo.uiDC.glconfig.version_string,uiInfo.uiDC.glconfig.renderer_string), rect->w, textStyle, iFontIndex);
@@ -1852,7 +1852,7 @@ static void UI_DrawGLInfo(rectDef_t *rect, float scale, vec4_t color, int textSt
 			*eptr++ = '\0';
 
 		// track start of valid string
-		if (*eptr && *eptr != ' ') 
+		if (*eptr && *eptr != ' ')
 		{
 			lines[numLines++] = eptr;
 			testy+=16;
@@ -1863,7 +1863,7 @@ static void UI_DrawGLInfo(rectDef_t *rect, float scale, vec4_t color, int textSt
 	}
 
 	numLines--;
-	while (i < numLines) 
+	while (i < numLines)
 	{
 		Text_Paint(rect->x, y, scale, color, lines[i++], rect->w, textStyle, iFontIndex);
 		y += 16;
@@ -1891,7 +1891,7 @@ UI_DataPad_Inventory
 =================
 */
 /*
-static void UI_DataPad_Inventory(rectDef_t *rect, float scale, vec4_t color, int iFontIndex) 
+static void UI_DataPad_Inventory(rectDef_t *rect, float scale, vec4_t color, int iFontIndex)
 {
 	Text_Paint(rect->x, rect->y, scale, color, "INVENTORY", 0, 1, iFontIndex);
 }
@@ -1902,7 +1902,7 @@ UI_DataPad_ForcePowers
 =================
 */
 /*
-static void UI_DataPad_ForcePowers(rectDef_t *rect, float scale, vec4_t color, int iFontIndex) 
+static void UI_DataPad_ForcePowers(rectDef_t *rect, float scale, vec4_t color, int iFontIndex)
 {
 	Text_Paint(rect->x, rect->y, scale, color, "FORCE POWERS", 0, 1, iFontIndex);
 }
@@ -1923,7 +1923,7 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
 UI_OwnerDraw
 =================
 */
-static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y, int ownerDraw, int ownerDrawFlags, int align, float special, float scale, vec4_t color, qhandle_t shader, int textStyle, int iFontIndex) 
+static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y, int ownerDraw, int ownerDrawFlags, int align, float special, float scale, vec4_t color, qhandle_t shader, int textStyle, int iFontIndex)
 {
 	rectDef_t rect;
 
@@ -1932,7 +1932,7 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 	rect.w = w;
 	rect.h = h;
 
-	switch (ownerDraw) 
+	switch (ownerDraw)
 	{
 		case UI_EFFECTS:
 			UI_DrawEffects(&rect, scale, color);
@@ -1996,16 +1996,16 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 UI_UpdateCvars
 =================
 */
-static qboolean UI_OwnerDrawVisible(int flags) 
+static qboolean UI_OwnerDrawVisible(int flags)
 {
 	qboolean vis = qtrue;
 
-	while (flags) 
+	while (flags)
 	{
 		// FIXME BOB
-/*		if (flags & UI_SHOW_FFA) 
+/*		if (flags & UI_SHOW_FFA)
 		{
-			if (trap_Cvar_VariableValue("g_gametype") != GT_FFA) 
+			if (trap_Cvar_VariableValue("g_gametype") != GT_FFA)
 			{
 				vis = qfalse;
 			}
@@ -2014,110 +2014,110 @@ static qboolean UI_OwnerDrawVisible(int flags)
 */
 
 		// FIXME BOB
-/*		if (flags & UI_SHOW_NOTFFA) 
+/*		if (flags & UI_SHOW_NOTFFA)
 		{
-			if (trap_Cvar_VariableValue("g_gametype") == GT_FFA) 
+			if (trap_Cvar_VariableValue("g_gametype") == GT_FFA)
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_NOTFFA;
 		}
 
-		if (flags & UI_SHOW_LEADER) 
+		if (flags & UI_SHOW_LEADER)
 		{
 			// these need to show when this client can give orders to a player or a group
-			if (!uiInfo.teamLeader) 
+			if (!uiInfo.teamLeader)
 			{
 				vis = qfalse;
-			} 
-			else 
+			}
+			else
 			{
 				// if showing yourself
-				if (ui_selectedPlayer.integer < uiInfo.myTeamCount && uiInfo.teamClientNums[ui_selectedPlayer.integer] == uiInfo.playerNumber) 
-				{	
+				if (ui_selectedPlayer.integer < uiInfo.myTeamCount && uiInfo.teamClientNums[ui_selectedPlayer.integer] == uiInfo.playerNumber)
+				{
 					vis = qfalse;
 				}
 			}
 			flags &= ~UI_SHOW_LEADER;
-		} 
+		}
 
-		if (flags & UI_SHOW_NOTLEADER) 
+		if (flags & UI_SHOW_NOTLEADER)
 		{
 			// these need to show when this client is assigning their own status or they are NOT the leader
 			if (uiInfo.teamLeader) {
 				// if not showing yourself
-				if (!(ui_selectedPlayer.integer < uiInfo.myTeamCount && uiInfo.teamClientNums[ui_selectedPlayer.integer] == uiInfo.playerNumber)) { 
+				if (!(ui_selectedPlayer.integer < uiInfo.myTeamCount && uiInfo.teamClientNums[ui_selectedPlayer.integer] == uiInfo.playerNumber)) {
 					vis = qfalse;
 				}
 			}
 			flags &= ~UI_SHOW_NOTLEADER;
-		} 
+		}
 
-		if (flags & UI_SHOW_FAVORITESERVERS) 
+		if (flags & UI_SHOW_FAVORITESERVERS)
 		{
 			// this assumes you only put this type of display flag on something showing in the proper context
-			if (ui_netSource.integer != AS_FAVORITES) 
+			if (ui_netSource.integer != AS_FAVORITES)
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_FAVORITESERVERS;
-		} 
+		}
 
-		if (flags & UI_SHOW_NOTFAVORITESERVERS) 
+		if (flags & UI_SHOW_NOTFAVORITESERVERS)
 		{
 			// this assumes you only put this type of display flag on something showing in the proper context
-			if (ui_netSource.integer == AS_FAVORITES) 
+			if (ui_netSource.integer == AS_FAVORITES)
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_NOTFAVORITESERVERS;
-		} 
+		}
 
-		if (flags & UI_SHOW_ANYTEAMGAME) 
+		if (flags & UI_SHOW_ANYTEAMGAME)
 		{
-			if (uiInfo.gameTypes[ui_gameType.integer].gtEnum <= GT_TEAM ) 
+			if (uiInfo.gameTypes[ui_gameType.integer].gtEnum <= GT_TEAM )
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_ANYTEAMGAME;
-		} 
+		}
 
-		if (flags & UI_SHOW_ANYNONTEAMGAME) 
+		if (flags & UI_SHOW_ANYNONTEAMGAME)
 		{
-			if (uiInfo.gameTypes[ui_gameType.integer].gtEnum > GT_TEAM ) 
+			if (uiInfo.gameTypes[ui_gameType.integer].gtEnum > GT_TEAM )
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_ANYNONTEAMGAME;
-		} 
+		}
 
-		if (flags & UI_SHOW_NETANYTEAMGAME) 
+		if (flags & UI_SHOW_NETANYTEAMGAME)
 		{
-			if (uiInfo.gameTypes[ui_netGameType.integer].gtEnum <= GT_TEAM ) 
+			if (uiInfo.gameTypes[ui_netGameType.integer].gtEnum <= GT_TEAM )
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_NETANYTEAMGAME;
-		} 
+		}
 
-		if (flags & UI_SHOW_NETANYNONTEAMGAME) 
+		if (flags & UI_SHOW_NETANYNONTEAMGAME)
 		{
-			if (uiInfo.gameTypes[ui_netGameType.integer].gtEnum > GT_TEAM ) 
+			if (uiInfo.gameTypes[ui_netGameType.integer].gtEnum > GT_TEAM )
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_NETANYNONTEAMGAME;
-		} 
+		}
 
-		if (flags & UI_SHOW_NEWHIGHSCORE) 
+		if (flags & UI_SHOW_NEWHIGHSCORE)
 		{
-			if (uiInfo.newHighScoreTime < uiInfo.uiDC.realTime) 
+			if (uiInfo.newHighScoreTime < uiInfo.uiDC.realTime)
 			{
 				vis = qfalse;
 			} else {
-				if (uiInfo.soundHighScore) 
+				if (uiInfo.soundHighScore)
 				{
-					if (trap_Cvar_VariableValue("sv_killserver") == 0) 
+					if (trap_Cvar_VariableValue("sv_killserver") == 0)
 					{
 						// wait on server to go down before playing sound
 						trap_S_StartLocalSound(uiInfo.newHighScoreSound, CHAN_ANNOUNCER);
@@ -2126,27 +2126,27 @@ static qboolean UI_OwnerDrawVisible(int flags)
 				}
 			}
 			flags &= ~UI_SHOW_NEWHIGHSCORE;
-		} 
+		}
 
-		if (flags & UI_SHOW_NEWBESTTIME) 
+		if (flags & UI_SHOW_NEWBESTTIME)
 		{
-			if (uiInfo.newBestTime < uiInfo.uiDC.realTime) 
+			if (uiInfo.newBestTime < uiInfo.uiDC.realTime)
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_NEWBESTTIME;
-		} 
+		}
 */
 
-		if (flags & UI_SHOW_DEMOAVAILABLE) 
+		if (flags & UI_SHOW_DEMOAVAILABLE)
 		{
-			if (!uiInfo.demoAvailable) 
+			if (!uiInfo.demoAvailable)
 			{
 				vis = qfalse;
 			}
 			flags &= ~UI_SHOW_DEMOAVAILABLE;
-		} 
-		else 
+		}
+		else
 		{
 			flags = 0;
 		}
@@ -2159,7 +2159,7 @@ static qboolean UI_OwnerDrawVisible(int flags)
 Text_Width
 =================
 */
-int Text_Width(const char *text, float scale, int iFontIndex) 
+int Text_Width(const char *text, float scale, int iFontIndex)
 {
 	// temp code until Bob retro-fits all menus to have font specifiers...
 	//
@@ -2175,26 +2175,26 @@ int Text_Width(const char *text, float scale, int iFontIndex)
 UI_OwnerDrawWidth
 =================
 */
-int UI_OwnerDrawWidth(int ownerDraw, float scale) 
+int UI_OwnerDrawWidth(int ownerDraw, float scale)
 {
 //	int i, h, value;
 //	const char *text;
 	const char *s = NULL;
 
 
-	switch (ownerDraw) 
+	switch (ownerDraw)
 	{
 	case UI_KEYBINDSTATUS:
-		if (Display_KeyBindPending()) 
+		if (Display_KeyBindPending())
 		{
 			s = ui.SP_GetStringTextString("MENUS_WAITINGFORKEY");
-		} 
-		else 
+		}
+		else
 		{
 //			s = ui.SP_GetStringTextString("MENUS_ENTERTOCHANGE");
 		}
 		break;
-	
+
 	// FIXME BOB
 //	case UI_SERVERREFRESHDATE:
 //		s = UI_Cvar_VariableString(va("ui_lastServerRefresh_%i", ui_netSource.integer));
@@ -2203,7 +2203,7 @@ int UI_OwnerDrawWidth(int ownerDraw, float scale)
       break;
 	}
 
-	if (s) 
+	if (s)
 	{
 		return Text_Width(s, scale, 0);
 	}
@@ -2215,7 +2215,7 @@ int UI_OwnerDrawWidth(int ownerDraw, float scale)
 Text_Height
 =================
 */
-int Text_Height(const char *text, float scale, int iFontIndex) 
+int Text_Height(const char *text, float scale, int iFontIndex)
 {
 	// temp until Bob retro-fits all menu files with font specifiers...
 	//
@@ -2255,7 +2255,7 @@ void _UI_MouseEvent( int dx, int dy )
 		uiInfo.uiDC.cursory = SCREEN_HEIGHT;
 	}
 
-	if (Menu_Count() > 0) 
+	if (Menu_Count() > 0)
 	{
     //menuDef_t *menu = Menu_GetFocused();
     //Menu_HandleMouseMove(menu, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
@@ -2269,7 +2269,7 @@ void _UI_MouseEvent( int dx, int dy )
 UI_KeyEvent
 =================
 */
-void _UI_KeyEvent( int key, qboolean down ) 
+void _UI_KeyEvent( int key, qboolean down )
 {
 /*	extern qboolean SwallowBadNumLockedKPKey( int iKey );
 	if (SwallowBadNumLockedKPKey(key)){
@@ -2277,21 +2277,21 @@ void _UI_KeyEvent( int key, qboolean down )
 	}
 */
 
-	if (Menu_Count() > 0) 
+	if (Menu_Count() > 0)
 	{
 		menuDef_t *menu = Menu_GetFocused();
-		if (menu) 
+		if (menu)
 		{
-			if (key == A_ESCAPE && down && !Menus_AnyFullScreenVisible()) 
+			if (key == A_ESCAPE && down && !Menus_AnyFullScreenVisible())
 			{
 				Menus_CloseAll();
-			} 
-			else 
+			}
+			else
 			{
 				Menu_HandleKey(menu, key, down );
 			}
-		} 
-		else 
+		}
+		else
 		{
 			trap_Key_SetCatcher( trap_Key_GetCatcher() & ~KEYCATCH_UI );
 			trap_Key_ClearStates();
@@ -2305,7 +2305,7 @@ void _UI_KeyEvent( int key, qboolean down )
 UI_Report
 =================
 */
-void UI_Report(void) 
+void UI_Report(void)
 {
   String_Report();
 }
@@ -2388,7 +2388,7 @@ void UI_InGameMenu(const char*menuID)
 	ui.Key_SetCatcher( KEYCATCH_UI );
 }
 
-qboolean _UI_IsFullscreen( void ) 
+qboolean _UI_IsFullscreen( void )
 {
 	return Menus_AnyFullScreenVisible();
 }
@@ -2453,7 +2453,7 @@ void Menu_Cache( void )
 UI_UpdateVideoSetup
 
 Copies the temporary user interface version of the video cvars into
-their real counterparts.  This is to create a interface which allows 
+their real counterparts.  This is to create a interface which allows
 you to discard your changes if you did something you didnt want
 =================
 */
@@ -2508,7 +2508,7 @@ void UI_GetVideoSetup ( void )
 	Cvar_Register ( NULL, "ui_r_allowExtensions",		"0", CVAR_ROM );
 	Cvar_Register ( NULL, "ui_cg_shadows",				"0", CVAR_ROM );
 	Cvar_Register ( NULL, "ui_r_modified",				"0", CVAR_ROM );
-	
+
 	// Copy over the real video cvars into their temporary counterparts
 	Cvar_Set ( "ui_r_mode", Cvar_VariableString ( "r_mode" ) );
 	Cvar_Set ( "ui_r_colorbits", Cvar_VariableString ( "r_colorbits" ) );
@@ -2598,7 +2598,7 @@ void UI_ResetDefaults( void )
 UI_SortSaveGames
 =======================
 */
-static int UI_SortSaveGames( const void *A, const void *B ) 
+static int UI_SortSaveGames( const void *A, const void *B )
 {
 
 	const int &a = ((savedata_t*)A)->currentSaveFileDateTime;
@@ -2628,7 +2628,7 @@ void ReadSaveDirectory (void)
 	// Clear out save data
 	memset(s_savedata,0,sizeof(s_savedata));
 	s_savegame.saveFileCnt = 0;
-	Cvar_Set("ui_gameDesc", "" );	// Blank out comment 
+	Cvar_Set("ui_gameDesc", "" );	// Blank out comment
 	Cvar_Set("ui_SelectionOK", "0" );
 	memset( screenShotBuf,0,(SG_SCR_WIDTH * SG_SCR_HEIGHT * 4)); //blank out sshot
 
@@ -2637,7 +2637,7 @@ void ReadSaveDirectory (void)
 
 	Cvar_Set("ui_ResumeOK", "0" );
 	holdChar = s_savegame.listBuf;
-	for ( i = 0; i < fileCnt; i++ ) 
+	for ( i = 0; i < fileCnt; i++ )
 	{
 		// strip extension
 		len = strlen( holdChar );
@@ -2653,11 +2653,11 @@ void ReadSaveDirectory (void)
 			else
 			{	// Is this a valid file??? & Get comment of file
 				result = ui.SG_GetSaveGameComment(holdChar, s_savedata[s_savegame.saveFileCnt].currentSaveFileComments, s_savedata[s_savegame.saveFileCnt].currentSaveFileMap);
-				if (result != 0) // ignore Bad save game 
+				if (result != 0) // ignore Bad save game
 				{
 					s_savedata[s_savegame.saveFileCnt].currentSaveFileName = holdChar;
 					s_savedata[s_savegame.saveFileCnt].currentSaveFileDateTime = result;
-					
+
 					struct tm *localTime;
 					localTime = localtime( &result );
 					strcpy(s_savedata[s_savegame.saveFileCnt].currentSaveFileDateTimeString,asctime( localTime ) );
@@ -2669,7 +2669,7 @@ void ReadSaveDirectory (void)
 				}
 			}
 		}
-		
+
 		holdChar += len + 1;	//move to next item
 	}
 
