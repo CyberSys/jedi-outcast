@@ -4,7 +4,7 @@
 //
 #include "../server/exe_headers.h"
 
-
+#include "../sys/sys_loadlib.h"
 #include "client.h"
 #include "client_ui.h"
 #include <limits.h>
@@ -62,12 +62,19 @@ cvar_t	*cl_ingameVideo;
 
 cvar_t	*cl_consoleKeys;
 
+#ifdef USE_RENDERER_DLOPEN
+cvar_t	*cl_renderer;
+#endif
+
 clientActive_t		cl;
 clientConnection_t	clc;
 clientStatic_t		cls;
 
 // Structure containing functions exported from refresh DLL
 refexport_t	re;
+#ifdef USE_RENDERER_DLOPEN
+static void	*rendererLib = NULL;
+#endif
 
 ping_t	cl_pinglist[MAX_PINGREQUESTS];
 
@@ -259,7 +266,7 @@ void CL_Disconnect( void ) {
 		CL_WritePacket();
 		CL_WritePacket();
 	}
-	
+
 	CL_ClearState ();
 
 	// wipe the client connection
@@ -331,7 +338,7 @@ void CL_ForwardToServer_f( void ) {
 		Com_Printf ("Not connected to a server.\n");
 		return;
 	}
-	
+
 	// don't forward the first argument
 	if ( Cmd_Argc() > 1 ) {
 		CL_AddReliableCommand( Cmd_Args() );
@@ -387,7 +394,7 @@ CL_Disconnect_f
 ==================
 */
 void CL_Disconnect_f( void ) {
-	SCR_StopCinematic();	
+	SCR_StopCinematic();
 
 	//FIXME:
 	// TA codebase added additional CA_CINEMATIC check below, presumably so they could play cinematics
@@ -536,7 +543,7 @@ void CL_CheckForResend( void ) {
 	int		port;
 	char	info[MAX_INFO_STRING];
 
-//	if ( cls.state == CA_CINEMATIC )  
+//	if ( cls.state == CA_CINEMATIC )
 	if ( cls.state == CA_CINEMATIC || CL_IsRunningInGameCinematic())
 	{
 		return;
@@ -626,7 +633,7 @@ Responses to broadcasts, etc
 void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	char	*s;
 	char	*c;
-	
+
 	MSG_BeginReading( msg );
 	MSG_ReadLong( msg );	// skip the -1
 
@@ -668,7 +675,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 		}
 		if ( !NET_CompareBaseAdr( from, clc.serverAddress ) ) {
 			Com_Printf( "connectResponse from a different address.  Ignored.\n" );
-			Com_Printf( "%s should have been %s\n", NET_AdrToString( from ), 
+			Com_Printf( "%s should have been %s\n", NET_AdrToString( from ),
 				NET_AdrToString( clc.serverAddress ) );
 			return;
 		}
@@ -761,7 +768,7 @@ void CL_CheckTimeout( void ) {
 	//
 	// check timeout
 	//
-	if ( ( !cl_paused->integer || !sv_paused->integer ) 
+	if ( ( !cl_paused->integer || !sv_paused->integer )
 //		&& cls.state >= CA_CONNECTED && cls.state != CA_CINEMATIC
 		&& cls.state >= CA_CONNECTED && (cls.state != CA_CINEMATIC && !CL_IsRunningInGameCinematic())
 		&& cls.realtime - clc.lastPacketTime > cl_timeout->value*1000) {
@@ -816,7 +823,7 @@ void CL_Frame ( int msec,float fractionMsec ) {
 	CL_StartHunkUsers();
 
 	if ( cls.state == CA_DISCONNECTED && !( cls.keyCatchers & KEYCATCH_UI )
-		&& !com_sv_running->integer ) {		
+		&& !com_sv_running->integer ) {
 		// if disconnected, bring up the menu
 		if (!CL_CheckPendingCinematic())	// this avoid having the menu flash for one frame before pending cinematics
 		{
@@ -908,7 +915,7 @@ void CL_Frame ( int msec,float fractionMsec ) {
 
 	if (cl_skippingcin->integer && !cl_endcredits->integer) {
 		if (cl_skippingcin->modified){
-			S_StopSounds();		//kill em all but music	
+			S_StopSounds();		//kill em all but music
 			cl_skippingcin->modified=qfalse;
 			Com_Printf (S_COLOR_YELLOW "....");
 			SCR_UpdateScreen();
@@ -946,7 +953,7 @@ void VID_Printf (int print_level, const char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
-	
+
 	va_start (argptr,fmt);
 	vsprintf (msg,fmt,argptr);
 	va_end (argptr);
@@ -1041,7 +1048,7 @@ void CL_StartHunkUsers( void ) {
 	}
 
 //	if ( !cls.cgameStarted && cls.state > CA_CONNECTED && cls.state != CA_CINEMATIC ) {
-	if ( !cls.cgameStarted && cls.state > CA_CONNECTED && (cls.state != CA_CINEMATIC && !CL_IsRunningInGameCinematic()) ) 
+	if ( !cls.cgameStarted && cls.state > CA_CONNECTED && (cls.state != CA_CINEMATIC && !CL_IsRunningInGameCinematic()) )
 	{
 		cls.cgameStarted = qtrue;
 		CL_InitCGame();
@@ -1063,8 +1070,38 @@ CL_InitRef
 void CL_InitRef( void ) {
 	refimport_t	ri;
 	refexport_t	*ret;
-
+#ifdef USE_RENDERER_DLOPEN
+	GetRefAPI_t		GetRefAPI;
+	char			dllName[MAX_OSPATH];
+#endif
 	Com_Printf( "----- Initializing Renderer ----\n" );
+
+#ifdef USE_RENDERER_DLOPEN
+	cl_renderer = Cvar_Get("cl_renderer", "opengl1", CVAR_ARCHIVE | CVAR_LATCH);
+
+	Com_sprintf(dllName, sizeof(dllName), "renderer_%s_" ARCH_STRING DLL_EXT, cl_renderer->string);
+
+	if(!(rendererLib = Sys_LoadDll(dllName, qfalse)) && strcmp(cl_renderer->string, cl_renderer->resetString))
+	{
+		Com_Printf("failed:\n\"%s\"\n", Sys_LibraryError());
+		Cvar_Reset("cl_renderer");
+
+		Com_sprintf(dllName, sizeof(dllName), "renderer_opengl1_" ARCH_STRING DLL_EXT);
+		rendererLib = Sys_LoadDll(dllName, qfalse);
+	}
+
+	if(!rendererLib)
+	{
+		Com_Printf("failed:\n\"%s\"\n", Sys_LibraryError());
+		Com_Error(ERR_FATAL, "Failed to load renderer");
+	}
+
+	GetRefAPI = (GetRefAPI_t)Sys_LoadFunction(rendererLib, "GetRefAPI");
+	if(!GetRefAPI)
+	{
+		Com_Error(ERR_FATAL, "Can't load symbol GetRefAPI: '%s'",  Sys_LibraryError());
+	}
+#endif
 
 	ri.Cmd_AddCommand = Cmd_AddCommand;
 	ri.Cmd_RemoveCommand = Cmd_RemoveCommand;
@@ -1074,7 +1111,7 @@ void CL_InitRef( void ) {
 	ri.Printf = VID_Printf;
 	ri.Error = Com_Error;
 	ri.Milliseconds = Sys_Milliseconds;
-	ri.flrand = Q_flrand;                      
+	ri.flrand = Q_flrand;
 	ri.Malloc = CL_ZMalloc_Helper;
 	ri.Free = Z_Free;
 	ri.Hunk_Clear = Hunk_ClearToMark;
@@ -1089,7 +1126,7 @@ void CL_InitRef( void ) {
 	ri.Cvar_Get = Cvar_Get;
 	ri.Cvar_Set = Cvar_Set;
 	ri.CM_PointContents = CM_PointContents;
-	ri.ArgsBuffer = Cmd_ArgsBuffer;                    
+	ri.ArgsBuffer = Cmd_ArgsBuffer;
 
 	// cinematic stuff
 
@@ -1126,7 +1163,7 @@ void CL_Init( void ) {
 
 	SP_Register("con_text", SP_REGISTER_REQUIRED);	//reference is CON_TEXT
 	SP_Register("keynames", SP_REGISTER_REQUIRED);	// reference is KEYNAMES
-	
+
 	Con_Init ();
 
 	CL_ClearState ();
@@ -1150,7 +1187,7 @@ void CL_Init( void ) {
 	cl_showTimeDelta = Cvar_Get ("cl_showTimeDelta", "0", CVAR_TEMP );
 	cl_newClock = Cvar_Get ("cl_newClock", "1", 0);
 	cl_activeAction = Cvar_Get( "activeAction", "", CVAR_TEMP );
-	
+
 	cl_avidemo = Cvar_Get ("cl_avidemo", "0", 0);
 	cl_pano = Cvar_Get ("pano", "0", 0);
 	cl_panoNumShots= Cvar_Get ("panoNumShots", "10", CVAR_ARCHIVE);
@@ -1195,7 +1232,7 @@ void CL_Init( void ) {
 	// userinfo
 	Cvar_Get ("name", "Kyle", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get ("snaps", "20", CVAR_USERINFO | CVAR_ARCHIVE );
-	
+
 	Cvar_Get ("sex", "male", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get ("handicap", "100", CVAR_USERINFO | CVAR_ARCHIVE );
 
@@ -1225,7 +1262,7 @@ void CL_Init( void ) {
 	SCR_Init ();
 
 	Cbuf_Execute ();
-	
+
 	Cvar_Set( "cl_running", "1" );
 
 	Com_Printf( "----- Client Initialization Complete -----\n" );
@@ -1240,7 +1277,7 @@ CL_Shutdown
 */
 void CL_Shutdown( void ) {
 	static qboolean recursive = qfalse;
-	
+
 	if ( !com_cl_running || !com_cl_running->integer ) {
 		return;
 	}
@@ -1268,7 +1305,7 @@ void CL_Shutdown( void ) {
 	Cmd_RemoveCommand ("snd_restart");
 	Cmd_RemoveCommand ("vid_restart");
 	Cmd_RemoveCommand ("disconnect");
-	Cmd_RemoveCommand ("cinematic");	
+	Cmd_RemoveCommand ("cinematic");
 	Cmd_RemoveCommand ("ingamecinematic");
 	Cmd_RemoveCommand ("setenv");
 	Cmd_RemoveCommand ("pause");
@@ -1360,7 +1397,7 @@ CL_GetFreePing
 ping_t* CL_GetFreePing( void )
 {
 	ping_t*	pingptr;
-	ping_t*	best;	
+	ping_t*	best;
 	int		oldest;
 	int		i;
 	int		time;

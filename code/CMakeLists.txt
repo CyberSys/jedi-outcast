@@ -59,6 +59,7 @@ add_definitions( -D_M_IX86=1 )	# tested to mean little endian...
 add_definitions( -D_IMMERSION_DISABLE )
 add_definitions( -DNDEBUG )
 add_definitions( -DFINAL_BUILD )
+add_definitions( -DUSE_RENDERER_DLOPEN)
 
 find_package (SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
@@ -293,7 +294,6 @@ set(src_starwars
 	${src_ghoul2}
 	${src_mp3code}
 	${src_qcommon}
-	${src_renderer}
 	${src_server}
 	${src_ui}
 	${src_main_game}
@@ -371,7 +371,7 @@ set(src_cgame
 	cgame/cg_weapons.cpp
 )
 
-set(src_game 
+set(src_game
 	game/AI_Atst.cpp
 	game/AI_Default.cpp
 	game/AI_Droid.cpp
@@ -464,3 +464,13 @@ add_library(jk2game${cpu} SHARED
 )
 
 SET_TARGET_PROPERTIES(jk2game${cpu} PROPERTIES PREFIX "")
+
+set(src_opengl1_renderer
+	${src_renderer}
+)
+
+add_library(renderer_opengl1_${cpu} SHARED
+	${src_opengl1_renderer}
+)
+
+SET_TARGET_PROPERTIES(renderer_opengl1_${cpu} PROPERTIES PREFIX "")

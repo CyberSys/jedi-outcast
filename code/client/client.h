@@ -4,7 +4,7 @@
 
 #include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
-#include "../renderer/tr_public.h"
+#include "../renderercommon/tr_public.h"
 #include "keys.h"
 #include "snd_public.h"
 #include "../cgame/cg_public.h"
@@ -44,7 +44,7 @@ new gamestate_t, potentially several times during an established connection
 
 // the parseEntities array must be large enough to hold PACKET_BACKUP frames of
 // entities, so that when a delta compressed message arives from the server
-// it can be un-deltad from the original 
+// it can be un-deltad from the original
 #define	MAX_PARSE_ENTITIES	2048
 
 extern int g_console_field_width;
@@ -120,7 +120,7 @@ or just a streaming cinematic.
 */
 
 
-typedef struct {		
+typedef struct {
 	int			lastPacketSentTime;			// for retransmits
 	int			lastPacketTime;
 	char		servername[MAX_OSPATH];		// name of server from original connect
@@ -229,7 +229,7 @@ typedef struct {
 	int		totallines;		// total lines in console scrollback
 
 	float	xadjust;		// for wide aspect screens
-	float	yadjust;		
+	float	yadjust;
 
 	float	displayFrac;	// aproaches finalFrac at scr_conspeed
 	float	finalFrac;		// 0.0 to 1.0 lines of console to display
@@ -285,7 +285,7 @@ extern	cvar_t	*m_filter;
 
 extern	cvar_t	*cl_activeAction;
 
-extern	cvar_t	*cl_consoleKeys;	
+extern	cvar_t	*cl_consoleKeys;
 
 //=================================================
 
@@ -379,7 +379,7 @@ void	SCR_DebugGraph (float value, int color);
 
 int		SCR_GetBigStringWidth( const char *str );	// returns in virtual 640x480 coordinates
 
-void	SCR_FillRect( float x, float y, float width, float height, 
+void	SCR_FillRect( float x, float y, float width, float height,
 					 const float *color );
 void	SCR_DrawPic( float x, float y, float width, float height, qhandle_t hShader );
 void	SCR_DrawNamedPic( float x, float y, float width, float height, const char *picname );

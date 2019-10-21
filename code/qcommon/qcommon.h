@@ -4,6 +4,7 @@
 
 #include "strippublic.h"
 #include "../qcommon/cm_public.h"
+#include "q_platform.h"
 
 
 // some zone mem debugging stuff
@@ -67,7 +68,7 @@ void MSG_ReadDeltaUsercmd( msg_t *msg, struct usercmd_s *from, struct usercmd_s 
 
 void MSG_WriteDeltaEntity( msg_t *msg, struct entityState_s *from, struct entityState_s *to
 						   , qboolean force );
-void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to, 
+void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 						 int number );
 
 void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct playerState_s *to );
@@ -171,7 +172,7 @@ typedef struct {
 
 	// incoming fragment assembly buffer
 	int			fragmentSequence;
-	int			fragmentLength;	
+	int			fragmentLength;
 	byte		fragmentBuffer[MAX_MSGLEN];
 } netchan_t;
 
@@ -215,7 +216,7 @@ enum svc_ops_e {
 //
 enum clc_ops_e {
 	clc_bad,
-	clc_nop, 		
+	clc_nop,
 	clc_move,				// [[usercmd_t]
 	clc_clientCommand		// [string] message
 };
@@ -585,12 +586,12 @@ int	  Z_Size	( void *pvAddress);
 #ifdef DEBUG_ZONE_ALLOCS
 
 	void *_D_Z_Malloc ( int iSize, memtag_t eTag, qboolean bZeroit, const char *psFile, int iLine );
-	void *_D_S_Malloc ( int iSize, const char *psFile, int iLine );	
+	void *_D_S_Malloc ( int iSize, const char *psFile, int iLine );
 	void  _D_Z_Label  ( const void *pvAddress, const char *pslabel );
 
 	#define Z_Malloc(_iSize, _eTag, _bZeroit)	_D_Z_Malloc (_iSize, _eTag, _bZeroit, __FILE__, __LINE__)
-	#define S_Malloc(_iSize)					_D_S_Malloc	(_iSize, __FILE__, __LINE__)	// NOT 0 filled memory only for small allocations	
-	
+	#define S_Malloc(_iSize)					_D_S_Malloc	(_iSize, __FILE__, __LINE__)	// NOT 0 filled memory only for small allocations
+
 	#define Z_Label(_ptr, _label)				_D_Z_Label	(_ptr, _label)
 
 #else
@@ -608,7 +609,7 @@ void Hunk_ClearToMark( void );
 void Hunk_SetMark( void );
 // note the opposite default for 'bZeroIt' in Hunk_Alloc to Z_Malloc, since Hunk_Alloc always used to memset(0)...
 //
-inline void *Hunk_Alloc( int size, qboolean bZeroIt = qtrue) 
+inline void *Hunk_Alloc( int size, qboolean bZeroIt = qtrue)
 {
 	return Z_Malloc(size, TAG_HUNKALLOC, bZeroIt);
 }
