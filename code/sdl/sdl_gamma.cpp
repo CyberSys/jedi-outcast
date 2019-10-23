@@ -88,5 +88,9 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
 	}
 
 	SDL_SetGammaRamp(table[0], table[1], table[2]);
+	if (SDL_SetGammaRamp(table[0], table[1], table[2]) < 0)
+	{
+		ri.Printf( PRINT_DEVELOPER, "SDL_SetWindowGammaRamp() failed: %s\n", SDL_GetError() );
+	}
 }
 
