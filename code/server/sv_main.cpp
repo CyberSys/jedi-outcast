@@ -96,7 +96,7 @@ void SV_AddServerCommand( client_t *client, const char *cmd ) {
 =================
 SV_SendServerCommand
 
-Sends a reliable command string to be interpreted by 
+Sends a reliable command string to be interpreted by
 the client game module: "cp", "print", "chat", etc
 A NULL client will broadcast to all clients
 =================
@@ -107,7 +107,7 @@ void SV_SendServerCommand(client_t *cl, const char *fmt, ...) {
 	int			len;
 	client_t	*client;
 	int			j;
-	
+
 	message[0] = svc_serverCommand;
 
 	va_start (argptr,fmt);
@@ -175,7 +175,7 @@ void SVC_Status( netadr_t from ) {
 			} else {
 				score = 0;
 			}
-			Com_sprintf (player, sizeof(player), "%i %i \"%s\"\n", 
+			Com_sprintf (player, sizeof(player), "%i %i \"%s\"\n",
 				score, cl->ping, cl->name);
 			playerLength = strlen(player);
 			if (statusLength + playerLength >= sizeof(status) ) {
@@ -326,7 +326,7 @@ void SV_PacketEvent( netadr_t from, msg_t *msg ) {
 		}
 		return;
 	}
-	
+
 	// if we received a sequenced packet from an address we don't reckognize,
 	// send an out of band disconnect packet to it
 	NET_OutOfBandPrint( NS_SERVER, from, "disconnect" );
@@ -382,7 +382,7 @@ void SV_CalcPings (void) {
 ==================
 SV_CheckTimeouts
 
-If a packet has not been received from a client for timeout->integer 
+If a packet has not been received from a client for timeout->integer
 seconds, drop the conneciton.  Server time is used instead of
 realtime to avoid dropping the local client while debugging.
 
@@ -415,7 +415,7 @@ void SV_CheckTimeouts( void ) {
 			// wait several frames so a debugger session doesn't
 			// cause a timeout
 			if ( ++cl->timeoutCount > 5 ) {
-				SV_DropClient (cl, "timed out"); 
+				SV_DropClient (cl, "timed out");
 				cl->state = CS_FREE;	// don't bother with zombie state
 			}
 		} else {
@@ -527,7 +527,7 @@ void SV_Frame( int msec,float fractionMsec ) {
 	while ( sv.timeResidual >= frameMsec ) {
 		sv.timeResidual -= frameMsec;
 		sv.time += frameMsec;
-		G2API_SetTime(sv.time,G2T_SV_TIME);
+		re.G2API_SetTime(sv.time,G2T_SV_TIME);
 
 		// let everything in the world think and move
 		ge->RunFrame( sv.time );

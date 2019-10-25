@@ -169,9 +169,6 @@ set(src_renderer
 	renderer/tr_cmds.cpp
 	renderer/tr_curve.cpp
 	renderer/tr_draw.cpp
-	renderer/tr_font.cpp
-	renderer/tr_ghoul2.cpp
-	renderer/tr_image.cpp
 	renderer/tr_init.cpp
 	renderer/tr_jpeg_interface.cpp
 	renderer/tr_light.cpp
@@ -179,7 +176,6 @@ set(src_renderer
 	renderer/tr_marks.cpp
 	renderer/tr_mesh.cpp
 	renderer/tr_model.cpp
-	renderer/tr_noise.cpp
 	renderer/tr_quicksprite.cpp
 	renderer/tr_scene.cpp
 	renderer/tr_shade.cpp
@@ -191,6 +187,13 @@ set(src_renderer
 	renderer/tr_surface.cpp
 	renderer/tr_surfacesprites.cpp
 	renderer/tr_world.cpp
+)
+
+set(src_renderercommon
+	renderercommon/tr_font.cpp
+	renderercommon/tr_ghoul2.cpp
+	renderercommon/tr_image.cpp
+	renderercommon/tr_noise.cpp
 )
 
 set(src_server
@@ -291,7 +294,6 @@ set(src_starwars
 	${src_ff}
 	${src_client}
 	${src_encryption}
-	${src_ghoul2}
 	${src_mp3code}
 	${src_qcommon}
 	${src_server}
@@ -299,7 +301,6 @@ set(src_starwars
 	${src_main_game}
 	${src_jpeg}
 	${src_unix}
-	${src_sdl}
 )
 
 add_executable(jk2sp
@@ -467,6 +468,9 @@ SET_TARGET_PROPERTIES(jk2game${cpu} PROPERTIES PREFIX "")
 
 set(src_opengl1_renderer
 	${src_renderer}
+	${src_ghoul2}
+    ${src_renderercommon}
+	${src_sdl}
 )
 
 add_library(renderer_opengl1_${cpu} SHARED

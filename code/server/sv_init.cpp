@@ -128,7 +128,7 @@ baseline will be transmitted
 */
 void SV_CreateBaseline( void ) {
 	gentity_t			*svent;
-	int				entnum;	
+	int				entnum;
 
 	for ( entnum = 0; entnum < ge->num_entities ; entnum++ ) {
 		svent = SV_GentityNum(entnum);
@@ -185,7 +185,7 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 	int			i;
 	int			checksum;
 
-	RE_RegisterMedia_LevelLoadBegin( server, eForceReload, bAllowScreenDissolve );
+	re.RegisterMedia_LevelLoadBegin( server, eForceReload, bAllowScreenDissolve );
 
 
 	Cvar_SetValue( "cl_paused", 0 );
@@ -195,21 +195,22 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 	SV_ShutdownGameProgs();
 
 	Com_Printf ("------ Server Initialization ------\n%s\n", com_version->string);
-	Com_Printf ("Server: %s\n",server);	
+	Com_Printf ("Server: %s\n",server);
 
-	// init client structures and svs.numSnapshotEntities 
+	// init client structures and svs.numSnapshotEntities
 	if ( !Cvar_VariableIntegerValue("sv_running") ) {
 		SV_Startup();
-	}		
+	}
 
 	// don't let sound stutter and dump all stuff on the hunk
 	CL_MapLoading();
 
 	Hunk_Clear();
+    re.ClearStuffToStopGhoul2CrashingThings();
  	// clear out those shaders, images and Models
-	R_InitImages();
-	R_InitShaders();
-	R_ModelInit();
+	re.InitImages();
+	re.InitShaders();
+	re.ModelInit();
 
 	// create a heap for Ghoul2 to use for game side model vertex transforms used in collision detection
 	if (!G2VertSpaceServer)
@@ -222,7 +223,7 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 	{
 		Z_Free(svs.snapshotEntities);
 	}
-	// allocate the snapshot entities 
+	// allocate the snapshot entities
 	svs.snapshotEntities = (entityState_t *) Z_Malloc (sizeof(entityState_t)*svs.numSnapshotEntities, TAG_CLIENTS, qtrue );
 
 	Music_SetLevelName(server);
@@ -250,7 +251,7 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 	}
 
 	sv.time = 1000;
-	G2API_SetTime(sv.time,G2T_SV_TIME);
+	re.G2API_SetTime(sv.time,G2T_SV_TIME);
 
 	CM_LoadMap( va("maps/%s.bsp", server), qfalse, &checksum );
 
@@ -265,7 +266,7 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 
 	// clear physics interaction links
 	SV_ClearWorld ();
-	
+
 	// media configstring setting should be done during
 	// the loading stage, so connected clients don't have
 	// to load during actual gameplay
@@ -278,7 +279,7 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 	for ( i = 0 ;i < 3 ; i++ ) {
 		ge->RunFrame( sv.time );
 		sv.time += 100;
-		G2API_SetTime(sv.time,G2T_SV_TIME);
+		re.G2API_SetTime(sv.time,G2T_SV_TIME);
 	}
 
 	// create a baseline for more efficient communications
@@ -306,12 +307,12 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 				// the new gamestate will be sent
 			}
 		}
-	}	
+	}
 
 	// run another frame to allow things to look at all connected clients
 	ge->RunFrame( sv.time );
 	sv.time += 100;
-	G2API_SetTime(sv.time,G2T_SV_TIME);
+	re.G2API_SetTime(sv.time,G2T_SV_TIME);
 
 
 	// save systeminfo and serverinfo strings
@@ -325,12 +326,12 @@ void SV_SpawnServer( char *server, ForceReload_e eForceReload, qboolean bAllowSc
 	// and any configstring changes should be reliably transmitted
 	// to all clients
 	sv.state = SS_GAME;
-	
+
 	// send a heartbeat now so the master will get up to date info
 	svs.nextHeartbeatTime = -9999999;
 
 	Hunk_SetMark();
-	
+
 	Com_Printf ("-----------------------------------\n");
 }
 
@@ -382,7 +383,7 @@ to totally exit after returning from this function.
 void SV_FinalMessage( char *message ) {
 	int			i, j;
 	client_t	*cl;
-	
+
 	SV_SendServerCommand( NULL, "print \"%s\"", message );
 	SV_SendServerCommand( NULL, "disconnect" );
 
