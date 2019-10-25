@@ -126,6 +126,12 @@ typedef struct {
     void    (*ModelInit)( void );
     void    (*InitImages)( void );
     void    (*InitShaders)( void );
+    void    (*Decompress_JPG)( const char *filename, byte *pJPGData, unsigned char **pic, int *width, int *height );
+    byte    *(*Compress_JPG)(int *pOutputSize, int quality, int image_width, int image_height, byte *image_buffer, qboolean bInvertDuringCompression);
+    qboolean (*RegisterImages_LevelLoadEnd)(void);
+    qboolean (*RegisterModels_LevelLoadEnd)(qboolean bDeleteEverythingNotUsedThisLevel);
+
+
 
     //Ghoul 2
     void    (*G2API_SetTime)(int currentTime,int clock);

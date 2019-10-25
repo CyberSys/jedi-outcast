@@ -4,6 +4,7 @@
 #include "qcommon.h"
 #include "../qcommon/sstring.h"	// to get Gil's string class, because MS's doesn't compile properly in here
 #include "stv_version.h"
+#include "../renderercommon/tr_public.h"
 
 #ifdef _WIN32
 #include <windows.h>	// for Sleep for Z_Malloc recovery attempy
@@ -33,6 +34,7 @@ static const char *psTagStrings[TAG_COUNT+1]=	// +1 because TAG_COUNT will itsel
 	#include "../qcommon/tags.h"
 };
 
+extern    refexport_t             re;             // interface to refresh .dll
 
 int		com_argc;
 char	*com_argv[MAX_NUM_ARGVS+1];
@@ -778,8 +780,7 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 
 			// ditch any image_t's (and associated GL texture mem) not used on this level...
 			//
-			extern qboolean RE_RegisterImages_LevelLoadEnd(void);
-			if (RE_RegisterImages_LevelLoadEnd())
+			if (re.RegisterImages_LevelLoadEnd())
 			{
 				gbMemFreeupOccured = qtrue;
 				continue;		// we've dropped at least one image, so try again with the malloc
@@ -788,8 +789,7 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 
 			// ditch the model-binaries cache...  (must be getting desperate here!)
 			//
-			extern qboolean RE_RegisterModels_LevelLoadEnd(qboolean bDeleteEverythingNotUsedThisLevel);
-			if (RE_RegisterModels_LevelLoadEnd(qtrue))
+			if (re.RegisterModels_LevelLoadEnd(qtrue))
 			{
 				gbMemFreeupOccured = qtrue;
 				continue;

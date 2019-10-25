@@ -87,6 +87,7 @@ set(src_client
 	client/snd_mix.cpp
 	client/snd_music.cpp
 	client/vmachine.cpp
+    sdl/sdl_input.cpp
 )
 
 set(src_encryption
@@ -287,7 +288,6 @@ set(src_unix
 set(src_sdl
 	sdl/sdl_gamma.cpp
 	sdl/sdl_glimp.cpp
-	sdl/sdl_input.cpp
 )
 
 set(src_starwars
@@ -299,7 +299,6 @@ set(src_starwars
 	${src_server}
 	${src_ui}
 	${src_main_game}
-	${src_jpeg}
 	${src_unix}
 )
 
@@ -471,6 +470,7 @@ set(src_opengl1_renderer
 	${src_ghoul2}
     ${src_renderercommon}
 	${src_sdl}
+    ${src_jpeg}
 )
 
 add_library(renderer_opengl1_${cpu} SHARED

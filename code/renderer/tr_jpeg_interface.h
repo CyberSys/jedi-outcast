@@ -20,6 +20,9 @@ typedef const char * LPCSTR;
 
 void LoadJPG( const char *filename, unsigned char **pic, int *width, int *height );
 void SaveJPG( const char *filename, int quality, int image_width, int image_height, unsigned char *image_buffer);
+byte *Compress_JPG(int *pOutputSize, int quality, int image_width, int image_height, byte *image_buffer, qboolean bInvertDuringCompression);
+void Decompress_JPG( const char *filename, byte *pJPGData, unsigned char **pic, int *width, int *height );
+
 
 void JPG_ErrorThrow(LPCSTR message);
 void JPG_MessageOut(LPCSTR message);

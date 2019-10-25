@@ -6,8 +6,8 @@
 
 
 
-#include "tr_local.h"
-#include "tr_jpeg_interface.h"
+#include "../renderer/tr_local.h"
+#include "../renderer/tr_jpeg_interface.h"
 #include "../qcommon/sstring.h"
 
 

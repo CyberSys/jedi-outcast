@@ -73,6 +73,7 @@ void CG_TestG2Model_f (void) {
 
 	memset( &cg.testModelEntity, 0, sizeof(cg.testModelEntity) );
 	ghoul2 = new CGhoul2Info_v;
+	ghoul2->TheGhoul2InfoArray = gi.TheGhoul2InfoArray;
 	cg.testModelEntity.ghoul2 = ghoul2;
 	if ( cgi_Argc() < 2 ) {
 		return;

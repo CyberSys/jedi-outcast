@@ -10,6 +10,7 @@
 #include "tr_stl.h"
 #include "tr_jpeg_interface.h"
 #include "tr_font.h"
+#include "../ghoul2/G2.h"
 
 #define Com_Memset memset
 #define Com_Memcpy memcpy
@@ -1426,6 +1427,10 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
     re.ModelInit = R_ModelInit;
     re.InitImages = R_InitImages;
     re.InitShaders = R_InitShaders;
+    re.Decompress_JPG = Decompress_JPG;
+    re.Compress_JPG = Compress_JPG;
+    re.RegisterImages_LevelLoadEnd = RE_RegisterImages_LevelLoadEnd;
+    re.RegisterModels_LevelLoadEnd = RE_RegisterModels_LevelLoadEnd;
 
 //ghoul 2
     re.G2API_SetTime = G2API_SetTime;
@@ -1490,6 +1495,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
     re.G2API_GetAnimFileNameIndex = G2API_GetAnimFileNameIndex;
     re.G2API_GetSurfaceRenderStatus = G2API_GetSurfaceRenderStatus;
     re.ClearStuffToStopGhoul2CrashingThings = R_ClearStuffToStopGhoul2CrashingThings;
+
 
 #ifdef _NPATCH
 	re.NPatchLevel = RE_NPatchLevel;
