@@ -1348,6 +1348,7 @@ GetRefAPI
 @@@@@@@@@@@@@@@@@@@@@
 */
 extern void R_WorldEffectCommand(const char *command);
+extern "C" {
 refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	static refexport_t	re;
 
@@ -1502,5 +1503,6 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 #endif // _NPATCH
 
 	return &re;
+}
 }
 

@@ -82,7 +82,7 @@ GLimp_Shutdown
 */
 void GLimp_Shutdown( void )
 {
-	IN_Shutdown();
+	ri.IN_Shutdown();
 
 	SDL_QuitSubSystem( SDL_INIT_VIDEO );
 	screen = NULL;
@@ -895,7 +895,7 @@ success:
 	ri.Cvar_Get( "r_availableModes", "", CVAR_ROM );
 
 	// This depends on SDL_INIT_VIDEO, hence having it here
-	IN_Init( );
+	ri.IN_Init( );
 }
 
 
@@ -946,7 +946,7 @@ void GLimp_EndFrame( void )
 			if( !sdlToggled )
 				ri.Cmd_ExecuteText(EXEC_APPEND, "vid_restart");
 
-			IN_Restart( );
+			ri.IN_Restart( );
 		}
 
 		r_fullscreen->modified = qfalse;

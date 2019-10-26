@@ -5,6 +5,7 @@
 #include "../server/exe_headers.h"
 
 #include "../sys/sys_loadlib.h"
+#include "../sdl/sdl_local.h"
 #include "client.h"
 #include "client_ui.h"
 #include <limits.h>
@@ -1070,13 +1071,11 @@ CL_InitRef
 void CL_InitRef( void ) {
 	refimport_t	ri;
 	refexport_t	*ret;
-#ifdef USE_RENDERER_DLOPEN
 	GetRefAPI_t		GetRefAPI;
 	char			dllName[MAX_OSPATH];
-#endif
+
 	Com_Printf( "----- Initializing Renderer ----\n" );
 
-#ifdef USE_RENDERER_DLOPEN
 	cl_renderer = Cvar_Get("cl_renderer", "opengl1", CVAR_ARCHIVE | CVAR_LATCH);
 
 	Com_sprintf(dllName, sizeof(dllName), "renderer_%s_" ARCH_STRING DLL_EXT, cl_renderer->string);
@@ -1101,7 +1100,6 @@ void CL_InitRef( void ) {
 	{
 		Com_Error(ERR_FATAL, "Can't load symbol GetRefAPI: '%s'",  Sys_LibraryError());
 	}
-#endif
 
 	ri.Cmd_AddCommand = Cmd_AddCommand;
 	ri.Cmd_RemoveCommand = Cmd_RemoveCommand;
@@ -1134,6 +1132,9 @@ void CL_InitRef( void ) {
 	ri.CIN_PlayCinematic = CIN_PlayCinematic;
 	ri.CIN_RunCinematic = CIN_RunCinematic;
 
+    ri.IN_Init = IN_Init;
+	ri.IN_Shutdown = IN_Shutdown;
+	ri.IN_Restart = IN_Restart;
 
 	ret = GetRefAPI( REF_API_VERSION, &ri );
 
