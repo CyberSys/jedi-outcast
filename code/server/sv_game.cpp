@@ -508,3 +508,7 @@ qboolean SV_GameCommand( void ) {
 	return ge->ConsoleCommand();
 }
 
+//Haxies
+IGhoul2InfoArray &TheGameGhoul2InfoArray() {
+    return re.TheGhoul2InfoArray();
+}

@@ -1466,7 +1466,7 @@ void Hunk_Clear( void )
 				CIN_CloseAllVideos();
 
 
-    //re.ClearStuffToStopGhoul2CrashingThings();
+    if(*(re.ClearStuffToStopGhoul2CrashingThings))re.ClearStuffToStopGhoul2CrashingThings();
 }
 
 

@@ -2782,3 +2782,7 @@ qboolean R_LoadMDXA( model_t *mod, void *buffer, const char *mod_name, qboolean 
 	return qtrue;
 }
 
+IGhoul2InfoArray &TheGameGhoul2InfoArray()
+{
+	return TheGhoul2InfoArray();
+}

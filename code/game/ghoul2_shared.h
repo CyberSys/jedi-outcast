@@ -225,11 +225,7 @@ class CGhoul2Info_v
     
 	IGhoul2InfoArray &InfoArray() const
 	{
-#ifdef _JK2EXE
-		return TheGhoul2InfoArray();
-#else
-		//return TheGameGhoul2InfoArray();
-#endif
+		return TheGameGhoul2InfoArray();
 	}
 
 	void Alloc()
