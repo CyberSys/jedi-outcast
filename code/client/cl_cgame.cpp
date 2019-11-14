@@ -4,7 +4,7 @@
 //
 #include "../server/exe_headers.h"
 #include "../ui/ui_shared.h"
-	   		
+
 
 #include "client.h"
 #ifdef _IMMERSION
@@ -162,10 +162,10 @@ qboolean	CL_GetSnapshot( int snapshotNumber, snapshot_t *snapshot ) {
 /*
 Ghoul2 Insert Start
 */
- 	for ( i = 0 ; i < count ; i++ ) 
+ 	for ( i = 0 ; i < count ; i++ )
 	{
 
-		int entNum =  ( clSnap->parseEntitiesNum + i ) & (MAX_PARSE_ENTITIES-1) ;		
+		int entNum =  ( clSnap->parseEntitiesNum + i ) & (MAX_PARSE_ENTITIES-1) ;
 		snapshot->entities[i] = cl.parseEntities[ entNum ];
 	}
 /*
@@ -237,7 +237,7 @@ void CL_ConfigstringModified( void ) {
 
 	// leave the first 0 for uninitialized strings
 	cl.gameState.dataCount = 1;
-		
+
 	for ( i = 0 ; i < MAX_CONFIGSTRINGS ; i++ ) {
 		if ( i == index ) {
 			dup = s;
@@ -396,7 +396,7 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 	case CG_MILLISECONDS:
 		return Sys_Milliseconds();
 	case CG_CVAR_REGISTER:
-		Cvar_Register( (vmCvar_t *) VMA(1), (const char *) VMA(2), (const char *) VMA(3), args[4] ); 
+		Cvar_Register( (vmCvar_t *) VMA(1), (const char *) VMA(2), (const char *) VMA(3), args[4] );
 		return 0;
 	case CG_CVAR_UPDATE:
 		Cvar_Update( (vmCvar_t *) VMA(1) );
@@ -462,15 +462,15 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		CM_SnapPVS((float(*))VMA(1),(byte *) VMA(2));
 		return 0;
 	case CG_S_STARTSOUND:
-		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here 
+		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here
 		//	legally during level start where normally the internal s_soundStarted check would return. So ok to hit this.
 		if (!cls.cgameStarted){
-			return 0;	
+			return 0;
 		}
 		S_StartSound( (float *) VMA(1), args[2], args[3], args[4] );
 		return 0;
 	case CG_S_UPDATEAMBIENTSET:
-		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here 
+		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here
 		//	legally during level start where normally the internal s_soundStarted check would return. So ok to hit this.
 		if (!cls.cgameStarted){
 			return 0;
@@ -486,9 +486,9 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		AS_AddPrecacheEntry( (const char *) VMA(1) );
 		return 0;
 	case CG_AS_GETBMODELSOUND:
-		return AS_GetBModelSound( (const char *) VMA(1), args[2] );	
+		return AS_GetBModelSound( (const char *) VMA(1), args[2] );
 	case CG_S_STARTLOCALSOUND:
-		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here 
+		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here
 		//	legally during level start where normally the internal s_soundStarted check would return. So ok to hit this.
 		if (!cls.cgameStarted){
 			return 0;
@@ -499,7 +499,7 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		S_ClearLoopingSounds();
 		return 0;
 	case CG_S_ADDLOOPINGSOUND:
-		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here 
+		// stops an ERR_DROP internally if called illegally from game side, but note that it also gets here
 		//	legally during level start where normally the internal s_soundStarted check would return. So ok to hit this.
 		if (!cls.cgameStarted){
 			return 0;
@@ -546,7 +546,7 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 #endif // _IMMERSION
 	case CG_R_LOADWORLDMAP:
 		re.LoadWorld( (const char *) VMA(1) );
-		return 0; 
+		return 0;
 	case CG_R_REGISTERMODEL:
 		return re.RegisterModel( (const char *) VMA(1) );
 	case CG_R_REGISTERSKIN:
@@ -645,20 +645,20 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 /*
 Ghoul2 Insert Start
 */
-		
+
 	case CG_G2_LISTSURFACES:
-		G2API_ListSurfaces( (CGhoul2Info *) VMA(1) );
+		re.G2API_ListSurfaces( (CGhoul2Info *) VMA(1) );
 		return 0;
 
 	case CG_G2_LISTBONES:
-		G2API_ListBones( (CGhoul2Info *) VMA(1), args[2]);
+		re.G2API_ListBones( (CGhoul2Info *) VMA(1), args[2]);
 		return 0;
 
 	case CG_G2_HAVEWEGHOULMODELS:
-		return G2API_HaveWeGhoul2Models( *((CGhoul2Info_v *)VMA(1)) );
+		return re.G2API_HaveWeGhoul2Models( *((CGhoul2Info_v *)VMA(1)) );
 
 	case CG_G2_SETMODELS:
-		G2API_SetGhoul2ModelIndexes( *((CGhoul2Info_v *)VMA(1)),(qhandle_t *)VMA(2),(qhandle_t *)VMA(3));
+		re.G2API_SetGhoul2ModelIndexes( *((CGhoul2Info_v *)VMA(1)),(qhandle_t *)VMA(2),(qhandle_t *)VMA(3));
 		return 0;
 
 /*
@@ -675,7 +675,7 @@ Ghoul2 Insert End
 	case CG_R_GET_BMODEL_VERTS:
 		re.GetBModelVerts( args[1], (float (*)[3])VMA(2), (float *)VMA(3) );
 		return 0;
-	
+
 	case CG_R_WORLD_EFFECT_COMMAND:
 		re.WorldEffectCommand( (const char *) VMA(1) );
 		return 0;
@@ -750,7 +750,7 @@ Ghoul2 Insert End
 		menuDef_t *menu;
 		int		*xPos,*yPos,result;
 
-		menu = Menus_FindByName((char *) VMA(1));	// Get menu 
+		menu = Menus_FindByName((char *) VMA(1));	// Get menu
 		if (menu)
 		{
 			xPos = (int *) VMA(2);
@@ -768,7 +768,7 @@ Ghoul2 Insert End
 
 	case CG_UI_GETITEMTEXT:
 		itemDef_t *item;
-		menu = Menus_FindByName((char *) VMA(1));	// Get menu 
+		menu = Menus_FindByName((char *) VMA(1));	// Get menu
 
 		if (menu)
 		{
@@ -792,12 +792,12 @@ Ghoul2 Insert End
 
 	case CG_SP_REGISTER:
 		return SP_Register( (const char *) VMA(1), args[2]?(SP_REGISTER_MENU|SP_REGISTER_REQUIRED):SP_REGISTER_CLIENT );
-		
+
 	case CG_SP_GETSTRINGTEXTSTRING:
 	case CG_SP_GETSTRINGTEXT:
 		const char* text;
 
-		assert(VMA(1));	
+		assert(VMA(1));
 //		assert(VMA(2));	// can now pass in NULL to just query the size
 
 		if (args[0] == CG_SP_GETSTRINGTEXT)
@@ -813,11 +813,11 @@ Ghoul2 Insert End
 		{
 			if ( text[0] )
 			{
-				Q_strncpyz( (char *) VMA(2), text, args[3] );				
+				Q_strncpyz( (char *) VMA(2), text, args[3] );
 			}
-			else 
+			else
 			{
-				Q_strncpyz( (char *) VMA(2), "??", args[3] );			
+				Q_strncpyz( (char *) VMA(2), "??", args[3] );
 			}
 		}
 		return strlen(text);
@@ -869,7 +869,7 @@ void CL_InitCGame( void ) {
 	re.EndRegistration();
 
 	// make sure everything is paged in
-//	if (!Sys_LowPhysicalMemory()) 
+//	if (!Sys_LowPhysicalMemory())
 	{
 		Com_TouchMemory();
 	}
@@ -916,7 +916,7 @@ void CL_CGameRendering( stereoFrame_t stereo ) {
 	{
 		timei-=0;
 	}
-	G2API_SetTime(cl.serverTime,G2T_CG_TIME);
+	re.G2API_SetTime(cl.serverTime,G2T_CG_TIME);
 	VM_Call( CG_DRAW_ACTIVE_FRAME,timei, stereo, qfalse );
 //	VM_Debug( 0 );
 }
@@ -947,7 +947,7 @@ void CL_AdjustTimeDelta( void ) {
 /*
 	cl.newSnapshots = qfalse;
 	// if the current time is WAY off, just correct to the current value
-	if ( cls.realtime + cl.serverTimeDelta < cl.frame.serverTime - RESET_TIME 
+	if ( cls.realtime + cl.serverTimeDelta < cl.frame.serverTime - RESET_TIME
 		|| cls.realtime + cl.serverTimeDelta > cl.frame.serverTime + RESET_TIME  ) {
 		cl.serverTimeDelta = cl.frame.serverTime - cls.realtime;
 		cl.oldServerTime = cl.frame.serverTime;
@@ -975,7 +975,7 @@ void CL_AdjustTimeDelta( void ) {
 	int		deltaDelta;
 
 	cl.newSnapshots = qfalse;
-	
+
 	// if the current time is WAY off, just correct to the current value
 	if ( com_sv_running->integer ) {
 		resetTime = 100;
@@ -1029,7 +1029,7 @@ CL_FirstSnapshot
 */
 void CL_FirstSnapshot( void ) {
 
-	RE_RegisterMedia_LevelLoadEnd();
+	re.RegisterMedia_LevelLoadEnd();
 
 	cls.state = CA_ACTIVE;
 
@@ -1045,7 +1045,7 @@ void CL_FirstSnapshot( void ) {
 		Cbuf_AddText( cl_activeAction->string );
 		Cvar_Set( "activeAction", "" );
 	}
-	
+
 	Sys_BeginProfiling();
 }
 
@@ -1069,7 +1069,7 @@ void CL_SetCGameTime( void ) {
 		if ( cls.state != CA_ACTIVE ) {
 			return;
 		}
-	}	
+	}
 
 	// if we have gotten to this point, cl.frame is guaranteed to be valid
 	if ( !cl.frame.valid ) {
@@ -1091,7 +1091,7 @@ void CL_SetCGameTime( void ) {
 	// get our current view of time
 
 	// cl_timeNudge is a user adjustable cvar that allows more
-	// or less latency to be added in the interest of better 
+	// or less latency to be added in the interest of better
 	// smoothness or better responsiveness.
 	cl.serverTime = cls.realtime + cl.serverTimeDelta - cl_timeNudge->integer;
 

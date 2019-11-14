@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../game/q_shared.h"
 #include "../renderer/tr_local.h"
+#include "../renderercommon/tr_public.h"
 #include "../qcommon/qcommon.h"
 
 /*

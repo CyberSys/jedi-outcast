@@ -175,4 +175,5 @@ void		G2_TimingModel(boneInfo_t &bone,int time,int numFramesInFile,int &currentF
 bool G2_SetupModelPointers(CGhoul2Info_v &ghoul2); // returns true if any model is properly set up
 bool G2_SetupModelPointers(CGhoul2Info *ghlInfo); // returns true if the model is properly set up
 
+IGhoul2InfoArray &TheGhoul2InfoArray();
 #endif // G2_H_INC

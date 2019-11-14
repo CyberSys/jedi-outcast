@@ -4,6 +4,7 @@
 #include "qcommon.h"
 #include "../qcommon/sstring.h"	// to get Gil's string class, because MS's doesn't compile properly in here
 #include "stv_version.h"
+#include "../renderercommon/tr_public.h"
 
 #ifdef _WIN32
 #include <windows.h>	// for Sleep for Z_Malloc recovery attempy
@@ -33,6 +34,7 @@ static const char *psTagStrings[TAG_COUNT+1]=	// +1 because TAG_COUNT will itsel
 	#include "../qcommon/tags.h"
 };
 
+extern    refexport_t             re;             // interface to refresh .dll
 
 int		com_argc;
 char	*com_argv[MAX_NUM_ARGVS+1];
@@ -169,7 +171,7 @@ A Com_Printf that only shows up if the "developer" cvar is set
 void QDECL Com_DPrintf( const char *fmt, ...) {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
-		
+
 	if ( !com_developer || !com_developer->integer ) {
 		return;			// don't confuse non-developers with techie stuff...
 	}
@@ -177,7 +179,7 @@ void QDECL Com_DPrintf( const char *fmt, ...) {
 	va_start (argptr,fmt);
 	vsprintf (msg,fmt,argptr);
 	va_end (argptr);
-	
+
 	Com_Printf ("%s", msg);
 }
 
@@ -185,7 +187,7 @@ void Com_WriteCam ( const char *text )
 {
 	static	char	mapname[MAX_QPATH];
 	// camerafile
-	if ( !camerafile ) 
+	if ( !camerafile )
 	{
 		extern	cvar_t	*sv_mapname;
 
@@ -194,7 +196,7 @@ void Com_WriteCam ( const char *text )
 		camerafile = FS_FOpenFileWrite( mapname );
 	}
 
-	if ( camerafile ) 
+	if ( camerafile )
 	{
 		FS_Printf( camerafile, "%s", text );
 	}
@@ -227,7 +229,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	if ( com_errorEntered ) {
 		Sys_Error( "recursive error after: %s", com_errorMessage );
 	}
-	
+
 	com_errorEntered = qtrue;
 
 	//reset some game stuff here
@@ -235,7 +237,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 
 	va_start (argptr,fmt);
 	vsprintf (com_errorMessage,fmt,argptr);
-	va_end (argptr);	
+	va_end (argptr);
 
 	if ( code != ERR_DISCONNECT ) {
 		Cvar_Get("com_errorMessage", "", CVAR_ROM);	//give com_errorMessage a default so it won't come back to life after a resetDefaults
@@ -591,7 +593,7 @@ struct	zoneHeader_s		*pPrev;
 
 } zoneHeader_t;
 
-typedef struct 
+typedef struct
 {
 	int iMagic;
 
@@ -616,8 +618,8 @@ typedef struct zoneStats_s
 	// I'm keeping these updated on the fly, since it's quicker for cache-pool
 	//	purposes rather than recalculating each time...
 	//
-	int		iSizesPerTag [TAG_COUNT];	
-	int		iCountsPerTag[TAG_COUNT];	
+	int		iSizesPerTag [TAG_COUNT];
+	int		iCountsPerTag[TAG_COUNT];
 
 } zoneStats_t;
 
@@ -637,7 +639,7 @@ zone_t	TheZone = {0};
 // Scans through the linked list of mallocs and makes sure no data has been overwritten
 
 void Z_Validate(void)
-{	
+{
 	if(!com_validateZone || !com_validateZone->integer)
 	{
 		return;
@@ -653,7 +655,7 @@ void Z_Validate(void)
 		{
 			Com_Error(ERR_FATAL, "Z_Validate(): Bad block allocation count!");
 			return;
-		}		   
+		}
 		#endif
 
 		if(pMemory->iMagic != ZONE_MAGIC)
@@ -667,11 +669,11 @@ void Z_Validate(void)
 			Com_Error(ERR_FATAL, "Z_Validate(): Corrupt zone tail!");
 			return;
 		}
-		
+
 		pMemory = pMemory->pNext;
 	}
 }
-				
+
 
 
 // static mem blocks to reduce a lot of small zone overhead
@@ -680,14 +682,14 @@ void Z_Validate(void)
 #pragma pack(1)
 typedef struct
 {
-	zoneHeader_t	Header;	
+	zoneHeader_t	Header;
 //	byte mem[0];
 	zoneTail_t		Tail;
 } StaticZeroMem_t;
 
 typedef struct
 {
-	zoneHeader_t	Header;	
+	zoneHeader_t	Header;
 	byte mem[2];
 	zoneTail_t		Tail;
 } StaticMem_t;
@@ -699,7 +701,7 @@ const static StaticZeroMem_t gZeroMalloc  =
 #ifdef DEBUG_ZONE_ALLOCS
 #define DEF_STATIC(_char) {ZONE_MAGIC, TAG_STATIC,2,NULL,NULL, "<static>",0,"",0},_char,'\0',{ZONE_MAGIC}
 #else
-#define DEF_STATIC(_char) {ZONE_MAGIC, TAG_STATIC,2,NULL,NULL			        },_char,'\0',{ZONE_MAGIC}	
+#define DEF_STATIC(_char) {ZONE_MAGIC, TAG_STATIC,2,NULL,NULL			        },_char,'\0',{ZONE_MAGIC}
 #endif
 
 const static StaticMem_t gEmptyString =
@@ -725,7 +727,7 @@ void *_D_Z_Malloc ( int iSize, memtag_t eTag, qboolean bZeroit, const char *psFi
 #else
 void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 #endif
-{	
+{
 	gbMemFreeupOccured = qfalse;
 
 	if (iSize == 0)
@@ -778,8 +780,7 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 
 			// ditch any image_t's (and associated GL texture mem) not used on this level...
 			//
-			extern qboolean RE_RegisterImages_LevelLoadEnd(void);
-			if (RE_RegisterImages_LevelLoadEnd())
+			if (re.RegisterImages_LevelLoadEnd())
 			{
 				gbMemFreeupOccured = qtrue;
 				continue;		// we've dropped at least one image, so try again with the malloc
@@ -788,30 +789,29 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 
 			// ditch the model-binaries cache...  (must be getting desperate here!)
 			//
-			extern qboolean RE_RegisterModels_LevelLoadEnd(qboolean bDeleteEverythingNotUsedThisLevel);
-			if (RE_RegisterModels_LevelLoadEnd(qtrue))
+			if (re.RegisterModels_LevelLoadEnd(qtrue))
 			{
 				gbMemFreeupOccured = qtrue;
 				continue;
 			}
 
-			// as a last panic measure, dump all the audio memory, but not if we're in the audio loader 
+			// as a last panic measure, dump all the audio memory, but not if we're in the audio loader
 			//	(which is annoying, but I'm not sure how to ensure we're not dumping any memory needed by the sound
 			//	currently being loaded if that was the case)...
 			//
 			// note that this keeps querying until it's freed up as many bytes as the requested size, but freeing
 			//	several small blocks might not mean that one larger one is satisfiable after freeup, however that'll
-			//	just make it go round again and try for freeing up another bunch of blocks until the total is satisfied 
-			//	again (though this will have freed twice the requested amount in that case), so it'll either work 
+			//	just make it go round again and try for freeing up another bunch of blocks until the total is satisfied
+			//	again (though this will have freed twice the requested amount in that case), so it'll either work
 			//	eventually or not free up enough and drop through to the final ERR_DROP. No worries...
 			//
-			extern qboolean gbInsideLoadSound;			
+			extern qboolean gbInsideLoadSound;
 			extern int SND_FreeOldestSound(void);	// I had to add a void-arg version of this because of link issues, sigh
 			if (!gbInsideLoadSound)
 			{
 				int iBytesFreed = SND_FreeOldestSound();
 				if (iBytesFreed)
-				{						
+				{
 					int iTheseBytesFreed = 0;
 					while ( (iTheseBytesFreed = SND_FreeOldestSound()) != 0)
 					{
@@ -840,7 +840,7 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 	extern char *Filename_WithoutPath(const char *psFilename);
 
 	Q_strncpyz(pMemory->sSrcFileBaseName, Filename_WithoutPath(psFile), sizeof(pMemory->sSrcFileBaseName));
-	pMemory->iSrcFileLineNum	= iLine;	
+	pMemory->iSrcFileLineNum	= iLine;
 	pMemory->sOptionalLabel[0]	= '\0';
 	pMemory->iSnapshotNumber	= giZoneSnaphotNum;
 #endif
@@ -848,7 +848,7 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 	// Link in
 	pMemory->iMagic	= ZONE_MAGIC;
 	pMemory->eTag	= eTag;
-	pMemory->iSize	= iSize;	
+	pMemory->iSize	= iSize;
 	pMemory->pNext  = TheZone.Header.pNext;
 	TheZone.Header.pNext = pMemory;
 	if (pMemory->pNext)
@@ -866,7 +866,7 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 	TheZone.Stats.iCurrent += iSize;
 	TheZone.Stats.iCount++;
 	TheZone.Stats.iSizesPerTag	[eTag] += iSize;
-	TheZone.Stats.iCountsPerTag	[eTag]++;	
+	TheZone.Stats.iCountsPerTag	[eTag]++;
 
 	if (TheZone.Stats.iCurrent > TheZone.Stats.iPeak)
 	{
@@ -876,7 +876,7 @@ void *Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
 #ifdef DETAILED_ZONE_DEBUG_CODE
 	mapAllocatedZones[pMemory]++;
 #endif
-	
+
 	Z_Validate();	// check for corruption
 
 	void *pvReturnMem = &pMemory[1];
@@ -912,7 +912,7 @@ static void Zone_FreeBlock(zoneHeader_t *pMemory)
 		}
 		free (pMemory);
 
-		
+
 		#ifdef DETAILED_ZONE_DEBUG_CODE
 		// this has already been checked for in execution order, but wtf?
 		int& iAllocCount = mapAllocatedZones[pMemory];
@@ -921,7 +921,7 @@ static void Zone_FreeBlock(zoneHeader_t *pMemory)
 			Com_Error(ERR_FATAL, "Zone_FreeBlock(): Double-freeing block!");
 			return;
 		}
-		iAllocCount--;	
+		iAllocCount--;
 		#endif
 	}
 }
@@ -986,10 +986,10 @@ void Z_Free(void *pvAddress)
 	//
 	int& iAllocCount = mapAllocatedZones[pMemory];
 	if (iAllocCount <= 0)
-	{			
+	{
 		Com_Error(ERR_FATAL, "Z_Free(): Block already-freed, or not allocated through Z_Malloc!");
 		return;
-	}		   
+	}
 	#endif
 
 	if (pMemory->iMagic != ZONE_MAGIC)
@@ -1047,7 +1047,7 @@ void *_D_S_Malloc ( int iSize, const char *psFile, int iLine)
 	return _D_Z_Malloc( iSize, TAG_SMALL, qfalse, psFile, iLine );
 }
 #else
-void *S_Malloc( int iSize ) 
+void *S_Malloc( int iSize )
 {
 	return Z_Malloc( iSize, TAG_SMALL, qfalse);
 }
@@ -1057,7 +1057,7 @@ void *S_Malloc( int iSize )
 #ifdef _DEBUG
 static void Z_MemRecoverTest_f(void)
 {
-	// needs to be in _DEBUG only, not good for final game! 
+	// needs to be in _DEBUG only, not good for final game!
 	// fixme: findmeste: Remove this sometime
 	//
 	int iTotalMalloc = 0;
@@ -1079,14 +1079,14 @@ static void Z_MemRecoverTest_f(void)
 
 static void Z_Stats_f(void)
 {
-	Com_Printf("\nThe zone is using %d bytes (%.2fMB) in %d memory blocks\n", 
-								  TheZone.Stats.iCurrent, 
-									        (float)TheZone.Stats.iCurrent / 1024.0f / 1024.0f, 
+	Com_Printf("\nThe zone is using %d bytes (%.2fMB) in %d memory blocks\n",
+								  TheZone.Stats.iCurrent,
+									        (float)TheZone.Stats.iCurrent / 1024.0f / 1024.0f,
 													  TheZone.Stats.iCount
 				);
 
-	Com_Printf("The zone peaked at %d bytes (%.2fMB)\n", 
-									TheZone.Stats.iPeak, 
+	Com_Printf("The zone peaked at %d bytes (%.2fMB)\n",
+									TheZone.Stats.iPeak,
 									         (float)TheZone.Stats.iPeak / 1024.0f / 1024.0f
 				);
 }
@@ -1106,15 +1106,15 @@ static void Z_Details_f(void)
 
 		if (iThisCount)
 		{
-			// can you believe that using %2.2f as a format specifier doesn't bloody work? 
+			// can you believe that using %2.2f as a format specifier doesn't bloody work?
 			//	It ignores the left-hand specifier. Sigh, now I've got to do shit like this...
 			//
 			float	fSize		= (float)(iThisSize) / 1024.0f / 1024.0f;
 			int		iSize		= fSize;
 			int		iRemainder 	= 100.0f * (fSize - floor(fSize));
-			Com_Printf("%20s %9d (%2d.%02dMB) in %6d blocks (%9d average)\n", 
-					    psTagStrings[i], 
-							  iThisSize, 
+			Com_Printf("%20s %9d (%2d.%02dMB) in %6d blocks (%9d average)\n",
+					    psTagStrings[i],
+							  iThisSize,
 								iSize,iRemainder,
 								           iThisCount, iThisSize / iThisCount
 					   );
@@ -1132,14 +1132,14 @@ typedef map <sDebugString_t,LabelRefCount_t>	TagBlockLabels_t;
 										TagBlockLabels_t AllTagBlockLabels;
 #pragma warning (disable:4503)	// decorated name length xceeded, name was truncated
 static void Z_Snapshot_f(void)
-{	
+{
 	AllTagBlockLabels.clear();
 
 	zoneHeader_t *pMemory = TheZone.Header.pNext;
 	while (pMemory)
 	{
 		AllTagBlockLabels[psTagStrings[pMemory->eTag]][pMemory->sOptionalLabel]++;
-		pMemory = pMemory->pNext;		
+		pMemory = pMemory->pNext;
 	}
 
 	giZoneSnaphotNum++;
@@ -1164,7 +1164,7 @@ static void Z_TagDebug_f(void)
 
 			AllTagBlockLabels_Local = AllTagBlockLabels;	// horrible great STL copy
 
-			psTAGName = Cmd_Argv(2);			
+			psTAGName = Cmd_Argv(2);
 		}
 
 		if (psTAGName[0])
@@ -1221,7 +1221,7 @@ static void Z_TagDebug_f(void)
 			{
 				AllTagBlockLabels_Local[psTagStrings[pMemory->eTag]][pMemory->sOptionalLabel]--;
 			}
-			pMemory = pMemory->pNext;		
+			pMemory = pMemory->pNext;
 		}
 	}
 
@@ -1259,7 +1259,7 @@ static void Z_TagDebug_f(void)
 			}
 			iBlocksListed++;
 			iTotalSize += pMemory->iSize;
-			
+
 			if (bSnapShotTestActive)
 			{
 				// bump ref count so we only 1 warning per new string, not for every one sharing that label...
@@ -1267,7 +1267,7 @@ static void Z_TagDebug_f(void)
 				AllTagBlockLabels_Local[psTagStrings[pMemory->eTag]][pMemory->sOptionalLabel]++;
 			}
 		}
-		pMemory = pMemory->pNext;		
+		pMemory = pMemory->pNext;
 	}
 
 	Com_Printf("( %d blocks listed, %d bytes (%.2fMB) total )\n",iBlocksListed, iTotalSize, (float)iTotalSize / 1024.0f / 1024.0f);
@@ -1301,11 +1301,11 @@ void Com_ShutdownZoneMemory(void)
 
 // Initialises the zone memory system
 
-void Com_InitZoneMemory( void ) 
+void Com_InitZoneMemory( void )
 {
 	Com_Printf("Initialising zone memory .....\n");
 
-	memset(&TheZone, 0, sizeof(TheZone)); 
+	memset(&TheZone, 0, sizeof(TheZone));
 	TheZone.Header.iMagic = ZONE_MAGIC;
 
 	com_validateZone = Cvar_Get("com_validateZone", "0", 0);
@@ -1361,7 +1361,7 @@ char *CopyString( const char *in ) {
 Com_Meminfo_f
 =================
 */
-void Com_Meminfo_f( void ) 
+void Com_Meminfo_f( void )
 {
 	Z_Details_f();
 }
@@ -1376,7 +1376,7 @@ Touch all known used data to make sure it is paged in
 void Com_TouchMemory( void ) {
 	int		start, end;
 	int		i, j;
-	int		sum;	
+	int		sum;
 	int		totalTouched;
 
 	Z_Validate();
@@ -1431,7 +1431,7 @@ Hunk_SetMark
 The server calls this after the level and game VM have been loaded
 ===================
 */
-void Hunk_SetMark( void ) 
+void Hunk_SetMark( void )
 {
 }
 
@@ -1444,9 +1444,9 @@ Hunk_ClearToMark
 The client calls this before starting a vid_restart or snd_restart
 =================
 */
-void Hunk_ClearToMark( void ) 
+void Hunk_ClearToMark( void )
 {
-	Z_TagFree(TAG_HUNKALLOC);	
+	Z_TagFree(TAG_HUNKALLOC);
 }
 
 
@@ -1458,15 +1458,15 @@ Hunk_Clear
 The server calls this before shutting down or loading a new map
 =================
 */
-void Hunk_Clear( void ) 
+void Hunk_Clear( void )
 {
 	Z_TagFree(TAG_HUNKALLOC);
 
 	extern void CIN_CloseAllVideos();
 				CIN_CloseAllVideos();
 
-	extern void R_ClearStuffToStopGhoul2CrashingThings(void);
-				R_ClearStuffToStopGhoul2CrashingThings();
+
+    if(*(re.ClearStuffToStopGhoul2CrashingThings))re.ClearStuffToStopGhoul2CrashingThings();
 }
 
 
@@ -1735,7 +1735,7 @@ int Com_Milliseconds (void) {
 			Com_PushEvent( &ev );
 		}
 	} while ( ev.evType != SE_NONE );
-	
+
 	return ev.evTime;
 }
 
@@ -1811,25 +1811,25 @@ void Com_Init( char *commandLine ) {
 		// prepare enough of the subsystems to handle
 		// cvar and command buffer management
 		Com_ParseCommandLine( commandLine );
-		
+
 		Swap_Init ();
 		Cbuf_Init ();
-		
+
 		Com_InitZoneMemory();
 
 		Cmd_Init ();
 		Cvar_Init ();
-		
+
 		// get the commandline cvars set
 		Com_StartupVariable( NULL );
 
 		// done early so bind command exists
 		CL_InitKeyCommands();
-		
+
 		FS_InitFilesystem ();	//uses z_malloc
-		
+
 		Com_InitJournaling();
-		
+
 		Cbuf_AddText ("exec default.cfg\n");
 
 		// skip the jk2config.cfg if "safe" is on the command line
@@ -1838,61 +1838,61 @@ void Com_Init( char *commandLine ) {
 		}
 
 		Cbuf_AddText ("exec autoexec.cfg\n");
-		
+
 		Cbuf_Execute ();
-		
+
 		// override anything from the config files with command line args
 		Com_StartupVariable( NULL );
-		
+
 		// allocate the stack based hunk allocator
 		Com_InitHunkMemory();
 
 		// if any archived cvars are modified after this, we will trigger a writing
 		// of the config file
 		cvar_modifiedFlags &= ~CVAR_ARCHIVE;
-		
+
 		//
 		// init commands and vars
 		//
 		Cmd_AddCommand ("quit", Com_Quit_f);
 		Cmd_AddCommand ("writeconfig", Com_WriteConfig_f );
-		
+
 		com_maxfps = Cvar_Get ("com_maxfps", "85", CVAR_ARCHIVE);
-		
+
 		com_developer = Cvar_Get ("developer", "0", CVAR_TEMP );
 		com_logfile = Cvar_Get ("logfile", "0", CVAR_TEMP );
 		com_speedslog = Cvar_Get ("speedslog", "0", CVAR_TEMP );
-		
+
 		com_timescale = Cvar_Get ("timescale", "1", CVAR_CHEAT );
 		com_fixedtime = Cvar_Get ("fixedtime", "0", CVAR_CHEAT);
 		com_showtrace = Cvar_Get ("com_showtrace", "0", CVAR_CHEAT);
 		com_viewlog = Cvar_Get( "viewlog", "0", CVAR_TEMP );
 		com_speeds = Cvar_Get ("com_speeds", "0", 0);
-		
+
 		cl_paused	   = Cvar_Get ("cl_paused", "0", CVAR_ROM);
 		sv_paused	   = Cvar_Get ("sv_paused", "0", CVAR_ROM);
 		com_sv_running = Cvar_Get ("sv_running", "0", CVAR_ROM);
 		com_cl_running = Cvar_Get ("cl_running", "0", CVAR_ROM);
 		com_skippingcin = Cvar_Get ("skippingCinematic", "0", CVAR_ROM);
 		com_buildScript = Cvar_Get( "com_buildScript", "0", 0 );
-		
+
 //		com_FirstTime = Cvar_Get( "com_FirstTime", "0", CVAR_ARCHIVE);
 		if ( com_developer && com_developer->integer ) {
 			Cmd_AddCommand ("error", Com_Error_f);
 			Cmd_AddCommand ("crash", Com_Crash_f );
 			Cmd_AddCommand ("freeze", Com_Freeze_f);
 		}
-		
+
 		s = va("%s %s %s", Q3_VERSION, CPUSTRING, __DATE__ );
 		com_version = Cvar_Get ("version", s, CVAR_ROM | CVAR_SERVERINFO );
 
 		SP_Init();	// Initialize StripEd
-	
+
 		Sys_Init();	// this also detects CPU type, so I can now do this CPU check below...
 
-/*		if( !com_FirstTime->integer )	// special request to detect and use top-settings for Intel Williamette chip...	
+/*		if( !com_FirstTime->integer )	// special request to detect and use top-settings for Intel Williamette chip...
 		{
-			Cvar_Set( "com_FirstTime", "1" );	// only do this once			
+			Cvar_Set( "com_FirstTime", "1" );	// only do this once
 			//
 			// ( make a local ptr only for quick test, since this is a common module )
 			//
@@ -1907,10 +1907,10 @@ void Com_Init( char *commandLine ) {
 		Netchan_Init( Com_Milliseconds() & 0xffff );	// pick a port value that should be nice and random
 //	VM_Init();
 		SV_Init();
-		
+
 		CL_Init();
 		Sys_ShowConsole( com_viewlog->integer, qfalse );
-		
+
 		// set com_frameTime so that if a map is started on the
 		// command line it will still be able to count on com_frameTime
 		// being random enough for a serverid
@@ -1920,20 +1920,20 @@ void Com_Init( char *commandLine ) {
 		if ( !Com_AddStartupCommands() ) {
 #ifdef NDEBUG
 			// if the user didn't give any commands, run default action
-//			if ( !com_dedicated->integer ) 
+//			if ( !com_dedicated->integer )
 			{
-				Cbuf_AddText ("cinematic openinglogos\n");				
+				Cbuf_AddText ("cinematic openinglogos\n");
 //				if( !com_introPlayed->integer ) {
 //					Cvar_Set( com_introPlayed->name, "1" );
 //					Cvar_Set( "nextmap", "cinematic intro" );
 //				}
 			}
-#endif	
+#endif
 		}
 		com_fullyInitialized = qtrue;
 		Com_Printf ("--- Common Initialization Complete ---\n");
 
-//HACKERY FOR THE DEUTSCH		
+//HACKERY FOR THE DEUTSCH
 		if ( (Cvar_VariableIntegerValue("ui_iscensored") == 1) 	//if this was on before, set it again so it gets its flags
 			|| sp_language->integer == SP_LANGUAGE_GERMAN )
 		{
@@ -2019,7 +2019,7 @@ Com_ModifyMsec
 */
 
 
-int Com_ModifyMsec( int msec, float &fraction ) 
+int Com_ModifyMsec( int msec, float &fraction )
 {
 	int		clampTime;
 
@@ -2028,20 +2028,20 @@ int Com_ModifyMsec( int msec, float &fraction )
 	//
 	// modify time for debugging values
 	//
-	if ( com_fixedtime->integer ) 
+	if ( com_fixedtime->integer )
 	{
 		msec = com_fixedtime->integer;
-	} 
-	else if ( com_timescale->value ) 
+	}
+	else if ( com_timescale->value )
 	{
 		fraction=(float)msec;
 		fraction*=com_timescale->value;
 		msec=(int)floor(fraction);
 		fraction-=(float)msec;
 	}
-	
+
 	// don't let it scale below 1 msec
-	if ( msec < 1 ) 
+	if ( msec < 1 )
 	{
 		msec = 1;
 		fraction=0.0f;
@@ -2081,7 +2081,7 @@ void Com_SetOrgAngles(vec3_t org,vec3_t angles)
 
 #pragma warning (disable: 4701)	//local may have been used without init (timing info vars)
 void Com_Frame( void ) {
-try 
+try
 {
 	int		timeBeforeFirstEvents, timeBeforeServer, timeBeforeEvents, timeBeforeClient, timeAfter;
 	int		msec, minMsec;
@@ -2091,7 +2091,7 @@ try
 	timeBeforeFirstEvents = timeBeforeServer = timeBeforeEvents = timeBeforeClient = 0;
 
 	// write config file if anything changed
-	Com_WriteConfiguration(); 
+	Com_WriteConfiguration();
 
 	// if "viewlog" has been modified, show or hide the log console
 	if ( com_viewlog->modified ) {
@@ -2127,7 +2127,7 @@ try
 	com_frameMsec = msec;
 	float fractionMsec=0.0f;
 	msec = Com_ModifyMsec( msec, fractionMsec);
-	
+
 	//
 	// server side
 	//
@@ -2141,7 +2141,7 @@ try
 	//
 	// client system
 	//
-//	if ( !com_dedicated->integer ) 
+//	if ( !com_dedicated->integer )
 	{
 		//
 		// run event loop a second time to get server to client packets
@@ -2182,7 +2182,7 @@ try
 		sv -= time_game;
 		cl -= time_frontend + time_backend;
 
-		Com_Printf("fr:%i all:%3i sv:%3i ev:%3i cl:%3i gm:%3i tr:%3i pvs:%3i rf:%3i bk:%3i\n", 
+		Com_Printf("fr:%i all:%3i sv:%3i ev:%3i cl:%3i gm:%3i tr:%3i pvs:%3i rf:%3i bk:%3i\n",
 					com_frameNumber, all, sv, ev, cl, time_game, timeInTrace, timeInPVSCheck, time_frontend, time_backend);
 
 		// speedslog
@@ -2193,7 +2193,7 @@ try
 				speedslog = FS_FOpenFileWrite("speeds.log");
 				FS_Write("data={\n", strlen("data={\n"), speedslog);
 				bComma=false;
-				if ( com_speedslog->integer > 1 ) 
+				if ( com_speedslog->integer > 1 )
 				{
 					// force it to not buffer so we get valid
 					// data even if we are crashing
@@ -2212,7 +2212,7 @@ try
 							"%8.4f,%8.4f,%8.4f,%8.4f,%8.4f,%8.4f,",corg[0],corg[1],corg[2],cangles[0],cangles[1],cangles[2]);
 				FS_Write(msg, strlen(msg), speedslog);
 				Com_sprintf(msg,sizeof(msg),
-					"%i,%3i,%3i,%3i,%3i,%3i,%3i,%3i,%3i,%3i}", 
+					"%i,%3i,%3i,%3i,%3i,%3i,%3i,%3i,%3i,%3i}",
 					com_frameNumber, all, sv, ev, cl, time_game, timeInTrace, timeInPVSCheck, time_frontend, time_backend);
 				FS_Write(msg, strlen(msg), speedslog);
 				bComma=true;
@@ -2234,7 +2234,7 @@ try
 		timeInTrace = numTraces = 0;
 		c_traces = 0;
 		*/
-		
+
 		Com_Printf ("%4i traces  (%ib %ip) %4i points\n", c_traces,
 			c_brush_traces, c_patch_traces, c_pointcontents);
 		c_traces = 0;

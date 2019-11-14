@@ -1,7 +1,7 @@
 #if !defined(MINIHEAP_H_INC)
 #define MINIHEAP_H_INC
 
-
+#include "qcommon.h"
 class CMiniHeap
 {
 	char	*mHeap;

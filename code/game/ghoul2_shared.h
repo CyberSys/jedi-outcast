@@ -23,7 +23,6 @@ Ghoul2 Insert End
 void		G2API_SetTime(int currentTime,int clock);
 int			G2API_GetTime(int argTime); // this may or may not return arg depending on ghoul2_time cvar
 
-
 //===================================================================
 //
 //   G H O U L  I I  D E F I N E S
@@ -218,20 +217,15 @@ public:
 	virtual const vector<CGhoul2Info> &Get(int handle) const=0;
 };
 
-IGhoul2InfoArray &TheGhoul2InfoArray();
 IGhoul2InfoArray &TheGameGhoul2InfoArray();
 
 class CGhoul2Info_v
 {
 	int mItem;
-
+    
 	IGhoul2InfoArray &InfoArray() const
 	{
-#ifdef _JK2EXE
-		return TheGhoul2InfoArray();
-#else
 		return TheGameGhoul2InfoArray();
-#endif
 	}
 
 	void Alloc()
@@ -260,6 +254,7 @@ class CGhoul2Info_v
 		return InfoArray().Get(mItem);
 	}
 public:
+    IGhoul2InfoArray &(*TheGhoul2InfoArray)();
 	CGhoul2Info_v()
 	{
 		mItem=0;

@@ -12,7 +12,7 @@
 	#include "tr_local.h"
 #endif
 
-#include "matcomp.h"
+#include "../renderer/matcomp.h"
 #if !defined(_QCOMMON_H_)
 	#include "../qcommon/qcommon.h"
 #endif
@@ -2782,3 +2782,7 @@ qboolean R_LoadMDXA( model_t *mod, void *buffer, const char *mod_name, qboolean 
 	return qtrue;
 }
 
+IGhoul2InfoArray &TheGameGhoul2InfoArray()
+{
+	return TheGhoul2InfoArray();
+}

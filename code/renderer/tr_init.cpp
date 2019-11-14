@@ -10,6 +10,7 @@
 #include "tr_stl.h"
 #include "tr_jpeg_interface.h"
 #include "tr_font.h"
+#include "../ghoul2/G2.h"
 
 #define Com_Memset memset
 #define Com_Memcpy memcpy
@@ -243,9 +244,9 @@ static void InitOpenGL( void )
 	//
 
     ri.Printf( PRINT_DEVELOPER, "InitOpenGL( )\n" );
-    
+
 	if ( glConfig.vidWidth == 0 )
-	{		
+	{
 		GLimp_Init();
 		// print info the first time only
 		GfxInfo_f();
@@ -371,19 +372,19 @@ static void R_ModeList_f( void )
 }
 
 
-/* 
-============================================================================== 
- 
-						SCREEN SHOTS 
- 
-============================================================================== 
-*/ 
+/*
+==============================================================================
 
-/* 
-================== 
+						SCREEN SHOTS
+
+==============================================================================
+*/
+
+/*
+==================
 R_TakeScreenshot
-================== 
-*/  
+==================
+*/
 // "filename" param is something like "screenshots/shot0000.tga"
 //	note that if the last extension is ".jpg", then it'll save a JPG, else TGA
 //
@@ -398,7 +399,7 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 		// JPG saver expects to be fed RGBA data, though it presumably ignores 'A'...
 		//
 		buffer = (unsigned char *) ri.Malloc(glConfig.vidWidth*glConfig.vidHeight*4, TAG_TEMP_WORKSPACE, qfalse);
-		qglReadPixels( x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer ); 
+		qglReadPixels( x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
 
 		// gamma correct
 		if ( tr.overbrightBits>0 && glConfig.deviceSupportsGamma ) {
@@ -420,7 +421,7 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 		buffer[15] = height >> 8;
 		buffer[16] = 24;	// pixel size
 
-		qglReadPixels( x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 ); 
+		qglReadPixels( x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 );
 
 		// swap rgb to bgr
 		c = 18 + width * height * 3;
@@ -436,15 +437,15 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 		}
 		ri.FS_WriteFile( fileName, buffer, c );
 	}
-	
+
 	ri.Free( buffer );
 }
 
-/* 
-================== 
+/*
+==================
 R_ScreenshotFilename
-================== 
-*/  
+==================
+*/
 void R_ScreenshotFilename( int lastNumber, char *fileName, const char *psExt ) {
 	int		a,b,c,d;
 
@@ -497,7 +498,7 @@ void R_LevelShot( void ) {
 	buffer[15] = LEVELSHOTSIZE >> 8;
 	buffer[16] = 24;	// pixel size
 
-	qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGB, GL_UNSIGNED_BYTE, source ); 
+	qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGB, GL_UNSIGNED_BYTE, source );
 
 	// resample from source
 	xScale = glConfig.vidWidth / (4.0*LEVELSHOTSIZE);
@@ -533,8 +534,8 @@ void R_LevelShot( void ) {
 	ri.Printf( PRINT_ALL, "Wrote %s\n", checkname );
 }
 
-/* 
-================== 
+/*
+==================
 R_ScreenShot_f
 
 screenshot
@@ -543,8 +544,8 @@ screenshot [levelshot]
 screenshot [filename]
 
 Doesn't print the pacifier message if there is a second arg
-================== 
-*/  
+==================
+*/
 void R_ScreenShot_f (void) {
 	char		checkname[MAX_OSPATH];
 	int			len;
@@ -585,7 +586,7 @@ void R_ScreenShot_f (void) {
 		}
 
 		if ( lastNumber == 10000 ) {
-			ri.Printf (PRINT_ALL, "ScreenShot: Couldn't create a file\n"); 
+			ri.Printf (PRINT_ALL, "ScreenShot: Couldn't create a file\n");
 			return;
  		}
 
@@ -598,12 +599,12 @@ void R_ScreenShot_f (void) {
 	if ( !silent ) {
 		ri.Printf (PRINT_ALL, "Wrote %s\n", checkname);
 	}
-} 
+}
 
 
 
-/* 
-================== 
+/*
+==================
 R_ScreenShotTGA_f
 
 screenshot
@@ -612,8 +613,8 @@ screenshot [levelshot]
 screenshot [filename]
 
 Doesn't print the pacifier message if there is a second arg
-================== 
-*/  
+==================
+*/
 void R_ScreenShotTGA_f (void) {
 	char		checkname[MAX_OSPATH];
 	int			len;
@@ -654,7 +655,7 @@ void R_ScreenShotTGA_f (void) {
 		}
 
 		if ( lastNumber == 10000 ) {
-			ri.Printf (PRINT_ALL, "ScreenShot: Couldn't create a file\n"); 
+			ri.Printf (PRINT_ALL, "ScreenShot: Couldn't create a file\n");
 			return;
  		}
 
@@ -667,7 +668,7 @@ void R_ScreenShotTGA_f (void) {
 	if ( !silent ) {
 		ri.Printf (PRINT_ALL, "Wrote %s\n", checkname);
 	}
-} 
+}
 
 
 
@@ -757,7 +758,7 @@ void R_PrintLongString(const char *string) {
 GfxInfo_f
 ================
 */
-void GfxInfo_f( void ) 
+void GfxInfo_f( void )
 {
 	cvar_t *sys_cpustring = ri.Cvar_Get( "sys_cpustring", "", 0 );
 	const char *enablestrings[] =
@@ -771,7 +772,7 @@ void GfxInfo_f( void )
 		"fullscreen"
 	};
 
-	const char *tc_table[] = 
+	const char *tc_table[] =
 	{
 		"None",
 		"GL_S3_s3tc",
@@ -912,7 +913,7 @@ void R_FogDistance_f(void)
 	}
 
 	distance = atof(ri.Cmd_Argv(1));
-	if (distance < 1.0) 
+	if (distance < 1.0)
 	{
 		distance = 1.0;
 	}
@@ -963,8 +964,8 @@ void R_FogColor_f(void)
 		return;
 	}
 
-	tr.world->fogs[tr.world->globalFog].colorInt = ColorBytes4 ( atof(ri.Cmd_Argv(1)) * tr.identityLight, 
-			                          atof(ri.Cmd_Argv(2)) * tr.identityLight, 
+	tr.world->fogs[tr.world->globalFog].colorInt = ColorBytes4 ( atof(ri.Cmd_Argv(1)) * tr.identityLight,
+			                          atof(ri.Cmd_Argv(2)) * tr.identityLight,
 			                          atof(ri.Cmd_Argv(3)) * tr.identityLight, 1.0 );
 }
 
@@ -973,7 +974,7 @@ void R_FogColor_f(void)
 R_Register
 ===============
 */
-void R_Register( void ) 
+void R_Register( void )
 {
 	//
 	// latched and archived variables
@@ -1017,7 +1018,7 @@ void R_Register( void )
 	r_smp = ri.Cvar_Get( "r_smp", "0", CVAR_ROM);
 	r_ignoreFastPath = ri.Cvar_Get( "r_ignoreFastPath", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_intensity = ri.Cvar_Get ("r_intensity", "1", CVAR_LATCH|CVAR_ARCHIVE );
-	
+
 	//
 	// temporary latched variables that can only change over a restart
 	//
@@ -1166,7 +1167,7 @@ R_Init
 ===============
 */
 extern void R_InitWorldEffects();
-void R_Init( void ) {	
+void R_Init( void ) {
 	int	err;
 	int i;
 
@@ -1258,7 +1259,7 @@ RE_Shutdown
 ===============
 */
 extern void R_ShutdownWorldEffects(void);
-void RE_Shutdown( qboolean destroyWindow ) {	
+void RE_Shutdown( qboolean destroyWindow ) {
 	ri.Printf( PRINT_ALL, "RE_Shutdown( %i )\n", destroyWindow );
 
 	ri.Cmd_RemoveCommand ("imagelist");
@@ -1267,7 +1268,7 @@ void RE_Shutdown( qboolean destroyWindow ) {
 	ri.Cmd_RemoveCommand ("modellist");
 	ri.Cmd_RemoveCommand ("modelist" );
 	ri.Cmd_RemoveCommand ("screenshot");
-	ri.Cmd_RemoveCommand ("screenshot_tga");	
+	ri.Cmd_RemoveCommand ("screenshot_tga");
 	ri.Cmd_RemoveCommand ("gfxinfo");
 	ri.Cmd_RemoveCommand ("r_fogDistance");
 	ri.Cmd_RemoveCommand ("r_fogColor");
@@ -1347,6 +1348,7 @@ GetRefAPI
 @@@@@@@@@@@@@@@@@@@@@
 */
 extern void R_WorldEffectCommand(const char *command);
+extern "C" {
 refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	static refexport_t	re;
 
@@ -1355,7 +1357,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	memset( &re, 0, sizeof( re ) );
 
 	if ( apiVersion != REF_API_VERSION ) {
-		ri.Printf(PRINT_ALL, "Mismatched REF_API_VERSION: expected %i, got %i\n", 
+		ri.Printf(PRINT_ALL, "Mismatched REF_API_VERSION: expected %i, got %i\n",
 			REF_API_VERSION, apiVersion );
 		return NULL;
 	}
@@ -1417,16 +1419,90 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.RegisterFont = RE_RegisterFont;
 	re._Font_StrLenPixels = RE_Font_StrLenPixels;
 	re.Font_StrLenChars = RE_Font_StrLenChars;
-	re._Font_HeightPixels = RE_Font_HeightPixels;	
+	re._Font_HeightPixels = RE_Font_HeightPixels;
 	re._Font_DrawString = RE_Font_DrawString;
 	re.Language_IsAsian = Language_IsAsian;
 	re.Language_UsesSpaces = Language_UsesSpaces;
 	re.AnyLanguage_ReadCharFromString = AnyLanguage_ReadCharFromString;
+    re.RegisterMedia_GetLevel = RE_RegisterMedia_GetLevel;
+    re.ModelInit = R_ModelInit;
+    re.InitImages = R_InitImages;
+    re.InitShaders = R_InitShaders;
+    re.Decompress_JPG = Decompress_JPG;
+    re.Compress_JPG = Compress_JPG;
+    re.RegisterImages_LevelLoadEnd = RE_RegisterImages_LevelLoadEnd;
+    re.RegisterModels_LevelLoadEnd = RE_RegisterModels_LevelLoadEnd;
+
+//ghoul 2
+    re.G2API_SetTime = G2API_SetTime;
+    re.G2API_SetGhoul2ModelIndexes = G2API_SetGhoul2ModelIndexes;
+    re.G2API_HaveWeGhoul2Models = G2API_HaveWeGhoul2Models;
+    re.G2API_ListSurfaces = G2API_ListSurfaces;
+    re.G2API_ListBones = G2API_ListBones;
+    re.G2API_AddBolt = G2API_AddBolt;
+    re.G2API_AttachEnt = G2API_AttachEnt;
+    re.G2API_AttachG2Model = G2API_AttachG2Model;
+    re.G2API_CollisionDetect = G2API_CollisionDetect;
+    re.G2API_DetachEnt = G2API_DetachEnt;
+    re.G2API_DetachG2Model = G2API_DetachG2Model;
+    re.G2API_GetAnimFileName = G2API_GetAnimFileName;
+    re.G2API_GetBoltMatrix = G2API_GetBoltMatrix;
+    re.G2API_GetBoneAnim = G2API_GetBoneAnim;
+    re.G2API_GetBoneAnimIndex = G2API_GetBoneAnimIndex;
+    re.G2API_AddSurface = G2API_AddSurface;
+    re.G2API_InitGhoul2Model = G2API_InitGhoul2Model;
+    re.G2API_IsPaused = G2API_IsPaused;
+    re.G2API_PauseBoneAnim = G2API_PauseBoneAnim;
+    re.G2API_PauseBoneAnimIndex = G2API_PauseBoneAnimIndex;
+    re.G2API_PrecacheGhoul2Model = G2API_PrecacheGhoul2Model;
+    re.G2API_RemoveBolt = G2API_RemoveBolt;
+    re.G2API_RemoveBone = G2API_RemoveBone;
+    re.G2API_RemoveGhoul2Model = G2API_RemoveGhoul2Model;
+    re.G2API_SetBoneAngles = G2API_SetBoneAngles;
+    re.G2API_SetBoneAnglesMatrix = G2API_SetBoneAnglesMatrix;
+    re.G2API_SetBoneAnim = G2API_SetBoneAnim;
+    re.G2API_SetLodBias = G2API_SetLodBias;
+    re.G2API_SetRootSurface = G2API_SetRootSurface;
+    re.G2API_SetShader = G2API_SetShader;
+    re.G2API_SetSkin = G2API_SetSkin;
+    re.G2API_SetSurfaceOnOff = G2API_SetSurfaceOnOff;
+    re.G2API_StopBoneAngles = G2API_StopBoneAngles;
+    re.G2API_StopBoneAnim = G2API_StopBoneAnim;
+    re.G2API_SetGhoul2ModelFlags = G2API_SetGhoul2ModelFlags;
+    re.G2API_AddBoltSurfNum = G2API_AddBoltSurfNum;
+    re.G2API_RemoveSurface = G2API_RemoveSurface;
+    re.G2API_GetAnimRange = G2API_GetAnimRange;
+    re.G2API_GetAnimRangeIndex = G2API_GetAnimRangeIndex;
+    re.G2API_GiveMeVectorFromMatrix = G2API_GiveMeVectorFromMatrix;
+    re.G2API_CopyGhoul2Instance = G2API_CopyGhoul2Instance;
+    re.G2API_GetGhoul2ModelFlags = G2API_GetGhoul2ModelFlags;
+    re.G2API_CleanGhoul2Models = G2API_CleanGhoul2Models;
+    re.TheGhoul2InfoArray = TheGhoul2InfoArray;
+    re.G2API_GetParentSurface = G2API_GetParentSurface;
+    re.G2API_GetSurfaceIndex = G2API_GetSurfaceIndex;
+    re.G2API_GetSurfaceName = G2API_GetSurfaceName;
+    re.G2API_GetGLAName = G2API_GetGLAName;
+    re.G2API_SetNewOrigin = G2API_SetNewOrigin;
+    re.G2API_GetBoneIndex = G2API_GetBoneIndex;
+    re.G2API_StopBoneAnglesIndex = G2API_StopBoneAnglesIndex;
+    re.G2API_StopBoneAnimIndex = G2API_StopBoneAnimIndex;
+    re.G2API_SetBoneAnglesIndex = G2API_SetBoneAnglesIndex;
+    re.G2API_SetBoneAnglesMatrixIndex = G2API_SetBoneAnglesMatrixIndex;
+    re.G2API_SetBoneAnimIndex = G2API_SetBoneAnimIndex;
+    re.G2API_SaveGhoul2Models = G2API_SaveGhoul2Models;
+    re.G2API_LoadGhoul2Models = G2API_LoadGhoul2Models;
+    re.G2API_FreeSaveBuffer = G2API_FreeSaveBuffer;
+    re.G2API_LoadSaveCodeDestructGhoul2Info = G2API_LoadSaveCodeDestructGhoul2Info;
+    re.G2API_GetAnimFileNameIndex = G2API_GetAnimFileNameIndex;
+    re.G2API_GetSurfaceRenderStatus = G2API_GetSurfaceRenderStatus;
+    re.ClearStuffToStopGhoul2CrashingThings = R_ClearStuffToStopGhoul2CrashingThings;
+
 
 #ifdef _NPATCH
 	re.NPatchLevel = RE_NPatchLevel;
 #endif // _NPATCH
 
 	return &re;
+}
 }
 

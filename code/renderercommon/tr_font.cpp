@@ -3,8 +3,8 @@
 #include "../server/exe_headers.h"
 
 #include "../qcommon/sstring.h"	// stl string class won't compile in here (MS shite), so use Gil's.
-#include "tr_local.h"
-#include "tr_font.h"
+#include "../renderer/tr_local.h"
+#include "../renderer/tr_font.h"
 
 inline int Round(float value)
 {

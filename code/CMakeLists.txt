@@ -59,6 +59,7 @@ add_definitions( -D_M_IX86=1 )	# tested to mean little endian...
 add_definitions( -D_IMMERSION_DISABLE )
 add_definitions( -DNDEBUG )
 add_definitions( -DFINAL_BUILD )
+add_definitions( -DUSE_RENDERER_DLOPEN)
 
 find_package (SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
@@ -86,6 +87,7 @@ set(src_client
 	client/snd_mix.cpp
 	client/snd_music.cpp
 	client/vmachine.cpp
+    sdl/sdl_input.cpp
 )
 
 set(src_encryption
@@ -168,9 +170,6 @@ set(src_renderer
 	renderer/tr_cmds.cpp
 	renderer/tr_curve.cpp
 	renderer/tr_draw.cpp
-	renderer/tr_font.cpp
-	renderer/tr_ghoul2.cpp
-	renderer/tr_image.cpp
 	renderer/tr_init.cpp
 	renderer/tr_jpeg_interface.cpp
 	renderer/tr_light.cpp
@@ -178,7 +177,6 @@ set(src_renderer
 	renderer/tr_marks.cpp
 	renderer/tr_mesh.cpp
 	renderer/tr_model.cpp
-	renderer/tr_noise.cpp
 	renderer/tr_quicksprite.cpp
 	renderer/tr_scene.cpp
 	renderer/tr_shade.cpp
@@ -190,6 +188,13 @@ set(src_renderer
 	renderer/tr_surface.cpp
 	renderer/tr_surfacesprites.cpp
 	renderer/tr_world.cpp
+)
+
+set(src_renderercommon
+	renderercommon/tr_font.cpp
+	renderercommon/tr_ghoul2.cpp
+	renderercommon/tr_image.cpp
+	renderercommon/tr_noise.cpp
 )
 
 set(src_server
@@ -283,23 +288,18 @@ set(src_unix
 set(src_sdl
 	sdl/sdl_gamma.cpp
 	sdl/sdl_glimp.cpp
-	sdl/sdl_input.cpp
 )
 
 set(src_starwars
 	${src_ff}
 	${src_client}
 	${src_encryption}
-	${src_ghoul2}
 	${src_mp3code}
 	${src_qcommon}
-	${src_renderer}
 	${src_server}
 	${src_ui}
 	${src_main_game}
-	${src_jpeg}
 	${src_unix}
-	${src_sdl}
 )
 
 add_executable(jk2sp
@@ -371,7 +371,7 @@ set(src_cgame
 	cgame/cg_weapons.cpp
 )
 
-set(src_game 
+set(src_game
 	game/AI_Atst.cpp
 	game/AI_Default.cpp
 	game/AI_Droid.cpp
@@ -464,3 +464,17 @@ add_library(jk2game${cpu} SHARED
 )
 
 SET_TARGET_PROPERTIES(jk2game${cpu} PROPERTIES PREFIX "")
+
+set(src_opengl1_renderer
+	${src_renderer}
+	${src_ghoul2}
+    ${src_renderercommon}
+	${src_sdl}
+    ${src_jpeg}
+)
+
+add_library(renderer_opengl1_${cpu} SHARED
+	${src_opengl1_renderer}
+)
+
+SET_TARGET_PROPERTIES(renderer_opengl1_${cpu} PROPERTIES PREFIX "")

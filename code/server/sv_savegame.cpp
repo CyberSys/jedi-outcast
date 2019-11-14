@@ -815,7 +815,7 @@ static qboolean SG_ReadScreenshot(qboolean qbSetAsLoadingScreen, void *pvDest/*=
 	//
 	byte *pDecompressedPic = NULL;
 	int iWidth, iHeight;
-	Decompress_JPG( "[savegame]", pJPGData, &pDecompressedPic, &iWidth, &iHeight );
+	re.Decompress_JPG( "[savegame]", pJPGData, &pDecompressedPic, &iWidth, &iHeight );
 	//
 	// if the loaded image is the same size as the game is expecting, then copy it to supplied arg (if present)...
 	//
@@ -881,7 +881,7 @@ static void SG_WriteScreenshot(qboolean qbAutosave, LPCSTR psMapName)
 
 
 	int iJPGDataSize = 0;
-	byte *pJPGData = Compress_JPG(&iJPGDataSize, JPEG_IMAGE_QUALITY, SG_SCR_WIDTH, SG_SCR_HEIGHT, pbRawScreenShot, qfalse);
+	byte *pJPGData = re.Compress_JPG(&iJPGDataSize, JPEG_IMAGE_QUALITY, SG_SCR_WIDTH, SG_SCR_HEIGHT, pbRawScreenShot, qfalse);
 	SG_Append('SHLN', &iJPGDataSize, sizeof(iJPGDataSize));
 	SG_Append('SHOT', pJPGData, iJPGDataSize);
 	Z_Free(pJPGData);

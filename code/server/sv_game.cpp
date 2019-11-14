@@ -74,7 +74,7 @@ Sends a command string to a client
 void SV_GameSendServerCommand( int clientNum, const char *fmt, ... ) {
 	char		msg[8192];
 	va_list		argptr;
-	
+
 	va_start (argptr,fmt);
 	vsprintf (msg, fmt, argptr);
 	va_end (argptr);
@@ -85,7 +85,7 @@ void SV_GameSendServerCommand( int clientNum, const char *fmt, ... ) {
 		if ( clientNum < 0 || clientNum >= 1 ) {
 			return;
 		}
-		SV_SendServerCommand( svs.clients + clientNum, "%s", msg );	
+		SV_SendServerCommand( svs.clients + clientNum, "%s", msg );
 	}
 }
 
@@ -101,7 +101,7 @@ void SV_GameDropClient( int clientNum, const char *reason ) {
 	if ( clientNum < 0 || clientNum >= 1 ) {
 		return;
 	}
-	SV_DropClient( svs.clients + clientNum, reason );	
+	SV_DropClient( svs.clients + clientNum, reason );
 }
 
 
@@ -174,13 +174,13 @@ qboolean SV_inPVS (const vec3_t p1, const vec3_t p2)
 		}
 		return qfalse;
 	}
-	
+
 	if (!CM_AreasConnected (area1, area2))
 	{
 		timeInPVSCheck += Sys_Milliseconds() - start;
 		return qfalse;		// a door blocks sight
 	}
-	
+
 	if ( com_speeds->integer ) {
 		timeInPVSCheck += Sys_Milliseconds() - start;
 	}
@@ -206,7 +206,7 @@ qboolean SV_inPVSIgnorePortals( const vec3_t p1, const vec3_t p2)
 	if ( com_speeds->integer ) {
 		start = Sys_Milliseconds ();
 	}
-	
+
 	leafnum = CM_PointLeafnum (p1);
 	cluster = CM_LeafCluster (leafnum);
 	area1 = CM_LeafArea (leafnum);
@@ -298,10 +298,10 @@ void SV_ShutdownGameProgs (void) {
 		return;
 	}
 	ge->Shutdown ();
-	
+
 	SCR_StopCinematic();
 	CL_ShutdownCGame();	//we have cgame burried in here.
-	
+
 	Sys_UnloadGame ();	//this kills cgame as well.
 
 	ge = NULL;
@@ -332,9 +332,9 @@ void SV_InitGameProgs (void) {
 		SV_ShutdownGameProgs ();
 	}
 
-	if ( !Cvar_VariableIntegerValue("fs_restrict") && !Sys_CheckCD() ) 
+	if ( !Cvar_VariableIntegerValue("fs_restrict") && !Sys_CheckCD() )
 	{
-		Com_Error( ERR_NEED_CD, SP_GetStringTextString("CON_TEXT_NEED_CD") ); //"Game CD not in drive" );		
+		Com_Error( ERR_NEED_CD, SP_GetStringTextString("CON_TEXT_NEED_CD") ); //"Game CD not in drive" );
 	}
 
 	// load a new game dll
@@ -400,68 +400,68 @@ void SV_InitGameProgs (void) {
 Ghoul2 Insert Start
 */
 
-	import.G2API_AddBolt = G2API_AddBolt;
-	import.G2API_AttachEnt = G2API_AttachEnt;
-	import.G2API_AttachG2Model = G2API_AttachG2Model;
-	import.G2API_CollisionDetect = G2API_CollisionDetect;
-	import.G2API_DetachEnt = G2API_DetachEnt;
-	import.G2API_DetachG2Model = G2API_DetachG2Model;
-	import.G2API_GetAnimFileName = G2API_GetAnimFileName;
-	import.G2API_GetBoltMatrix = G2API_GetBoltMatrix;
-	import.G2API_GetBoneAnim = G2API_GetBoneAnim;
-	import.G2API_GetBoneAnimIndex = G2API_GetBoneAnimIndex;
-	import.G2API_AddSurface = G2API_AddSurface;
-	import.G2API_HaveWeGhoul2Models =G2API_HaveWeGhoul2Models;
-	import._G2API_InitGhoul2Model = G2API_InitGhoul2Model;
-	import.G2API_IsPaused = G2API_IsPaused;
-	import.G2API_ListBones = G2API_ListBones;
-	import.G2API_ListSurfaces = G2API_ListSurfaces;
-	import.G2API_PauseBoneAnim = G2API_PauseBoneAnim;
-	import.G2API_PauseBoneAnimIndex = G2API_PauseBoneAnimIndex;
-	import.G2API_PrecacheGhoul2Model = G2API_PrecacheGhoul2Model;
-	import.G2API_RemoveBolt = G2API_RemoveBolt;
-	import.G2API_RemoveBone = G2API_RemoveBone;
-	import.G2API_RemoveGhoul2Model = G2API_RemoveGhoul2Model;
-	import._G2API_SetBoneAngles = G2API_SetBoneAngles;
-	import._G2API_SetBoneAnglesMatrix = G2API_SetBoneAnglesMatrix;
-	import._G2API_SetBoneAnim = G2API_SetBoneAnim;
-	import.G2API_SetLodBias = G2API_SetLodBias;
-	import.G2API_SetRootSurface = G2API_SetRootSurface;
-	import.G2API_SetShader = G2API_SetShader;
-	import.G2API_SetSkin = G2API_SetSkin;
-	import.G2API_SetSurfaceOnOff = G2API_SetSurfaceOnOff;
-	import.G2API_StopBoneAngles = G2API_StopBoneAngles;
-	import.G2API_StopBoneAnim = G2API_StopBoneAnim;
-	import.G2API_SetGhoul2ModelFlags = G2API_SetGhoul2ModelFlags;
-	import.G2API_AddBoltSurfNum = G2API_AddBoltSurfNum;
-	import.G2API_RemoveSurface = G2API_RemoveSurface;
-	import.G2API_GetAnimRange = G2API_GetAnimRange;
-	import.G2API_GetAnimRangeIndex = G2API_GetAnimRangeIndex;
-	import.G2API_GiveMeVectorFromMatrix = G2API_GiveMeVectorFromMatrix;
-	import._G2API_CopyGhoul2Instance = G2API_CopyGhoul2Instance;
-	import.G2API_GetGhoul2ModelFlags = G2API_GetGhoul2ModelFlags;
-	import.G2API_CleanGhoul2Models = G2API_CleanGhoul2Models;
-	import.TheGhoul2InfoArray = TheGhoul2InfoArray;
-	import.G2API_GetParentSurface = G2API_GetParentSurface;
-	import.G2API_GetSurfaceIndex = G2API_GetSurfaceIndex;
-	import.G2API_GetSurfaceName = G2API_GetSurfaceName;
-	import.G2API_GetGLAName = G2API_GetGLAName;
-	import.G2API_SetNewOrigin = G2API_SetNewOrigin;
-	import.G2API_GetBoneIndex = G2API_GetBoneIndex;
-	import.G2API_StopBoneAnglesIndex = G2API_StopBoneAnglesIndex;
-	import.G2API_StopBoneAnimIndex = G2API_StopBoneAnimIndex;
-	import._G2API_SetBoneAnglesIndex = G2API_SetBoneAnglesIndex;
-	import.G2API_SetBoneAnglesMatrixIndex = G2API_SetBoneAnglesMatrixIndex;
-	import._G2API_SetBoneAnimIndex = G2API_SetBoneAnimIndex;
-	import.G2API_SaveGhoul2Models = G2API_SaveGhoul2Models;
-	import.G2API_LoadGhoul2Models = G2API_LoadGhoul2Models;
-	import.G2API_FreeSaveBuffer = G2API_FreeSaveBuffer;
-	import.G2API_LoadSaveCodeDestructGhoul2Info = G2API_LoadSaveCodeDestructGhoul2Info;
-	import.G2API_GetAnimFileNameIndex = G2API_GetAnimFileNameIndex;
-	import.G2API_GetSurfaceRenderStatus = G2API_GetSurfaceRenderStatus;
+	import.G2API_AddBolt = re.G2API_AddBolt;
+	import.G2API_AttachEnt = re.G2API_AttachEnt;
+	import.G2API_AttachG2Model = re.G2API_AttachG2Model;
+	import.G2API_CollisionDetect = re.G2API_CollisionDetect;
+	import.G2API_DetachEnt = re.G2API_DetachEnt;
+	import.G2API_DetachG2Model = re.G2API_DetachG2Model;
+	import.G2API_GetAnimFileName = re.G2API_GetAnimFileName;
+	import.G2API_GetBoltMatrix = re.G2API_GetBoltMatrix;
+	import.G2API_GetBoneAnim = re.G2API_GetBoneAnim;
+	import.G2API_GetBoneAnimIndex = re.G2API_GetBoneAnimIndex;
+	import.G2API_AddSurface = re.G2API_AddSurface;
+	import.G2API_HaveWeGhoul2Models = re.G2API_HaveWeGhoul2Models;
+	import._G2API_InitGhoul2Model = re.G2API_InitGhoul2Model;
+	import.G2API_IsPaused = re.G2API_IsPaused;
+	import.G2API_ListBones = re.G2API_ListBones;
+	import.G2API_ListSurfaces = re.G2API_ListSurfaces;
+	import.G2API_PauseBoneAnim = re.G2API_PauseBoneAnim;
+	import.G2API_PauseBoneAnimIndex = re.G2API_PauseBoneAnimIndex;
+	import.G2API_PrecacheGhoul2Model = re.G2API_PrecacheGhoul2Model;
+	import.G2API_RemoveBolt = re.G2API_RemoveBolt;
+	import.G2API_RemoveBone = re.G2API_RemoveBone;
+	import.G2API_RemoveGhoul2Model = re.G2API_RemoveGhoul2Model;
+	import._G2API_SetBoneAngles = re.G2API_SetBoneAngles;
+	import._G2API_SetBoneAnglesMatrix = re.G2API_SetBoneAnglesMatrix;
+	import._G2API_SetBoneAnim = re.G2API_SetBoneAnim;
+	import.G2API_SetLodBias = re.G2API_SetLodBias;
+	import.G2API_SetRootSurface = re.G2API_SetRootSurface;
+	import.G2API_SetShader = re.G2API_SetShader;
+	import.G2API_SetSkin = re.G2API_SetSkin;
+	import.G2API_SetSurfaceOnOff = re.G2API_SetSurfaceOnOff;
+	import.G2API_StopBoneAngles = re.G2API_StopBoneAngles;
+	import.G2API_StopBoneAnim = re.G2API_StopBoneAnim;
+	import.G2API_SetGhoul2ModelFlags = re.G2API_SetGhoul2ModelFlags;
+	import.G2API_AddBoltSurfNum = re.G2API_AddBoltSurfNum;
+	import.G2API_RemoveSurface = re.G2API_RemoveSurface;
+	import.G2API_GetAnimRange = re.G2API_GetAnimRange;
+	import.G2API_GetAnimRangeIndex = re.G2API_GetAnimRangeIndex;
+	import.G2API_GiveMeVectorFromMatrix = re.G2API_GiveMeVectorFromMatrix;
+	import._G2API_CopyGhoul2Instance = re.G2API_CopyGhoul2Instance;
+	import.G2API_GetGhoul2ModelFlags = re.G2API_GetGhoul2ModelFlags;
+	import.G2API_CleanGhoul2Models = re.G2API_CleanGhoul2Models;
+	import.TheGhoul2InfoArray = re.TheGhoul2InfoArray;
+	import.G2API_GetParentSurface = re.G2API_GetParentSurface;
+	import.G2API_GetSurfaceIndex = re.G2API_GetSurfaceIndex;
+	import.G2API_GetSurfaceName = re.G2API_GetSurfaceName;
+	import.G2API_GetGLAName = re.G2API_GetGLAName;
+	import.G2API_SetNewOrigin = re.G2API_SetNewOrigin;
+	import.G2API_GetBoneIndex = re.G2API_GetBoneIndex;
+	import.G2API_StopBoneAnglesIndex = re.G2API_StopBoneAnglesIndex;
+	import.G2API_StopBoneAnimIndex = re.G2API_StopBoneAnimIndex;
+	import._G2API_SetBoneAnglesIndex = re.G2API_SetBoneAnglesIndex;
+	import.G2API_SetBoneAnglesMatrixIndex = re.G2API_SetBoneAnglesMatrixIndex;
+	import._G2API_SetBoneAnimIndex = re.G2API_SetBoneAnimIndex;
+	import.G2API_SaveGhoul2Models = re.G2API_SaveGhoul2Models;
+	import.G2API_LoadGhoul2Models = re.G2API_LoadGhoul2Models;
+	import.G2API_FreeSaveBuffer = re.G2API_FreeSaveBuffer;
+	import.G2API_LoadSaveCodeDestructGhoul2Info = re.G2API_LoadSaveCodeDestructGhoul2Info;
+	import.G2API_GetAnimFileNameIndex = re.G2API_GetAnimFileNameIndex;
+	import.G2API_GetSurfaceRenderStatus = re.G2API_GetSurfaceRenderStatus;
 
-	import.RE_RegisterSkin = RE_RegisterSkin;
-	import.RE_GetAnimationCFG = RE_GetAnimationCFG;
+	import.RE_RegisterSkin = re.RegisterSkin;
+	import.RE_GetAnimationCFG = re.GetAnimationCFG;
 
 /*
 Ghoul2 Insert End
@@ -508,3 +508,7 @@ qboolean SV_GameCommand( void ) {
 	return ge->ConsoleCommand();
 }
 
+//Haxies
+IGhoul2InfoArray &TheGameGhoul2InfoArray() {
+    return re.TheGhoul2InfoArray();
+}

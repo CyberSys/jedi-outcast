@@ -21,7 +21,8 @@
 
 #include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
-#include "../renderer/tr_public.h"
+#include "../renderercommon/tr_public.h"
+#include "../sys/sys_loadlib.h"
 
 #include "unix_local.h"
 
@@ -56,7 +57,7 @@ Sys_In_Restart_f
 Restart the input subsystem
 =================
 */
-void Sys_In_Restart_f( void ) 
+void Sys_In_Restart_f( void )
 {
 	IN_Shutdown();
 	IN_Init();
@@ -149,7 +150,7 @@ void Sys_Init(void)
 }
 
 void	Sys_Error( const char *error, ...)
-{ 
+{
     va_list     argptr;
     char        string[1024];
 
@@ -157,7 +158,7 @@ void	Sys_Error( const char *error, ...)
     fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 
 	CL_Shutdown ();
-    
+
     va_start (argptr,error);
     vsprintf (string,error,argptr);
     va_end (argptr);
@@ -165,18 +166,18 @@ void	Sys_Error( const char *error, ...)
 
 	_exit (1);
 
-} 
+}
 
 void Sys_Warn (char *warning, ...)
-{ 
+{
     va_list     argptr;
     char        string[1024];
-    
+
     va_start (argptr,warning);
     vsprintf (string,warning,argptr);
     va_end (argptr);
 	fprintf(stderr, "Warning: %s", string);
-} 
+}
 
 /*
 ============
@@ -188,10 +189,10 @@ returns -1 if not present
 int	Sys_FileTime (char *path)
 {
 	struct	stat	buf;
-	
+
 	if (stat (path,&buf) == -1)
 		return -1;
-	
+
 	return buf.st_mtime;
 }
 
@@ -270,7 +271,7 @@ Sys_UnloadGame
 void Sys_UnloadGame (void)
 {
 	Com_Printf("------ Unloading %s ------\n", gamename);
-	if (game_library) 
+	if (game_library)
 		dlclose (game_library);
 	game_library = NULL;
 }
@@ -311,7 +312,7 @@ void *Sys_GetGameAPI (void *parms)
 	if (!GetGameAPI)
 	{
 		Com_Error( ERR_FATAL, "dlsym GetGameAPI failed %s\n", dlerror());
-		Sys_UnloadGame ();		
+		Sys_UnloadGame ();
 		return NULL;
 	}
 
@@ -343,7 +344,7 @@ Sys_UnloadGame
 */
 void Sys_UnloadCGame (void)
 {
-	if (cgame_library) 
+	if (cgame_library)
 		dlclose (cgame_library);
 	cgame_library = NULL;
 }
@@ -410,7 +411,7 @@ Sys_UnloadUI
 */
 void Sys_UnloadUI(void)
 {
-	if (ui_library) 
+	if (ui_library)
 		dlclose (ui_library);
 	ui_library = NULL;
 }
@@ -465,7 +466,7 @@ void *Sys_GetUIAPI (void)
 
 /*****************************************************************************/
 
-void *Sys_GetRefAPI (void *parms) 
+void *Sys_GetRefAPI (void *parms)
 {
 	return (NULL);
 #if 0
@@ -481,20 +482,20 @@ BACKGROUND FILE STREAMING
 ========================================================================
 */
 
-void Sys_InitStreamThread( void ) 
+void Sys_InitStreamThread( void )
 {
 }
 
-void Sys_ShutdownStreamThread( void ) 
+void Sys_ShutdownStreamThread( void )
 {
 }
 
 
-void Sys_BeginStreamedFile( fileHandle_t f, int readAhead ) 
+void Sys_BeginStreamedFile( fileHandle_t f, int readAhead )
 {
 }
 
-void Sys_EndStreamedFile( FILE *f ) 
+void Sys_EndStreamedFile( FILE *f )
 {
 }
 
@@ -675,7 +676,7 @@ int main (int argc, char **argv)
 		// set low precision every frame, because some system calls
 		// reset it arbitrarily
 #if 0
-		Sys_LowFPPrecision ();    
+		Sys_LowFPPrecision ();
 #endif
 
         Com_Frame ();
@@ -708,3 +709,73 @@ void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
 }
 
 #endif
+/*
+=================
+Sys_LoadDll
+
+First try to load library name from system library path,
+from executable path, then fs_basepath.
+=================
+*/
+
+void *Sys_LoadDll(const char *name, qboolean useSystemLib)
+{
+	void *dllhandle = NULL;
+
+/*
+	if(!Sys_DllExtension(name))
+	{
+		Com_Printf("Refusing to attempt to load library \"%s\": Extension not allowed.\n", name);
+		return NULL;
+	}*/
+
+	if(useSystemLib)
+	{
+		Com_Printf("Trying to load \"%s\"...\n", name);
+		dllhandle = Sys_LoadLibrary(name);
+	}
+
+	if(!dllhandle)
+	{
+        char topDir[MAX_OSPATH];
+		char libPath[MAX_OSPATH];
+		int len;
+
+        getcwd(topDir, sizeof(topDir));
+
+		Com_sprintf(libPath, sizeof(libPath), "%s/%s", topDir,  name);
+
+        Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, topDir);
+        dllhandle = Sys_LoadLibrary(libPath);
+
+/*
+		if(!dllhandle)
+		{
+			const char *basePath = Cvar_VariableString("fs_basepath");
+
+			if(!basePath || !*basePath)
+				basePath = ".";
+
+			if(FS_FilenameCompare(topDir, basePath))
+			{
+				len = Com_sprintf(libPath, sizeof(libPath), "%s%c%s", basePath, PATH_SEP, name);
+				if(len < sizeof(libPath))
+				{
+					Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, basePath);
+					dllhandle = Sys_LoadLibrary(libPath);
+				}
+				else
+				{
+					Com_Printf("Skipping trying to load \"%s\" from \"%s\", file name is too long.\n", name, basePath);
+				}
+			}
+
+			if(!dllhandle)
+				Com_Printf("Loading \"%s\" failed\n", name);
+		}*/
+			if(!dllhandle)
+				Com_Printf("Loading \"%s\" failed\n", name);
+	}
+
+	return dllhandle;
+}
