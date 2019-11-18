@@ -70,6 +70,9 @@ include_directories(${OPENGL_INCLUDE_DIR})
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
+find_package(Vulkan REQUIRED)
+include_directories(${Vulkan_INCLUDE_DIR})
+
 set(src_client
 	client/cl_cgame.cpp
 	client/cl_cin.cpp
@@ -170,6 +173,7 @@ set(src_renderer
 	renderer/tr_cmds.cpp
 	renderer/tr_curve.cpp
 	renderer/tr_draw.cpp
+    renderer/tr_image.cpp
 	renderer/tr_init.cpp
 	renderer/tr_jpeg_interface.cpp
 	renderer/tr_light.cpp
@@ -190,10 +194,39 @@ set(src_renderer
 	renderer/tr_world.cpp
 )
 
+set(src_renderervk
+	renderervk/matcomp.c
+	renderervk/tr_worldeffects.cpp
+	renderervk/tr_animation.cpp
+	renderervk/tr_backend.cpp
+	renderervk/tr_bsp.cpp
+	renderervk/tr_cmds.cpp
+	renderervk/tr_curve.cpp
+	renderervk/tr_draw.cpp
+    renderervk/tr_image.cpp
+	renderervk/tr_init.cpp
+	renderervk/tr_jpeg_interface.cpp
+	renderervk/tr_light.cpp
+	renderervk/tr_main.cpp
+	renderervk/tr_marks.cpp
+	renderervk/tr_mesh.cpp
+	renderervk/tr_model.cpp
+	renderervk/tr_quicksprite.cpp
+	renderervk/tr_scene.cpp
+	renderervk/tr_shade.cpp
+	renderervk/tr_shade_calc.cpp
+	renderervk/tr_shader.cpp
+	renderervk/tr_shadows.cpp
+	renderervk/tr_sky.cpp
+	renderervk/tr_stl.cpp
+	renderervk/tr_surface.cpp
+	renderervk/tr_surfacesprites.cpp
+	renderervk/tr_world.cpp
+)
+
 set(src_renderercommon
 	renderercommon/tr_font.cpp
 	renderercommon/tr_ghoul2.cpp
-	renderercommon/tr_image.cpp
 	renderercommon/tr_noise.cpp
 )
 
@@ -314,6 +347,7 @@ target_link_libraries(jk2sp
 	${OPENGL_LIBRARIES}
 	${OPENAL_LIBRARY}
 	${OPENGL_glx_LIBRARY}
+	${Vulkan_LIBRARY}
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
@@ -478,3 +512,17 @@ add_library(renderer_opengl1_${cpu} SHARED
 )
 
 SET_TARGET_PROPERTIES(renderer_opengl1_${cpu} PROPERTIES PREFIX "")
+
+set(src_vk_renderer
+	${src_renderervk}
+	${src_ghoul2}
+    ${src_renderercommon}
+	${src_sdl}
+    ${src_jpeg}
+)
+
+add_library(renderer_vk_${cpu} SHARED
+	${src_vk_renderer}
+)
+
+SET_TARGET_PROPERTIES(renderer_vk_${cpu} PROPERTIES PREFIX "")

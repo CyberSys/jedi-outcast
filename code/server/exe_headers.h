@@ -7,7 +7,6 @@
 
 #include "../client/client.h"
 #include "../server/server.h"
-#include "../renderer/tr_local.h"
 
 #pragma hdrstop
 
