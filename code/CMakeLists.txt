@@ -173,6 +173,7 @@ set(src_renderer
 	renderer/tr_cmds.cpp
 	renderer/tr_curve.cpp
 	renderer/tr_draw.cpp
+	renderer/tr_ghoul2.cpp
     renderer/tr_image.cpp
 	renderer/tr_init.cpp
 	renderer/tr_jpeg_interface.cpp
@@ -203,6 +204,7 @@ set(src_renderervk
 	renderervk/tr_cmds.cpp
 	renderervk/tr_curve.cpp
 	renderervk/tr_draw.cpp
+	renderervk/tr_ghoul2.cpp
     renderervk/tr_image.cpp
 	renderervk/tr_init.cpp
 	renderervk/tr_jpeg_interface.cpp
@@ -226,7 +228,6 @@ set(src_renderervk
 
 set(src_renderercommon
 	renderercommon/tr_font.cpp
-	renderercommon/tr_ghoul2.cpp
 	renderercommon/tr_noise.cpp
 )
 

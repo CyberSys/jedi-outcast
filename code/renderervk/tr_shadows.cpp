@@ -28,6 +28,8 @@ typedef struct {
 static	edgeDef_t	edgeDefs[SHADER_MAX_VERTEXES][MAX_EDGE_DEFS];
 static	int			numEdgeDefs[SHADER_MAX_VERTEXES];
 static	int			facing[SHADER_MAX_INDEXES/3];
+static vec4_t		extrudedEdges[SHADER_MAX_VERTEXES * 4];
+static int			numExtrudedEdges;
 
 void R_AddEdgeDef( int i1, int i2, int facing ) {
 	int		c;
@@ -42,7 +44,7 @@ void R_AddEdgeDef( int i1, int i2, int facing ) {
 	numEdgeDefs[ i1 ]++;
 }
 
-static void R_Vk_Dx_RenderShadowEdges(VkPipeline vk_pipeline, ID3D12PipelineState* dx_pipeline) {
+static void R_Vk_RenderShadowEdges(VkPipeline vk_pipeline) {
 
 	int i = 0;
 	while (i < numExtrudedEdges) {
@@ -79,6 +81,7 @@ static void R_Vk_Dx_RenderShadowEdges(VkPipeline vk_pipeline, ID3D12PipelineStat
 }
 
 void R_RenderShadowEdges( void ) {
+/*
 	int		i;
 
 #if 0
@@ -157,6 +160,7 @@ void R_RenderShadowEdges( void ) {
 		}
 	}
 #endif
+*/
 }
 
 /*
@@ -230,44 +234,45 @@ void RB_ShadowTessEnd( void ) {
 	// draw the silhouette edges
 
 	GL_Bind( tr.whiteImage );
-	qglEnable( GL_CULL_FACE );
+	//qglEnable( GL_CULL_FACE );
 	GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );
-	qglColor3f( 0.2f, 0.2f, 0.2f );
+	/*qglColor3f( 0.2f, 0.2f, 0.2f );
 
 	// don't write to the color buffer
 	qglColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
 
 	qglEnable( GL_STENCIL_TEST );
-	qglStencilFunc( GL_ALWAYS, 1, 255 );
+	qglStencilFunc( GL_ALWAYS, 1, 255 );*/
 
 	// mirrors have the culling order reversed
 	if ( backEnd.viewParms.isMirror ) {
-		qglCullFace( GL_FRONT );
+		/*qglCullFace( GL_FRONT );
 		qglStencilOp( GL_KEEP, GL_KEEP, GL_INCR );
 
 		R_RenderShadowEdges();
 
 		qglCullFace( GL_BACK );
-		qglStencilOp( GL_KEEP, GL_KEEP, GL_DECR );
+		qglStencilOp( GL_KEEP, GL_KEEP, GL_DECR );*/
 
-		R_Vk_Dx_RenderShadowEdges(vk.shadow_volume_pipelines[0][1], dx.shadow_volume_pipelines[0][1]);
-		R_Vk_Dx_RenderShadowEdges(vk.shadow_volume_pipelines[1][1], dx.shadow_volume_pipelines[1][1]);
+		R_Vk_RenderShadowEdges(vk.shadow_volume_pipelines[0][1]);
+		R_Vk_RenderShadowEdges(vk.shadow_volume_pipelines[1][1]);
 	} else {
+	/*
 		qglCullFace( GL_BACK );
 		qglStencilOp( GL_KEEP, GL_KEEP, GL_INCR );
 
 		R_RenderShadowEdges();
 
 		qglCullFace( GL_FRONT );
-		qglStencilOp( GL_KEEP, GL_KEEP, GL_DECR );
+		qglStencilOp( GL_KEEP, GL_KEEP, GL_DECR );*/
 
-		R_Vk_Dx_RenderShadowEdges(vk.shadow_volume_pipelines[0][0], dx.shadow_volume_pipelines[0][0]);
-		R_Vk_Dx_RenderShadowEdges(vk.shadow_volume_pipelines[1][0], dx.shadow_volume_pipelines[1][0]);
+		R_Vk_RenderShadowEdges(vk.shadow_volume_pipelines[0][0]);
+		R_Vk_RenderShadowEdges(vk.shadow_volume_pipelines[1][0]);
 	}
 
 
 	// reenable writing to the color buffer
-	qglColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+	//qglColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 }
 
 
@@ -288,21 +293,21 @@ void RB_ShadowFinish( void ) {
 	if ( glConfig.stencilBits < 4 ) {
 		return;
 	}
-	qglEnable( GL_STENCIL_TEST );
+	/*qglEnable( GL_STENCIL_TEST );
 	qglStencilFunc( GL_NOTEQUAL, 0, 255 );
 
 	qglDisable (GL_CLIP_PLANE0);
 	qglDisable (GL_CULL_FACE);
-
+*/
 	GL_Bind( tr.whiteImage );
-
+/*
     qglLoadIdentity ();
 
-	qglColor3f( 0.6f, 0.6f, 0.6f );
+	qglColor3f( 0.6f, 0.6f, 0.6f );*/
 	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO );
 	//Following line makes a kind of flashlight instead of shadows, should multiply though
 	//GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_DST_COLOR  | GLS_DSTBLEND_ONE );
-
+/*
 	qglBegin( GL_QUADS );
 	qglVertex3f( -100, 100, -10 );
 	qglVertex3f( 100, 100, -10 );
@@ -311,7 +316,7 @@ void RB_ShadowFinish( void ) {
 	qglEnd ();
 
 	qglColor4f(1,1,1,1);
-	qglDisable( GL_STENCIL_TEST );
+	qglDisable( GL_STENCIL_TEST );*/
 	
     tess.indexes[0] = 0;
     tess.indexes[1] = 1;
@@ -344,7 +349,6 @@ void RB_ShadowFinish( void ) {
     vk_shade_geometry(vk.shadow_finish_pipeline, false, Vk_Depth_Range::normal);
 
     Com_Memcpy(vk_world.modelview_transform, tmp, 64);
-
 
     tess.numIndexes = 0;
     tess.numVertexes = 0;

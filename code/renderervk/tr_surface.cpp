@@ -1083,23 +1083,23 @@ void RB_SurfaceBeam( void )
 	switch(e->skinNum)
 	{
 	case 1://Green
-		qglColor3f( 0, 1, 0 );
+		//qglColor3f( 0, 1, 0 );
 		break;
 	case 2://Blue
-		qglColor3f( 0.5, 0.5, 1 );
+		//qglColor3f( 0.5, 0.5, 1 );
 		break;
 	case 0://red
 	default:
-		qglColor3f( 1, 0, 0 );
+		//qglColor3f( 1, 0, 0 );
 		break;
 	}
-
+/*
 	qglBegin( GL_TRIANGLE_STRIP );
 	for ( i = 0; i <= NUM_BEAM_SEGS; i++ ) {
 		qglVertex3fv( start_points[ i % NUM_BEAM_SEGS] );
 		qglVertex3fv( end_points[ i % NUM_BEAM_SEGS] );
 	}
-	qglEnd();
+	qglEnd();*/
 }
 
 
@@ -1905,7 +1905,7 @@ Draws x/y/z lines from the origin for orientation debugging
 */
 void RB_SurfaceAxis( void ) {
 	GL_Bind( tr.whiteImage );
-	qglLineWidth( 3 );
+	/*qglLineWidth( 3 );
 	qglBegin( GL_LINES );
 	qglColor3f( 1,0,0 );
 	qglVertex3f( 0,0,0 );
@@ -1917,7 +1917,7 @@ void RB_SurfaceAxis( void ) {
 	qglVertex3f( 0,0,0 );
 	qglVertex3f( 0,0,16 );
 	qglEnd();
-	qglLineWidth( 1 );
+	qglLineWidth( 1 );*/
 }
 
 //===========================================================================
@@ -1980,7 +1980,9 @@ This is called at surface tesselation time
 qboolean RB_TestZFlare( vec3_t point, vec3_t color, vec3_t normal) {
 	int				i;
 	vec4_t			eye, clip, normalized, window;
-
+	//TODO: Implement in vk
+	return qfalse;
+/*
 	// if the point is off the screen, don't bother adding it
 	// calculate screen coordinates and depth
 	R_TransformModelToClip( point, backEnd.ori.modelMatrix, 
@@ -2016,7 +2018,7 @@ qboolean RB_TestZFlare( vec3_t point, vec3_t color, vec3_t normal) {
 		( ( 2*depth - 1 ) * backEnd.viewParms.projectionMatrix[11] - backEnd.viewParms.projectionMatrix[10] );
 
 	visible = ( -eye[2] - -screenZ ) < 24;
-	return visible;
+	return visible;*/
 }
 
 void RB_SurfaceFlare( srfFlare_t *surf ) {
@@ -2072,7 +2074,7 @@ void RB_SurfaceFlare( srfFlare_t *surf ) {
 void RB_SurfaceDisplayList( srfDisplayList_t *surf ) {
 	// all apropriate state must be set in RB_BeginSurface
 	// this isn't implemented yet...
-	qglCallList( surf->listNum );
+	//qglCallList( surf->listNum );
 }
 
 void RB_SurfaceSkip( void *surf ) {

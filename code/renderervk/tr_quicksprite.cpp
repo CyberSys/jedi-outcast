@@ -16,7 +16,7 @@ CQuickSpriteSystem SQuickSprite;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-
+//TODO: Implement in vk? Needed??
 CQuickSpriteSystem::CQuickSpriteSystem(void)
 {
 	int i;
@@ -49,7 +49,7 @@ void CQuickSpriteSystem::Flush(void)
 	{
 		return;
 	}
-
+/*
 	//
 	// render the main pass
 	//
@@ -113,12 +113,13 @@ void CQuickSpriteSystem::Flush(void)
 		GLimp_LogComment( "glUnlockArraysEXT\n" );
 	}
 
-	mNextVert=0;
+	mNextVert=0;*/
 }
 
 
 void CQuickSpriteSystem::StartGroup(textureBundle_t *bundle, unsigned long glbits, unsigned long fogcolor )
 {
+/*
 	mNextVert = 0;
 
 	mTexBundle = bundle;
@@ -144,19 +145,20 @@ void CQuickSpriteSystem::StartGroup(textureBundle_t *bundle, unsigned long glbit
 	{
 		mTurnCullBackOn=false;
 	}
-	qglDisable(GL_CULL_FACE);
+	qglDisable(GL_CULL_FACE);*/
 }
 
 
 void CQuickSpriteSystem::EndGroup(void)
 {
+/*
 	Flush();
 
 	qglColor4ub(255,255,255,255);
 	if(mTurnCullBackOn)
 	{
 		qglEnable(GL_CULL_FACE);
-	}
+	}*/
 }
 
 
@@ -164,6 +166,7 @@ void CQuickSpriteSystem::EndGroup(void)
 
 void CQuickSpriteSystem::Add(float *pointdata, color4ub_t color, vec2_t fog)
 {
+/*
 	float *curcoord;
 	float *curfogtexcoord;
 	unsigned long *curcolor;
@@ -205,5 +208,5 @@ void CQuickSpriteSystem::Add(float *pointdata, color4ub_t color, vec2_t fog)
 		mUseFog=qfalse;
 	}
 
-	mNextVert+=4;
+	mNextVert+=4;*/
 }

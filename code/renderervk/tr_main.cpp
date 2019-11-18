@@ -1531,7 +1531,7 @@ R_DebugPolygon
 */
 void R_DebugPolygon( int color, int numPoints, float *points ) {
 	int		i;
-
+/*
 	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE );
 
 	// draw solid shade
@@ -1552,7 +1552,7 @@ void R_DebugPolygon( int color, int numPoints, float *points ) {
 		qglVertex3fv( points + i * 3 );
 	}
 	qglEnd();
-	qglDepthRange( 0, 1 );
+	qglDepthRange( 0, 1 );*/
 	
     if (numPoints < 3 || numPoints >= SHADER_MAX_VERTEXES/2)
 		return;

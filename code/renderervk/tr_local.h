@@ -21,6 +21,12 @@ long myftol( float f );
 #define	myftol(x) ((int)(x))
 #endif
 
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
+#define Com_Memset memset
+#define Com_Memcpy memcpy
 
 // everything that is needed by the backend needs
 // to be double buffered to allow it to run in
@@ -29,6 +35,10 @@ long myftol( float f );
 
 #define	MAX_SHADERS				1024
 // can't be increased without changing bit packing for drawsurfs
+
+#define TEX_MODULATE    1
+#define TEX_ADD         2
+#define TEX_DECAL       3
 
 
 typedef struct dlight_s {
@@ -371,6 +381,10 @@ typedef struct {
 	acff_t			adjustColorsForFog;
 
 	surfaceSprite_t	ss;
+	
+    VkPipeline		vk_pipeline = VK_NULL_HANDLE;
+	VkPipeline		vk_portal_pipeline = VK_NULL_HANDLE;
+	VkPipeline		vk_mirror_pipeline = VK_NULL_HANDLE;
 
 } shaderStage_t;
 
@@ -1359,6 +1373,10 @@ void		GLimp_WakeRenderer( void *data );
 
 void		GLimp_LogComment( char *comment );
 
+void        vk_imp_init();
+void        vk_imp_shutdown();
+void        vk_imp_create_surface();
+
 void		GLimp_SetGamma( unsigned char red[256],
 						    unsigned char green[256],
 							unsigned char blue[256] );
@@ -1812,4 +1830,5 @@ Ghoul2 Insert End
 // tr_surfacesprites
 void RB_DrawSurfaceSprites( shaderStage_t *stage, shaderCommands_t *input);
 
+void myGlMultMatrix( const float *a, const float *b, float *out );
 #endif //TR_LOCAL_H

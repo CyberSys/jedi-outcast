@@ -173,7 +173,7 @@ cvar_t	*r_Ghoul2UnSqashAfterSmooth;
 Ghoul2 Insert End
 */
 
-
+/*
 void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
@@ -182,7 +182,7 @@ void ( APIENTRY * qglLockArraysEXT)( GLint, GLint);
 void ( APIENTRY * qglUnlockArraysEXT) ( void );
 
 void ( APIENTRY * qglPointParameterfEXT)( GLenum, GLfloat);
-void ( APIENTRY * qglPointParameterfvEXT)( GLenum, GLfloat *);
+void ( APIENTRY * qglPointParameterfvEXT)( GLenum, GLfloat *);*/
 
 #ifdef _NPATCH
 void ( APIENTRY * qglPNTrianglesiATI )( GLenum pname, GLint param );
@@ -268,6 +268,8 @@ GL_CheckErrors
 ==================
 */
 void GL_CheckErrors( void ) {
+    return;
+    /*
     int		err;
     char	s[64];
 
@@ -303,6 +305,7 @@ void GL_CheckErrors( void ) {
     }
 
     ri.Error( ERR_FATAL, "GL_CheckErrors: %s", s );
+    */
 }
 
 
@@ -394,7 +397,8 @@ R_TakeScreenshot
 void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 	byte		*buffer;
 	int			i, c, temp;
-
+	//TODO:Implement vk
+/*
 	qboolean bSaveAsJPG = !Q_strnicmp(&fileName[strlen(fileName)-4],".jpg",4);
 
 	if (bSaveAsJPG)
@@ -441,7 +445,7 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 		ri.FS_WriteFile( fileName, buffer, c );
 	}
 
-	ri.Free( buffer );
+	ri.Free( buffer );*/
 }
 
 /*
@@ -501,7 +505,21 @@ void R_LevelShot( void ) {
 	buffer[15] = LEVELSHOTSIZE >> 8;
 	buffer[16] = 24;	// pixel size
 
-	qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGB, GL_UNSIGNED_BYTE, source );
+	//qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGB, GL_UNSIGNED_BYTE, source );
+    byte* buffer2 = //(byte*) ri.Hunk_AllocateTempMemory(glConfig.vidWidth*glConfig.vidHeight*4);
+                    (byte*) Z_Malloc(glConfig.vidWidth*glConfig.vidHeight*4, TAG_TEMP_WORKSPACE, qfalse);
+    vk_read_pixels(buffer2);
+
+    byte* buffer_ptr = source;
+    byte* buffer2_ptr = buffer2;
+    for (int i = 0; i < glConfig.vidWidth * glConfig.vidHeight; i++) {
+        buffer_ptr[0] = buffer2_ptr[0];
+        buffer_ptr[1] = buffer2_ptr[1];
+        buffer_ptr[2] = buffer2_ptr[2];
+        buffer_ptr += 3;
+        buffer2_ptr += 4;
+    }
+    Z_Free(buffer2);
 
 	// resample from source
 	xScale = glConfig.vidWidth / (4.0*LEVELSHOTSIZE);
@@ -682,7 +700,7 @@ void R_ScreenShotTGA_f (void) {
 */
 void GL_SetDefaultState( void )
 {
-	qglClearDepth( 1.0f );
+	/*qglClearDepth( 1.0f );
 
 	qglCullFace(GL_FRONT);
 
@@ -719,7 +737,7 @@ void GL_SetDefaultState( void )
 	qglDisable( GL_DEPTH_TEST );
 	qglEnable( GL_SCISSOR_TEST );
 	qglDisable( GL_CULL_FACE );
-	qglDisable( GL_BLEND );
+	qglDisable( GL_BLEND );*/
 
 #ifdef _NPATCH
 	// If n-patches are supported, make sure they are disabled for now
@@ -843,11 +861,7 @@ void GfxInfo_f( void )
 		ri.Printf( PRINT_ALL, "rendering primitives: " );
 		primitives = r_primitives->integer;
 		if ( primitives == 0 ) {
-			if ( qglLockArraysEXT ) {
-				primitives = 2;
-			} else {
-				primitives = 1;
-			}
+            primitives = 2;
 		}
 		if ( primitives == -1 ) {
 			ri.Printf( PRINT_ALL, "none\n" );
@@ -864,8 +878,8 @@ void GfxInfo_f( void )
 	ri.Printf( PRINT_ALL, "picmip: %d\n", r_picmip->integer );
 	ri.Printf( PRINT_ALL, "texture bits: %d\n", r_texturebits->integer );
 	ri.Printf( PRINT_ALL, "lightmap texture bits: %d\n", r_texturebitslm->integer );
-	ri.Printf( PRINT_ALL, "multitexture: %s\n", enablestrings[qglActiveTextureARB != 0] );
-	ri.Printf( PRINT_ALL, "compiled vertex arrays: %s\n", enablestrings[qglLockArraysEXT != 0 ] );
+	ri.Printf( PRINT_ALL, "multitexture: %s\n", enablestrings[1] );
+	ri.Printf( PRINT_ALL, "compiled vertex arrays: %s\n", enablestrings[1] );
 	ri.Printf( PRINT_ALL, "texenv add: %s\n", enablestrings[glConfig.textureEnvAddAvailable != 0] );
 	ri.Printf( PRINT_ALL, "compressed textures: %s\n", enablestrings[glConfig.textureCompression != TC_NONE] );
 	ri.Printf( PRINT_ALL, "compressed lightmaps: %s\n", enablestrings[(r_ext_compressed_lightmaps->integer != 0 && glConfig.textureCompression != TC_NONE)] );
@@ -1274,10 +1288,12 @@ void R_Init( void ) {
 //	R_InitWorldEffects();
 	R_InitFonts();
 
+	/*
+	TODO: Implement vulkan errors
 	err = qglGetError();
 	if ( err != GL_NO_ERROR )
 		ri.Printf (PRINT_ALL, "glGetError() = 0x%x\n", err);
-
+*/
 	ri.Printf( PRINT_ALL, "----- finished R_Init -----\n" );
 }
 

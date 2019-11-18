@@ -351,8 +351,8 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 	int s, t;
 
 	GL_Bind( image );
-
-	for ( t = mins[1]+HALF_SKY_SUBDIVISIONS; t < maxs[1]+HALF_SKY_SUBDIVISIONS; t++ )
+    //TODO: Implement in vk??
+	/*for ( t = mins[1]+HALF_SKY_SUBDIVISIONS; t < maxs[1]+HALF_SKY_SUBDIVISIONS; t++ )
 	{
 		qglBegin( GL_TRIANGLE_STRIP );
 
@@ -366,7 +366,7 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 		}
 
 		qglEnd();
-	}
+	}*/
 }
 
 static void DrawSkyBox( shader_t *shader )
@@ -435,7 +435,7 @@ static void DrawSkyBox( shader_t *shader )
 		DrawSkySide( shader->sky.outerbox[i],
 			         sky_mins_subd,
 					 sky_maxs_subd );
-        GL_Bind(shader->sky.outerbox[sky_texorder[i]]);
+        GL_Bind(shader->sky.outerbox[i]);
 
         tess.numVertexes = 0;
         tess.numIndexes = 0;
@@ -740,9 +740,9 @@ void RB_DrawSun( void ) {
 	if ( !r_drawSun->integer ) {
 		return;
 	}
-	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
-	qglTranslatef (backEnd.viewParms.ori.origin[0], backEnd.viewParms.ori.origin[1], backEnd.viewParms.ori.origin[2]);
-
+	//qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
+	//qglTranslatef (backEnd.viewParms.ori.origin[0], backEnd.viewParms.ori.origin[1], backEnd.viewParms.ori.origin[2]);
+    //TODO: Implement vk
 	dist = 	backEnd.viewParms.zFar / 1.75;		// div sqrt(3)
 	size = dist * 0.4;
 
@@ -754,7 +754,7 @@ void RB_DrawSun( void ) {
 	VectorScale( vec2, size, vec2 );
 
 	// farthest depth range
-	qglDepthRange( 1.0, 1.0 );
+	//qglDepthRange( 1.0, 1.0 );
 
 	// FIXME: use quad stamp
 	RB_BeginSurface( tr.sunShader, tess.fogNum );
@@ -812,7 +812,7 @@ void RB_DrawSun( void ) {
 	RB_EndSurface();
 
 	// back to normal depth range
-	qglDepthRange( 0.0, 1.0 );
+	//qglDepthRange( 0.0, 1.0 );
 }
 
 
@@ -840,23 +840,33 @@ void RB_StageIteratorSky( void ) {
 	// r_showsky will let all the sky blocks be drawn in
 	// front of everything to allow developers to see how
 	// much sky is getting sucked in
-	if ( r_showsky->integer ) {
+	/*if ( r_showsky->integer ) {
 		qglDepthRange( 0.0, 0.0 );
 	} else {
 		qglDepthRange( 1.0, 1.0 );
-	}
+	}*/
 
 	// draw the outer skybox
 	if ( tess.shader->sky.outerbox[0] && tess.shader->sky.outerbox[0] != tr.defaultImage ) {
-		qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
+	    float modelMatrix_original[16];
+        Com_Memcpy(modelMatrix_original, vk_world.modelview_transform, sizeof(float[16]));
+		//qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
 
-		qglPushMatrix ();
+        float skybox_translate[16] = {
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            backEnd.viewParms.ori.origin[0], backEnd.viewParms.ori.origin[1], backEnd.viewParms.ori.origin[2], 1
+        };
+		//qglPushMatrix ();
+		myGlMultMatrix(skybox_translate, modelMatrix_original, vk_world.modelview_transform);
 		GL_State( 0 );
-		qglTranslatef (backEnd.viewParms.ori.origin[0], backEnd.viewParms.ori.origin[1], backEnd.viewParms.ori.origin[2]);
+		//qglTranslatef (backEnd.viewParms.ori.origin[0], backEnd.viewParms.ori.origin[1], backEnd.viewParms.ori.origin[2]);
 
 		DrawSkyBox( tess.shader );
 
-		qglPopMatrix();
+		//qglPopMatrix();
+		Com_Memcpy(vk_world.modelview_transform, modelMatrix_original, sizeof(float[16]));
 	}
 
 	// generate the vertexes for all the clouds, which will be drawn
@@ -869,7 +879,7 @@ void RB_StageIteratorSky( void ) {
 
 
 	// back to normal depth range
-	qglDepthRange( 0.0, 1.0 );
+	//qglDepthRange( 0.0, 1.0 );
 
 	// note that sky was drawn so we will draw a sun later
 	backEnd.skyRenderedThisView = qtrue;

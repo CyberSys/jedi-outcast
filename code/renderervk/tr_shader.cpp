@@ -1100,7 +1100,7 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 			}
 			else
 			{
-				stage->bundle[0].image[0] = R_FindImageFile( token, !shader.noMipMaps, !shader.noPicMip, !shader.noTC, GL_REPEAT );
+				stage->bundle[0].image[0] = R_FindImageFile( token, !shader.noMipMaps, !shader.noPicMip, !shader.noTC, true );
 				if ( !stage->bundle[0].image[0] )
 				{
 					ri.Printf( PRINT_WARNING, "WARNING: R_FindImageFile could not find '%s' in shader '%s'\n", token, shader.name );
@@ -1120,7 +1120,7 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 				return qfalse;
 			}
 
-			stage->bundle[0].image[0] = R_FindImageFile( token, !shader.noMipMaps, !shader.noPicMip, !shader.noTC, GL_CLAMP );
+			stage->bundle[0].image[0] = R_FindImageFile( token, !shader.noMipMaps, !shader.noPicMip, !shader.noTC, false );
 			if ( !stage->bundle[0].image[0] )
 			{
 				ri.Printf( PRINT_WARNING, "WARNING: R_FindImageFile could not find '%s' in shader '%s'\n", token, shader.name );
@@ -1154,7 +1154,7 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 				}
 				num = stage->bundle[0].numImageAnimations;
 				if ( num < MAX_IMAGE_ANIMATIONS ) {
-					stage->bundle[0].image[num] = R_FindImageFile( token, !shader.noMipMaps, !shader.noPicMip, !shader.noTC, bClamp?GL_CLAMP:GL_REPEAT );
+					stage->bundle[0].image[num] = R_FindImageFile( token, !shader.noMipMaps, !shader.noPicMip, !shader.noTC, !bClamp );
 					if ( !stage->bundle[0].image[num] )
 					{
 						ri.Printf( PRINT_WARNING, "WARNING: R_FindImageFile could not find '%s' in shader '%s'\n", token, shader.name );
@@ -1752,7 +1752,7 @@ static void ParseSkyParms( const char **text ) {
 	if ( strcmp( token, "-" ) ) {
 		for (i=0 ; i<6 ; i++) {
 			Com_sprintf( pathname, sizeof(pathname), "%s_%s", token, suf[i] );
-			shader.sky.outerbox[i] = R_FindImageFile( ( char * ) pathname, qtrue, qtrue, !shader.noTC, GL_CLAMP );
+			shader.sky.outerbox[i] = R_FindImageFile( ( char * ) pathname, qtrue, qtrue, !shader.noTC, false );
 			if ( !shader.sky.outerbox[i] ) {
 				if (i) {
 					shader.sky.outerbox[i] = shader.sky.outerbox[i-1];//not found, so let's use the previous image
@@ -1785,7 +1785,7 @@ static void ParseSkyParms( const char **text ) {
 	if ( strcmp( token, "-" ) ) {
 		for (i=0 ; i<6 ; i++) {
 			Com_sprintf( pathname, sizeof(pathname), "%s_%s", token, suf[i] );
-			shader.sky.innerbox[i] = R_FindImageFile( ( char * ) pathname, qtrue, qtrue, !shader.noTC, GL_CLAMP );
+			shader.sky.innerbox[i] = R_FindImageFile( ( char * ) pathname, qtrue, qtrue, !shader.noTC, false );
 			if ( !shader.sky.innerbox[i] ) {
 				if (i) {
 					shader.sky.innerbox[i] = shader.sky.innerbox[i];//not found, so let's use the previous
@@ -2372,31 +2372,31 @@ typedef struct {
 
 static collapse_t	collapse[] = {
 	{ 0, GLS_DSTBLEND_SRC_COLOR | GLS_SRCBLEND_ZERO,	
-		GL_MODULATE, 0 },
+		TEX_MODULATE, 0 },
 
 	{ 0, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR,
-		GL_MODULATE, 0 },
+		TEX_MODULATE, 0 },
 
 	{ GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR,
-		GL_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
+		TEX_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
 
 	{ GLS_DSTBLEND_SRC_COLOR | GLS_SRCBLEND_ZERO, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR,
-		GL_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
+		TEX_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
 
 	{ GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR, GLS_DSTBLEND_SRC_COLOR | GLS_SRCBLEND_ZERO,
-		GL_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
+		TEX_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
 
 	{ GLS_DSTBLEND_SRC_COLOR | GLS_SRCBLEND_ZERO, GLS_DSTBLEND_SRC_COLOR | GLS_SRCBLEND_ZERO,
-		GL_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
+		TEX_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
 
 	{ 0, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE,
-		GL_ADD, 0 },
+		TEX_ADD, 0 },
 
 	{ GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE,
-		GL_ADD, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE },
+		TEX_ADD, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE },
 #if 0
 	{ 0, GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_SRCBLEND_SRC_ALPHA,
-		GL_DECAL, 0 },
+		TEX_DECAL, 0 },
 #endif
 	{ -1 }
 };
@@ -2413,10 +2413,10 @@ static qboolean CollapseMultitexture( void ) {
 	int abits, bbits;
 	int i;
 	textureBundle_t tmpBundle;
-
+/*
 	if ( !qglActiveTextureARB ) {
 		return qfalse;
-	}
+	}*/
 
 	// make sure both stages are active
 	if ( !stages[0].active || !stages[1].active ) {
@@ -2449,7 +2449,7 @@ static qboolean CollapseMultitexture( void ) {
 	}
 
 	// GL_ADD is a separate extension
-	if ( collapse[i].multitextureEnv == GL_ADD && !glConfig.textureEnvAddAvailable ) {
+	if ( collapse[i].multitextureEnv == TEX_ADD && !glConfig.textureEnvAddAvailable ) {
 		return qfalse;
 	}
 
@@ -2460,7 +2460,7 @@ static qboolean CollapseMultitexture( void ) {
 	}
 
 	// an add collapse can only have identity colors
-	if ( collapse[i].multitextureEnv == GL_ADD && stages[0].rgbGen != CGEN_IDENTITY ) {
+	if ( collapse[i].multitextureEnv == TEX_ADD && stages[0].rgbGen != CGEN_IDENTITY ) {
 		return qfalse;
 	}
 
@@ -2955,9 +2955,9 @@ static shader_t *FinishShader( void ) {
 
         if (pStage->bundle[1].image[0] == nullptr)
             def.shader_type = Vk_Shader_Type::single_texture;
-        else if (shader.multitextureEnv == GL_MODULATE)
+        else if (shader.multitextureEnv == TEX_MODULATE)
             def.shader_type = Vk_Shader_Type::multi_texture_mul;
-        else if (shader.multitextureEnv == GL_ADD)
+        else if (shader.multitextureEnv == TEX_ADD)
             def.shader_type = Vk_Shader_Type::multi_texture_add;
         else
             ri.Error(ERR_FATAL, "Vulkan: could not create pipelines for q3 shader '%s'\n", shader.name);
@@ -3190,7 +3190,7 @@ shader_t *R_FindShader( const char *name, const int *lightmapIndex, const byte *
 	// if not defined in the in-memory shader descriptions,
 	// look for a single TGA, BMP, or PCX
 	//
-	image = R_FindImageFile( name, mipRawImage, mipRawImage, qtrue, mipRawImage ? GL_REPEAT : GL_CLAMP );
+	image = R_FindImageFile( name, mipRawImage, mipRawImage, qtrue, mipRawImage );
 	if ( !image ) {
 		if (strncmp(name, "levelshots", 10 ) ) {	//hide these warnings
 			ri.Printf( PRINT_WARNING, "Couldn't find image for shader %s\n", name );
@@ -3359,11 +3359,11 @@ void	R_ShaderList_f (void) {
 		} else {
 			ri.Printf (PRINT_ALL, "  ");
 		}
-		if ( shader->multitextureEnv == GL_ADD ) {
+		if ( shader->multitextureEnv == TEX_ADD ) {
 			ri.Printf( PRINT_ALL, "MT(a) " );
-		} else if ( shader->multitextureEnv == GL_MODULATE ) {
+		} else if ( shader->multitextureEnv == TEX_MODULATE ) {
 			ri.Printf( PRINT_ALL, "MT(m) " );
-		} else if ( shader->multitextureEnv == GL_DECAL ) {
+		} else if ( shader->multitextureEnv == TEX_DECAL ) {
 			ri.Printf( PRINT_ALL, "MT(d) " );
 		} else {
 			ri.Printf( PRINT_ALL, "      " );
