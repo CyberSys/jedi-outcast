@@ -193,8 +193,11 @@ set(src_renderer
 	renderer/tr_surface.cpp
 	renderer/tr_surfacesprites.cpp
 	renderer/tr_world.cpp
+	sdl/sdl_glimp.cpp
 )
 
+aux_source_directory(renderervk/shaders/hlsl_compiled vk_hlsl_compiled)
+aux_source_directory(renderervk/shaders/spirv vk_spirv)
 set(src_renderervk
 	renderervk/matcomp.c
 	renderervk/tr_worldeffects.cpp
@@ -224,7 +227,11 @@ set(src_renderervk
 	renderervk/tr_surface.cpp
 	renderervk/tr_surfacesprites.cpp
 	renderervk/tr_world.cpp
+	renderervk/vk.cpp
+	${vk_hlsl_compiled}
+	${vk_spirv}
 )
+
 
 set(src_renderercommon
 	renderercommon/tr_font.cpp
@@ -321,7 +328,6 @@ set(src_unix
 
 set(src_sdl
 	sdl/sdl_gamma.cpp
-	sdl/sdl_glimp.cpp
 )
 
 set(src_starwars

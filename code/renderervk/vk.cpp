@@ -38,7 +38,7 @@ PFN_vkGetPhysicalDeviceFormatProperties			vkGetPhysicalDeviceFormatProperties;
 PFN_vkGetPhysicalDeviceMemoryProperties			vkGetPhysicalDeviceMemoryProperties;
 PFN_vkGetPhysicalDeviceProperties				vkGetPhysicalDeviceProperties;
 PFN_vkGetPhysicalDeviceQueueFamilyProperties	vkGetPhysicalDeviceQueueFamilyProperties;
-PFN_vkCreateWin32SurfaceKHR						vkCreateWin32SurfaceKHR;
+//PFN_vkCreateWin32SurfaceKHR						vkCreateWin32SurfaceKHR;
 PFN_vkDestroySurfaceKHR							vkDestroySurfaceKHR;
 PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR	vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
 PFN_vkGetPhysicalDeviceSurfaceFormatsKHR		vkGetPhysicalDeviceSurfaceFormatsKHR;
@@ -455,7 +455,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags
 static void create_instance() {
 	const char* instance_extensions[] = {
 		VK_KHR_SURFACE_EXTENSION_NAME,
-		VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+		//VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #ifndef NDEBUG
 		VK_EXT_DEBUG_REPORT_EXTENSION_NAME
 #endif
@@ -636,7 +636,7 @@ static void init_vulkan_library() {
 	INIT_INSTANCE_FUNCTION(vkGetPhysicalDeviceMemoryProperties)
 	INIT_INSTANCE_FUNCTION(vkGetPhysicalDeviceProperties)
 	INIT_INSTANCE_FUNCTION(vkGetPhysicalDeviceQueueFamilyProperties)
-	INIT_INSTANCE_FUNCTION(vkCreateWin32SurfaceKHR)
+	//INIT_INSTANCE_FUNCTION(vkCreateWin32SurfaceKHR)
 	INIT_INSTANCE_FUNCTION(vkDestroySurfaceKHR)
 	INIT_INSTANCE_FUNCTION(vkGetPhysicalDeviceSurfaceCapabilitiesKHR)
 	INIT_INSTANCE_FUNCTION(vkGetPhysicalDeviceSurfaceFormatsKHR)
@@ -759,7 +759,7 @@ static void deinit_vulkan_library() {
 	vkGetPhysicalDeviceMemoryProperties			= nullptr;
 	vkGetPhysicalDeviceProperties				= nullptr;
 	vkGetPhysicalDeviceQueueFamilyProperties	= nullptr;
-	vkCreateWin32SurfaceKHR						= nullptr;
+	//vkCreateWin32SurfaceKHR						= nullptr;
 	vkDestroySurfaceKHR							= nullptr;
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR	= nullptr;
 	vkGetPhysicalDeviceSurfaceFormatsKHR		= nullptr;
@@ -845,7 +845,7 @@ static void deinit_vulkan_library() {
 	vkQueuePresentKHR							= nullptr;
 }
 
-VkPipeline create_pipeline(const Vk_Pipeline_Def&);
+static VkPipeline create_pipeline(const Vk_Pipeline_Def&);
 
 void vk_initialize() {
 	init_vulkan_library();
@@ -1576,8 +1576,8 @@ void vk_update_descriptor_set(VkDescriptorSet set, VkImageView image_view, bool 
 		sampler_def.gl_mag_filter = gl_filter_max;
 		sampler_def.gl_min_filter = gl_filter_min;
 	} else {
-		sampler_def.gl_mag_filter = GL_LINEAR;
-		sampler_def.gl_min_filter = GL_LINEAR;
+		sampler_def.gl_mag_filter = VK_FILTER_LINEAR;
+		sampler_def.gl_min_filter = VK_FILTER_LINEAR;
 	}
 
 	VkDescriptorImageInfo image_info;
@@ -1962,9 +1962,9 @@ VkSampler vk_find_sampler(const Vk_Sampler_Def& def) {
 	VkSamplerAddressMode address_mode = def.repeat_texture ? VK_SAMPLER_ADDRESS_MODE_REPEAT : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 
 	VkFilter mag_filter;
-	if (def.gl_mag_filter == GL_NEAREST) {
+	if (def.gl_mag_filter == VK_FILTER_NEAREST) {
 		mag_filter = VK_FILTER_NEAREST;
-	} else if (def.gl_mag_filter == GL_LINEAR) {
+	} else if (def.gl_mag_filter == VK_FILTER_LINEAR) {
 		mag_filter = VK_FILTER_LINEAR;
 	} else {
 		ri.Error(ERR_FATAL, "vk_find_sampler: invalid gl_mag_filter");
@@ -1973,24 +1973,24 @@ VkSampler vk_find_sampler(const Vk_Sampler_Def& def) {
 	VkFilter min_filter;
 	VkSamplerMipmapMode mipmap_mode;
 	bool max_lod_0_25 = false; // used to emulate OpenGL's GL_LINEAR/GL_NEAREST minification filter
-	if (def.gl_min_filter == GL_NEAREST) {
+	if (def.gl_min_filter == VK_FILTER_NEAREST) {
 		min_filter = VK_FILTER_NEAREST;
 		mipmap_mode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
 		max_lod_0_25 = true;
-	} else if (def.gl_min_filter == GL_LINEAR) {
+	} else if (def.gl_min_filter == VK_FILTER_LINEAR) {
 		min_filter = VK_FILTER_LINEAR;
 		mipmap_mode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
 		max_lod_0_25 = true;
-	} else if (def.gl_min_filter == GL_NEAREST_MIPMAP_NEAREST) {
+	} else if (def.gl_min_filter == VK_SAMPLER_MIPMAP_MODE_NEAREST) {
 		min_filter = VK_FILTER_NEAREST;
 		mipmap_mode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-	} else if (def.gl_min_filter == GL_LINEAR_MIPMAP_NEAREST) {
+	} else if (def.gl_min_filter == VK_SAMPLER_MIPMAP_MODE_NEAREST) {
 		min_filter = VK_FILTER_LINEAR;
 		mipmap_mode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-	} else if (def.gl_min_filter == GL_NEAREST_MIPMAP_LINEAR) {
+	} else if (def.gl_min_filter == VK_SAMPLER_MIPMAP_MODE_LINEAR) {
 		min_filter = VK_FILTER_NEAREST;
 		mipmap_mode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	} else if (def.gl_min_filter == GL_LINEAR_MIPMAP_LINEAR) {
+	} else if (def.gl_min_filter == VK_SAMPLER_MIPMAP_MODE_LINEAR) {
 		min_filter = VK_FILTER_LINEAR;
 		mipmap_mode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	} else {
@@ -2251,7 +2251,7 @@ void vk_bind_geometry() {
 		// when computing clipping plane too.
 		float* eye_xform = push_constants + 16;
 		for (int i = 0; i < 12; i++) {
-			eye_xform[i] = backEnd.or.modelMatrix[(i%4)*4 + i/4 ];
+			eye_xform[i] = backEnd.ori.modelMatrix[(i%4)*4 + i/4 ];
 		}
 
 		// Clipping plane in eye coordinates.
@@ -2262,10 +2262,10 @@ void vk_bind_geometry() {
 		world_plane[3] = backEnd.viewParms.portalPlane.dist;
 
 		float eye_plane[4];
-		eye_plane[0] = DotProduct (backEnd.viewParms.or.axis[0], world_plane);
-		eye_plane[1] = DotProduct (backEnd.viewParms.or.axis[1], world_plane);
-		eye_plane[2] = DotProduct (backEnd.viewParms.or.axis[2], world_plane);
-		eye_plane[3] = DotProduct (world_plane, backEnd.viewParms.or.origin) - world_plane[3];
+		eye_plane[0] = DotProduct (backEnd.viewParms.ori.axis[0], world_plane);
+		eye_plane[1] = DotProduct (backEnd.viewParms.ori.axis[1], world_plane);
+		eye_plane[2] = DotProduct (backEnd.viewParms.ori.axis[2], world_plane);
+		eye_plane[3] = DotProduct (world_plane, backEnd.viewParms.ori.origin) - world_plane[3];
 
 		// Apply s_flipMatrix to be in the same coordinate system as eye_xfrom.
 		push_constants[28] = -eye_plane[1];
