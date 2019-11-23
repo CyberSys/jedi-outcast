@@ -34,7 +34,6 @@ refexport_t	re;
 #endif
 
 unsigned	sys_frame_time;
-
 uid_t saved_euid;
 qboolean stdin_active = qtrue;
 
@@ -59,8 +58,7 @@ Restart the input subsystem
 */
 void Sys_In_Restart_f( void )
 {
-	IN_Shutdown();
-	IN_Init();
+	IN_Restart();
 }
 
 void Sys_ConsoleOutput (char *string)
