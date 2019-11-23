@@ -270,7 +270,7 @@ typedef struct {
 	int		(*CIN_PlayCinematic)( const char *arg0, int xpos, int ypos, int width, int height, int iBits, const char *psAudioFile);
 	e_status (*CIN_RunCinematic) (int handle);
 	
-	void (*IN_Init)( void );
+	void (*IN_Init)( void *windowData );
 	void (*IN_Shutdown)( void );
 	void (*IN_Restart)( void );
 } refimport_t;

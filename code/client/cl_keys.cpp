@@ -21,6 +21,8 @@ char		keymatch_last[256];
 
 keyGlobals_t	kg;										
 
+qkey_t		keys[MAX_KEYS];
+
 // do NOT blithely change any of the key names (3rd field) here, since they have to match the key binds
 //	in the CFG files, they're also prepended with "KEYNAME_" when looking up StripEd references
 //

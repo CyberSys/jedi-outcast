@@ -61,8 +61,8 @@ add_definitions( -DNDEBUG )
 add_definitions( -DFINAL_BUILD )
 add_definitions( -DUSE_RENDERER_DLOPEN)
 
-find_package (SDL REQUIRED)
-include_directories(${SDL_INCLUDE_DIR})
+find_package (SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
 
 find_package(OpenGL COMPONENTS OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
@@ -350,7 +350,7 @@ set_target_properties(jk2sp PROPERTIES COMPILE_DEFINITIONS "_JK2EXE;_FF_DISABLE"
 
 target_link_libraries(jk2sp
 	m pthread
-	${SDL_LIBRARY}
+	${SDL2_LIBRARIES}
 	${OPENGL_LIBRARIES}
 	${OPENAL_LIBRARY}
 	${OPENGL_glx_LIBRARY}
