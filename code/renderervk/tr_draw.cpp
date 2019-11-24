@@ -7,7 +7,6 @@
 #include "tr_local.h"
 
 
-
 /*
 =============
 RE_StretchRaw

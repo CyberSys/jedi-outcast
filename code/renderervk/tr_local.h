@@ -1371,11 +1371,12 @@ void		*GLimp_RendererSleep( void );
 void		GLimp_FrontEndSleep( void );
 void		GLimp_WakeRenderer( void *data );
 
-void		GLimp_LogComment( char *comment );
+void		VKimp_LogComment( char *comment );
 
-void        vk_imp_init();
-void        vk_imp_shutdown();
-void        vk_imp_create_surface();
+void        VKimp_Init();
+void        VKimp_Shutdown();
+void        VKimp_CreateSurface();
+void        VKimp_GetExtensions();
 
 void		GLimp_SetGamma( unsigned char red[256],
 						    unsigned char green[256],

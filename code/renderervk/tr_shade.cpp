@@ -361,7 +361,7 @@ static void DrawTris (shaderCommands_t *input)
 		if ( qglLockArraysEXT ) 
 		{
 			qglLockArraysEXT( 0, input->numVertexes );
-			GLimp_LogComment( "glLockArraysEXT\n" );
+			VKimp_LogComment( "glLockArraysEXT\n" );
 		}
 
 		R_DrawElements( input->numIndexes, input->indexes );
@@ -369,7 +369,7 @@ static void DrawTris (shaderCommands_t *input)
 		if ( qglUnlockArraysEXT ) 
 		{
 			qglUnlockArraysEXT( );
-			GLimp_LogComment( "glUnlockArraysEXT\n" );
+			VKimp_LogComment( "glUnlockArraysEXT\n" );
 		}
 
 #ifdef _NPATCH
@@ -403,14 +403,14 @@ static void DrawTris (shaderCommands_t *input)
 
 		if (qglLockArraysEXT) {
 			qglLockArraysEXT(0, input->numVertexes);
-			GLimp_LogComment( "glLockArraysEXT\n" );
+			VKimp_LogComment( "glLockArraysEXT\n" );
 		}
 
 		R_DrawElements( input->numIndexes, input->indexes );
 
 		if (qglUnlockArraysEXT) {
 			qglUnlockArraysEXT();
-			GLimp_LogComment( "glUnlockArraysEXT\n" );
+			VKimp_LogComment( "glUnlockArraysEXT\n" );
 		}
 
 #ifdef _NPATCH
@@ -1443,7 +1443,7 @@ void RB_StageIteratorGeneric( void )
 	{
 		// don't just call LogComment, or we will get
 		// a call to va() every frame!
-		GLimp_LogComment( va("--- RB_StageIteratorGeneric( %s ) ---\n", tess.shader->name) );
+		VKimp_LogComment( va("--- RB_StageIteratorGeneric( %s ) ---\n", tess.shader->name) );
 	}
 
 	//
@@ -1501,7 +1501,7 @@ void RB_StageIteratorGeneric( void )
 	/*if (qglLockArraysEXT)
 	{
 		qglLockArraysEXT(0, input->numVertexes);
-		GLimp_LogComment( "glLockArraysEXT\n" );
+		VKimp_LogComment( "glLockArraysEXT\n" );
 	}*/
 
 	//
@@ -1539,7 +1539,7 @@ void RB_StageIteratorGeneric( void )
 	/*if (qglUnlockArraysEXT) 
 	{
 		qglUnlockArraysEXT();
-		GLimp_LogComment( "glUnlockArraysEXT\n" );
+		VKimp_LogComment( "glUnlockArraysEXT\n" );
 	}*/
 
 #ifdef _NPATCH
@@ -1600,7 +1600,7 @@ void RB_StageIteratorVertexLitTexture( void )
 	{
 		// don't just call LogComment, or we will get
 		// a call to va() every frame!
-		GLimp_LogComment( va("--- RB_StageIteratorVertexLitTexturedUnfogged( %s ) ---\n", tess.shader->name) );
+		VKimp_LogComment( va("--- RB_StageIteratorVertexLitTexturedUnfogged( %s ) ---\n", tess.shader->name) );
 	}
 
 	//
@@ -1633,7 +1633,7 @@ void RB_StageIteratorVertexLitTexture( void )
 	if ( qglLockArraysEXT )
 	{
 		qglLockArraysEXT(0, input->numVertexes);
-		GLimp_LogComment( "glLockArraysEXT\n" );
+		VKimp_LogComment( "glLockArraysEXT\n" );
 	}*/
 
 	//
@@ -1663,7 +1663,7 @@ void RB_StageIteratorVertexLitTexture( void )
 	/*if (qglUnlockArraysEXT) 
 	{
 		qglUnlockArraysEXT();
-		GLimp_LogComment( "glUnlockArraysEXT\n" );
+		VKimp_LogComment( "glUnlockArraysEXT\n" );
 	}*/
 
 #ifdef _NPATCH
@@ -1704,7 +1704,7 @@ void RB_StageIteratorLightmappedMultitexture( void ) {
 	if ( r_logFile->integer ) {
 		// don't just call LogComment, or we will get
 		// a call to va() every frame!
-		GLimp_LogComment( va("--- RB_StageIteratorLightmappedMultitexture( %s ) ---\n", tess.shader->name) );
+		VKimp_LogComment( va("--- RB_StageIteratorLightmappedMultitexture( %s ) ---\n", tess.shader->name) );
 	}
 
 	//
@@ -1766,7 +1766,7 @@ void RB_StageIteratorLightmappedMultitexture( void ) {
 	//
 	/*if ( qglLockArraysEXT ) {
 		qglLockArraysEXT(0, input->numVertexes);
-		GLimp_LogComment( "glLockArraysEXT\n" );
+		VKimp_LogComment( "glLockArraysEXT\n" );
 	}*/
 
 	R_DrawElements( input->numIndexes, input->indexes );
@@ -1802,7 +1802,7 @@ void RB_StageIteratorLightmappedMultitexture( void ) {
 	//
 	/*if ( qglUnlockArraysEXT ) {
 		qglUnlockArraysEXT();
-		GLimp_LogComment( "glUnlockArraysEXT\n" );
+		VKimp_LogComment( "glUnlockArraysEXT\n" );
 	}*/
 
 #ifdef _NPATCH
@@ -1890,6 +1890,6 @@ void RB_EndSurface( void ) {
 	// clear shader so we can tell we don't have any unclosed surfaces
 	tess.numIndexes = 0;
 
-	GLimp_LogComment( "----------\n" );
+	VKimp_LogComment( "----------\n" );
 }
 

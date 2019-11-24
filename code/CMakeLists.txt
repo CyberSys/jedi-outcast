@@ -228,6 +228,7 @@ set(src_renderervk
 	renderervk/tr_surfacesprites.cpp
 	renderervk/tr_world.cpp
 	renderervk/vk.cpp
+	sdl/sdl_vkimp.cpp
 	${vk_hlsl_compiled}
 	${vk_spirv}
 )
@@ -354,7 +355,7 @@ target_link_libraries(jk2sp
 	${OPENGL_LIBRARIES}
 	${OPENAL_LIBRARY}
 	${OPENGL_glx_LIBRARY}
-	${Vulkan_LIBRARY}
+	
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")

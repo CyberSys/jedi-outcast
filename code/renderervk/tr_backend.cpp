@@ -61,16 +61,16 @@ void GL_SelectTexture( int unit )
 	if ( unit == 0 )
 	{
 		//qglActiveTextureARB( GL_TEXTURE0_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE0_ARB )\n" );
+		VKimp_LogComment( "glActiveTextureARB( GL_TEXTURE0_ARB )\n" );
 		//qglClientActiveTextureARB( GL_TEXTURE0_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE0_ARB )\n" );
+		VKimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE0_ARB )\n" );
 	}
 	else if ( unit == 1 )
 	{
 		//qglActiveTextureARB( GL_TEXTURE1_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE1_ARB )\n" );
+		VKimp_LogComment( "glActiveTextureARB( GL_TEXTURE1_ARB )\n" );
 		//qglClientActiveTextureARB( GL_TEXTURE1_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE1_ARB )\n" );
+		VKimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE1_ARB )\n" );
 	} else {
 		ri.Error( ERR_DROP, "GL_SelectTexture: unit = %i", unit );
 	}
@@ -1226,7 +1226,7 @@ const void	*RB_SwapBuffers( const void *data ) {
         //qglFinish();
 	}
 
-    GLimp_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
+    VKimp_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
 
 	backEnd.projection2D = qfalse;
     

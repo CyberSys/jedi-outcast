@@ -251,7 +251,7 @@ static void InitVulkan( void )
 
 	if ( glConfig.vidWidth == 0 )
 	{
-        vk_imp_init();
+        VKimp_Init();
         vk_initialize();
 	}
 
@@ -1335,7 +1335,7 @@ void RE_Shutdown( qboolean destroyWindow ) {
     vk_release_resources();
     if (destroyWindow) {
         vk_shutdown();
-        vk_imp_shutdown();
+        VKimp_Shutdown();
     }
 	tr.registered = qfalse;
 }

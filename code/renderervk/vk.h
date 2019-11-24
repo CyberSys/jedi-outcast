@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __VK_H__
+#define __VK_H__
 
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -6,7 +7,9 @@
 #endif
 
 #define VK_NO_PROTOTYPES
-#include "vulkan/vulkan.h"
+#include <vulkan/vulkan.h>
+#include <SDL_vulkan.h>
+
 
 const int MAX_SWAPCHAIN_IMAGES = 8;
 const int MAX_VK_SAMPLERS = 32;
@@ -248,9 +251,12 @@ struct Vk_World {
 // Most of the renderer's code uses Vulkan API via function provides in this file but 
 // there are few places outside of vk.cpp where we use Vulkan commands directly.
 //extern PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
-extern PFN_vkFreeDescriptorSets vkFreeDescriptorSets;
-extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
-extern PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
-extern PFN_vkDestroyImage vkDestroyImage;
-extern PFN_vkDestroyImageView vkDestroyImageView;
-extern PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+ extern PFN_vkCreateInstance							vkCreateInstance;
+ extern PFN_vkFreeDescriptorSets vkFreeDescriptorSets;
+ extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
+ extern PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
+ extern PFN_vkDestroyImage vkDestroyImage;
+ extern PFN_vkDestroyImageView vkDestroyImageView;
+ extern PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+ 
+ #endif // __VK_H__

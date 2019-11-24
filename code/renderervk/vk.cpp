@@ -1,5 +1,5 @@
 #include "tr_local.h"
-
+#include <vulkan/vulkan.h>
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -24,7 +24,6 @@ static const int INDEX_BUFFER_SIZE = 2 * 1024 * 1024;
 // Vulkan API functions used by the renderer.
 //
 PFN_vkGetInstanceProcAddr						vkGetInstanceProcAddr;
-
 PFN_vkCreateInstance							vkCreateInstance;
 PFN_vkEnumerateInstanceExtensionProperties		vkEnumerateInstanceExtensionProperties;
 
@@ -453,6 +452,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags
 }
 
 static void create_instance() {
+    VKimp_GetExtensions();
+    //VK_CHECK(vkCreateInstance(desc, nullptr, &vk.instance));
+/*
 	const char* instance_extensions[] = {
 		VK_KHR_SURFACE_EXTENSION_NAME,
 		//VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
@@ -500,7 +502,7 @@ static void create_instance() {
 #endif
 
 		VK_CHECK(vkCreateInstance(&desc, nullptr, &vk.instance));
-	}
+	}*/
 }
 
 static void create_device() {
@@ -511,13 +513,14 @@ static void create_device() {
 
 		if (count == 0)
 			ri.Error(ERR_FATAL, "Vulkan: no physical device found");
-
+        else    
+            ri.Printf( PRINT_ALL, "Found %i devices\n", count );
 		std::vector<VkPhysicalDevice> physical_devices(count);
 		VK_CHECK(vkEnumeratePhysicalDevices(vk.instance, &count, physical_devices.data()));
 		vk.physical_device = physical_devices[0];
 	}
 
-	vk_imp_create_surface();
+	VKimp_CreateSurface();
 
 	// select surface format
 	{
