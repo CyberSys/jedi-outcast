@@ -861,7 +861,16 @@ void vk_initialize() {
 		ri.Error(ERR_FATAL, "vk_create_instance: fillModeNonSolid feature is not supported");
 
 	vkGetDeviceQueue(vk.device, vk.queue_family_index, 0, &vk.queue);
-
+    //Hardware Info
+    {
+        
+        VkPhysicalDeviceProperties props;
+        char * vk_vendor_string;
+        
+        vkGetPhysicalDeviceProperties(vk.physical_device, &props);
+        ri.Printf( PRINT_ALL, "Device : %s\n", props.deviceName);
+		glConfig.maxTextureSize = props.limits.maxImageDimension2D;
+    }
 	//
 	// Swapchain.
 	//
@@ -1434,6 +1443,18 @@ void vk_release_resources() {
 	vk.color_st_elements = 0;
 	vk.index_buffer_offset = 0;
 }
+
+void vk_clear_images(){
+    vkDeviceWaitIdle(vk.device);
+    for (int i = 0; i < MAX_VK_IMAGES; i++) {
+		Vk_Image& image = vk_world.images[i];
+
+		if (image.handle != VK_NULL_HANDLE) {
+			vkDestroyImage(vk.device, image.handle, nullptr);
+			vkDestroyImageView(vk.device, image.view, nullptr);
+		}
+	}
+	vk_world.num_images = 0;}
 
 static void record_buffer_memory_barrier(VkCommandBuffer cb, VkBuffer buffer,
 		VkPipelineStageFlags src_stages, VkPipelineStageFlags dst_stages,

@@ -707,32 +707,32 @@ void GL_SetDefaultState( void )
 	qglColor4f (1,1,1,1);
 
 	// initialize downstream texture unit if we're running
-	// in a multitexture environment
-	if ( qglActiveTextureARB ) {
+	// in a multitexture environment*/
+	//if ( qglActiveTextureARB ) {
 		GL_SelectTexture( 1 );
 		GL_TextureMode( r_textureMode->string );
-		GL_TexEnv( GL_MODULATE );
-		qglDisable( GL_TEXTURE_2D );
+		//GL_TexEnv( GL_MODULATE );
+		//qglDisable( GL_TEXTURE_2D );
 		GL_SelectTexture( 0 );
-	}
+	//}
 
-	qglEnable(GL_TEXTURE_2D);
+	//qglEnable(GL_TEXTURE_2D);
 	GL_TextureMode( r_textureMode->string );
-	GL_TexEnv( GL_MODULATE );
+	//GL_TexEnv( GL_MODULATE );
 
-	qglShadeModel( GL_SMOOTH );
-	qglDepthFunc( GL_LEQUAL );
+	//qglShadeModel( GL_SMOOTH );
+	//qglDepthFunc( GL_LEQUAL );
 
 	// the vertex array is always enabled, but the color and texture
 	// arrays are enabled and disabled around the compiled vertex array call
-	qglEnableClientState (GL_VERTEX_ARRAY);
+	//qglEnableClientState (GL_VERTEX_ARRAY);
 
 	//
 	// make sure our GL state vector is set correctly
 	//
 	glState.glStateBits = GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_TRUE;
 
-	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+	/*qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	qglDepthMask( GL_TRUE );
 	qglDisable( GL_DEPTH_TEST );
 	qglEnable( GL_SCISSOR_TEST );

@@ -120,6 +120,7 @@ VKimp_LogComment
 */
 void VKimp_LogComment( char *comment )
 {
+    ri.Printf( PRINT_ALL, "VKimp_LogComment: %s\n", comment );
 }
 
 
@@ -750,8 +751,15 @@ void VKimp_CreateSurface() {
 
 
 void VKimp_GetExtensions() {
-    // Note: This sample uses C++17 features/syntax.
-    // Get the required extension count
+	const char* instance_extensions[] = {
+		VK_KHR_SURFACE_EXTENSION_NAME,
+		"VK_KHR_xlib_surface",//VK_KHR_XLIB_SURFACE_EXTENSION_NAME,
+		//VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+#ifndef NDEBUG
+		VK_EXT_DEBUG_REPORT_EXTENSION_NAME
+#endif
+	};
+	
     unsigned int count;
     if (!SDL_Vulkan_GetInstanceExtensions(SDL_window, &count, nullptr)) 
         ri.Error(ERR_FATAL, "SDL_Vulkan: Could not get extensions "); 
@@ -764,14 +772,42 @@ void VKimp_GetExtensions() {
 
     if (!SDL_Vulkan_GetInstanceExtensions(SDL_window, &count, extensions.data() + additional_extension_count)) 
         ri.Error(ERR_FATAL, "SDL_Vulkan: Could not get additional extensions "); 
-
+        
+    for (auto name : instance_extensions) {
+        bool supported = false;
+        for (const auto& property : extensions) {
+            if (!strcmp(property, name)) {
+                supported = true;
+                break;
+            }
+        }
+        if (!supported)
+            ri.Error(ERR_FATAL, "Vulkan: required instance extension is not available: %s", name);
+    }
     // Now we can make the Vulkan instance
-    VkInstanceCreateInfo create_info = {};
+    /*VkInstanceCreateInfo create_info = {};
     create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-    create_info.ppEnabledExtensionNames = extensions.data();
+    create_info.ppEnabledExtensionNames = extensions.data();*/
+    
+    VkInstanceCreateInfo desc;
+		desc.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		desc.pNext = nullptr;
+		desc.flags = 0;
+		desc.pApplicationInfo = nullptr;
+		desc.enabledLayerCount = 0;
+		desc.ppEnabledLayerNames = nullptr;
+		desc.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+		desc.ppEnabledExtensionNames = extensions.data();
+
+#ifndef NDEBUG
+		const char* validation_layer_name = "VK_LAYER_KHRONOS_validation";
+		desc.enabledLayerCount = 1;
+		desc.ppEnabledLayerNames = &validation_layer_name;
+#endif
+
     //return &create_info;
     
-    VkResult result = vkCreateInstance(&create_info, nullptr, &vk.instance);
+    VkResult result = vkCreateInstance(&desc, nullptr, &vk.instance);
 }
 
 /*

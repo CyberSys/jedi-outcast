@@ -135,7 +135,7 @@ void GL_TextureMode( const char *string ) {
 		
         //image_t* glt = tr.images[i];
         if (glt->mipmap) {
-            Vk_Image& image = vk_world.images[i];
+            Vk_Image& image = vk_world.images[glt->index];
             vk_update_descriptor_set(image.descriptor_set, image.view, true, glt->wrapClampMode );
         }
         i++;
@@ -1011,6 +1011,12 @@ static void R_Images_DeleteImageContents( image_t *pImage )
 	if (pImage)
 	{
 		//qglDeleteTextures( 1, &pImage->texnum );
+        Vk_Image& image = vk_world.images[pImage->index];
+
+		if (image.handle != VK_NULL_HANDLE) {
+			vkDestroyImage(vk.device, image.handle, nullptr);
+			vkDestroyImageView(vk.device, image.view, nullptr);
+		}
 		ri.Free(pImage);
 	}
 }
@@ -1021,11 +1027,11 @@ static void GL_ResetBinds(void)
 	/*if ( qglBindTexture ) 
 	{
 		if ( qglActiveTextureARB ) 
-		{
+		{*/
 			GL_SelectTexture( 1 );
-			qglBindTexture( GL_TEXTURE_2D, 0 );
+			//qglBindTexture( GL_TEXTURE_2D, 0 );
 			GL_SelectTexture( 0 );
-			qglBindTexture( GL_TEXTURE_2D, 0 );
+			/*qglBindTexture( GL_TEXTURE_2D, 0 );
 		} 
 		else 
 		{
@@ -1090,6 +1096,8 @@ void R_Images_Clear(void)
 	AllocatedImages.clear();
 
 	giTextureBindNum = 1024;
+	
+	vk_clear_images();
 }
 
 
@@ -1280,27 +1288,29 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 	image->wrapClampMode = repeat_texture ? 0 : 1;
 
 	// lightmaps are always allocated on TMU 1
-	/*if ( qglActiveTextureARB && isLightmap ) {
+	if ( isLightmap ) {
 		image->TMU = 1;
 	} else {
 		image->TMU = 0;
-	}*/
+	}
 
-	/*if ( qglActiveTextureARB ) {
-		GL_SelectTexture( image->TMU );
-	}*/
 	GL_SelectTexture( image->TMU );
 
 	GL_Bind(image);
-
+    
+    image->index = vk_world.num_images++;
+    
 	Image_Upload_Data upload_data = generate_image_upload_data(pic, width, height, mipmap, allowPicmip);
-	vk_world.images[image->index] = upload_vk_image(upload_data, repeat_texture);
+	glState.currenttextures[glState.currenttmu] = 0;
+	vk_world.images[image->index] = upload_vk_image(upload_data, repeat_texture);	
 	
 	if (isLightmap) {
 		GL_SelectTexture( 0 );
 	}
 	Z_Free(upload_data.buffer);//ri.Hunk_FreeTempMemory(upload_data.buffer);
-	
+    LPCSTR psNewName = GenerateImageMappingName(name);
+	Q_strncpyz(image->imgName, psNewName, sizeof(image->imgName));
+	AllocatedImages[ image->imgName ] = image;
 	return image;
 }
 

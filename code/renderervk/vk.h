@@ -17,7 +17,7 @@ const int MAX_VK_PIPELINES = 1024;
 const int MAX_VK_IMAGES = 2048; // should be the same as MAX_DRAWIMAGES
 
 const int IMAGE_CHUNK_SIZE = 32 * 1024 * 1024;
-const int MAX_IMAGE_CHUNKS = 16;
+const int MAX_IMAGE_CHUNKS = 64;
 
 #define VK_CHECK(function_call) { \
 	VkResult result = function_call; \
@@ -103,6 +103,7 @@ void vk_bind_geometry();
 void vk_shade_geometry(VkPipeline pipeline, bool multitexture, Vk_Depth_Range depth_range, bool indexed = true);
 void vk_begin_frame();
 void vk_end_frame();
+void vk_clear_images();
 
 void vk_read_pixels(byte* buffer); // screenshots
 
@@ -214,6 +215,7 @@ struct Vk_World {
 	VkPipeline pipelines[MAX_VK_PIPELINES];
 	float pipeline_create_time;
 
+	int num_images = 0;
 	Vk_Image images[MAX_VK_IMAGES];
 
 	//

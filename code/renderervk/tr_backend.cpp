@@ -43,6 +43,7 @@ void GL_Bind( image_t *image ) {
 		glState.currenttextures[glState.currenttmu] = texnum;
 		//qglBindTexture (GL_TEXTURE_2D, texnum);
 		
+		//VkDescriptorSet set = vk_world.images[image->index].descriptor_set;
 		VkDescriptorSet set = vk_world.images[image->index].descriptor_set;
         vk_world.current_descriptor_sets[glState.currenttmu] = set;
 	}
@@ -193,7 +194,7 @@ void GL_TexEnv( int env )
 */
 void GL_State( unsigned long stateBits )
 {
-/*
+
 	unsigned long diff = stateBits ^ glState.glStateBits;
 
 	if ( !diff )
@@ -204,7 +205,7 @@ void GL_State( unsigned long stateBits )
 	//
 	// check depthFunc bits
 	//
-	if ( diff & GLS_DEPTHFUNC_EQUAL )
+	/*if ( diff & GLS_DEPTHFUNC_EQUAL )
 	{
 		if ( stateBits & GLS_DEPTHFUNC_EQUAL )
 		{
@@ -299,12 +300,12 @@ void GL_State( unsigned long stateBits )
 		{
 			qglDisable( GL_BLEND );
 		}
-	}
+	}*/
 
 	//
 	// check depthmask
 	//
-	if ( diff & GLS_DEPTHMASK_TRUE )
+	/*if ( diff & GLS_DEPTHMASK_TRUE )
 	{
 		if ( stateBits & GLS_DEPTHMASK_TRUE )
 		{
@@ -314,12 +315,12 @@ void GL_State( unsigned long stateBits )
 		{
 			qglDepthMask( GL_FALSE );
 		}
-	}
+	}*/
 
 	//
 	// fill/line mode
 	//
-	if ( diff & GLS_POLYMODE_LINE )
+	/*if ( diff & GLS_POLYMODE_LINE )
 	{
 		if ( stateBits & GLS_POLYMODE_LINE )
 		{
@@ -329,12 +330,12 @@ void GL_State( unsigned long stateBits )
 		{
 			qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		}
-	}
+	}*/
 
 	//
 	// depthtest
 	//
-	if ( diff & GLS_DEPTHTEST_DISABLE )
+	/*if ( diff & GLS_DEPTHTEST_DISABLE )
 	{
 		if ( stateBits & GLS_DEPTHTEST_DISABLE )
 		{
@@ -344,12 +345,12 @@ void GL_State( unsigned long stateBits )
 		{
 			qglEnable( GL_DEPTH_TEST );
 		}
-	}
+	}*/
 
 	//
 	// alpha test
 	//
-	if ( diff & GLS_ATEST_BITS )
+	/*if ( diff & GLS_ATEST_BITS )
 	{
 		switch ( stateBits & GLS_ATEST_BITS )
 		{
@@ -376,9 +377,9 @@ void GL_State( unsigned long stateBits )
 			assert( 0 );
 			break;
 		}
-	}
+	}*/
 
-	glState.glStateBits = stateBits;*/
+	glState.glStateBits = stateBits;
 }
 
 
