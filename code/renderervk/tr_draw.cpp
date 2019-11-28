@@ -20,7 +20,7 @@ Used for cinematics.
 void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *data, int iClient, qboolean bDirty ) 
 {
 	R_SyncRenderThread();
-
+    ri.Printf( PRINT_WARNING, "RE_StretchRaw: %i client\n", iClient );
 //===========
 	// Q3Final added this:
 	// we definately want to sync every frame for the cinematics
@@ -35,8 +35,6 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	{
 		ri.Error (ERR_DROP, "Draw_StretchRaw: size not a power of 2: %i by %i", cols, rows);
 	}
-
-	GL_Bind( tr.scratchImage[iClient] );
 
 	// if the scratchImage isn't in the format we want, specify it as a new texture...
 	//
@@ -64,6 +62,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
         vkFreeDescriptorSets(vk.device, vk.descriptor_pool, 1, &image.descriptor_set);
         image = vk_create_image(cols, rows, VK_FORMAT_R8G8B8A8_UNORM, 1, false);
         vk_upload_image_data(image.handle, cols, rows, false, data, 4);
+        vk_world.images[tr.scratchImage[iClient]->index] = image;
 #ifdef TIMEBIND
 		if ( r_ignore->integer ) 
 		{
@@ -98,6 +97,8 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	#endif
 		}
 	}
+	
+	GL_Bind( tr.scratchImage[iClient] );
 
 /*
 	extern void	RB_SetGL2D (void);
@@ -120,9 +121,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 
 
 void RE_UploadCinematic (int cols, int rows, const byte *data, int client, qboolean dirty) {
-
-	GL_Bind( tr.scratchImage[client] );
-
+    ri.Printf( PRINT_WARNING, "RE_UploadCinematic: %i client\n", client );
 	// if the scratchImage isn't in the format we want, specify it as a new texture
 	if ( cols != tr.scratchImage[client]->width || rows != tr.scratchImage[client]->height ) {
 		tr.scratchImage[client]->width = tr.scratchImage[client]->uploadWidth = cols;
@@ -138,6 +137,7 @@ void RE_UploadCinematic (int cols, int rows, const byte *data, int client, qbool
         vkFreeDescriptorSets(vk.device, vk.descriptor_pool, 1, &image.descriptor_set);
         image = vk_create_image(cols, rows, VK_FORMAT_R8G8B8A8_UNORM, 1, false);
         vk_upload_image_data(image.handle, cols, rows, false, data, 4);
+        vk_world.images[tr.scratchImage[client]->index] = image;
 	} else {
 		if (dirty) {
 			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
@@ -147,6 +147,8 @@ void RE_UploadCinematic (int cols, int rows, const byte *data, int client, qbool
             vk_upload_image_data(image.handle, cols, rows, false, data, 4);
 		}
 	}
+	
+	GL_Bind( tr.scratchImage[client] );
 }
 
 

@@ -1445,6 +1445,7 @@ void vk_release_resources() {
 }
 
 void vk_clear_images(){
+/*
     vkDeviceWaitIdle(vk.device);
     for (int i = 0; i < MAX_VK_IMAGES; i++) {
 		Vk_Image& image = vk_world.images[i];
@@ -1454,7 +1455,7 @@ void vk_clear_images(){
 			vkDestroyImageView(vk.device, image.view, nullptr);
 		}
 	}
-	vk_world.num_images = 0;}
+	vk_world.num_images = 0;*/}
 
 static void record_buffer_memory_barrier(VkCommandBuffer cb, VkBuffer buffer,
 		VkPipelineStageFlags src_stages, VkPipelineStageFlags dst_stages,

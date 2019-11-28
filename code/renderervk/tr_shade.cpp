@@ -294,9 +294,9 @@ Draws triangle outlines for debugging
 */
 static void DrawTris (shaderCommands_t *input) 
 {
-/*
-	GL_Bind( tr.whiteImage );
 
+	GL_Bind( tr.whiteImage );
+/*
 	if ( r_showtriscolor->integer )
 	{
 		int i = r_showtriscolor->integer;
@@ -440,13 +440,13 @@ Draws vertex normals for debugging
 static void DrawNormals (shaderCommands_t *input) {
 	int		i;
 	vec3_t	temp;
-/*
+
 	GL_Bind( tr.whiteImage );
-	qglColor3f (1,1,1);
-	qglDepthRange( 0, 0 );	// never occluded
+	//qglColor3f (1,1,1);
+	//qglDepthRange( 0, 0 );	// never occluded
 	GL_State( GLS_POLYMODE_LINE | GLS_DEPTHMASK_TRUE );
 
-	qglBegin (GL_LINES);
+	/*qglBegin (GL_LINES);
 	for (i = 0 ; i < input->numVertexes ; i++) {
 		qglVertex3fv (input->xyz[i]);
 		VectorMA (input->xyz[i], 2, input->normal[i], temp);
@@ -1751,8 +1751,8 @@ void RB_StageIteratorLightmappedMultitexture( void ) {
 	// configure second stage
 	//
 	GL_SelectTexture( 1 );
-	/*qglEnable( GL_TEXTURE_2D );
-	if ( r_lightmap->integer ) {
+	//qglEnable( GL_TEXTURE_2D );
+	/*if ( r_lightmap->integer ) {
 		GL_TexEnv( GL_REPLACE );
 	} else {
 		GL_TexEnv( GL_MODULATE );

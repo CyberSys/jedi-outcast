@@ -1332,8 +1332,8 @@ void RE_Shutdown( qboolean destroyWindow ) {
 	}
 
 	// shut down platform specific Vulkan stuff
-    vk_release_resources();
     if (destroyWindow) {
+        vk_release_resources();
         vk_shutdown();
         VKimp_Shutdown();
     }

@@ -1011,12 +1011,14 @@ static void R_Images_DeleteImageContents( image_t *pImage )
 	if (pImage)
 	{
 		//qglDeleteTextures( 1, &pImage->texnum );
-        Vk_Image& image = vk_world.images[pImage->index];
+        /*Vk_Image& image = vk_world.images[pImage->index];
 
 		if (image.handle != VK_NULL_HANDLE) {
 			vkDestroyImage(vk.device, image.handle, nullptr);
 			vkDestroyImageView(vk.device, image.view, nullptr);
 		}
+		
+		vk_world.images[pImage->index] = Vk_Image;*/
 		ri.Free(pImage);
 	}
 }
@@ -1296,13 +1298,14 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 
 	GL_SelectTexture( image->TMU );
 
-	GL_Bind(image);
-    
     image->index = vk_world.num_images++;
     
 	Image_Upload_Data upload_data = generate_image_upload_data(pic, width, height, mipmap, allowPicmip);
 	glState.currenttextures[glState.currenttmu] = 0;
 	vk_world.images[image->index] = upload_vk_image(upload_data, repeat_texture);	
+	
+	ri.Printf( PRINT_WARNING, "R_CreateImage: %s image, index : %i\n", image->imgName, image->index );
+	GL_Bind(image);
 	
 	if (isLightmap) {
 		GL_SelectTexture( 0 );

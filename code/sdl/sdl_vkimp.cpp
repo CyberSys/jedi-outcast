@@ -120,7 +120,7 @@ VKimp_LogComment
 */
 void VKimp_LogComment( char *comment )
 {
-    ri.Printf( PRINT_ALL, "VKimp_LogComment: %s\n", comment );
+    //ri.Printf( PRINT_ALL, "VKimp_LogComment: %s\n", comment );
 }
 
 
@@ -536,12 +536,13 @@ static int VKimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 
 		//opengl_context = GLimp_GetCurrentContext();
 
-		ri.Printf( PRINT_ALL, "Using %d color bits, %d depth, %d stencil display.\n",
-				glConfig.colorBits, glConfig.depthBits, glConfig.stencilBits );
-
 		glConfig.colorBits = testColorBits;
 		glConfig.depthBits = testDepthBits;
 		glConfig.stencilBits = testStencilBits;
+		
+		ri.Printf( PRINT_ALL, "Using %d color bits, %d depth, %d stencil display.\n",
+				glConfig.colorBits, glConfig.depthBits, glConfig.stencilBits );
+
 		break;
 	}
 

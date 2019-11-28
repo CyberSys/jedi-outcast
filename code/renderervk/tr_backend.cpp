@@ -33,7 +33,7 @@ void GL_Bind( image_t *image ) {
 	} else {
 		texnum = image->texnum;
 	}
-
+	
 	if ( r_nobind->integer && tr.dlightImage ) {		// performance evaluation option
 		texnum = tr.dlightImage->texnum;
 	}
