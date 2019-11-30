@@ -20,7 +20,6 @@ Used for cinematics.
 void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *data, int iClient, qboolean bDirty ) 
 {
 	R_SyncRenderThread();
-    ri.Printf( PRINT_WARNING, "RE_StretchRaw: %i client\n", iClient );
 //===========
 	// Q3Final added this:
 	// we definately want to sync every frame for the cinematics
@@ -200,16 +199,17 @@ void RE_GetScreenShot(byte *buffer, int w, int h)
 	int			r, g, b;
 	float		xScale, yScale;
 	int			xx, yy;
-	//TODO: Implement
-/*
+
     //qglFinish();	// try and fix broken Radeon cards (7500 & 8500) that don't read screen pixels properly
 
-	source = (byte *)ri.Malloc(glConfig.vidWidth * glConfig.vidHeight * 3, TAG_TEMP_WORKSPACE, qfalse);
+	source = (byte *)ri.Malloc(glConfig.vidWidth * glConfig.vidHeight * 4, TAG_TEMP_WORKSPACE, qfalse);
+	
 	if(!source)
 	{
 		return;
 	}
 	//qglReadPixels (0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGB, GL_UNSIGNED_BYTE, source ); 
+	vk_read_pixels(source);
 	
 	assert (w == h);
 	int count = 0;
@@ -221,7 +221,7 @@ void RE_GetScreenShot(byte *buffer, int w, int h)
 			r = g = b = 0;
 			for ( yy = 0 ; yy < 3 ; yy++ ) {
 				for ( xx = 0 ; xx < 4 ; xx++ ) {
-					src = source + 3 * ( glConfig.vidWidth * (int)( (y*3+yy)*yScale ) + (int)( (x*4+xx)*xScale ) );
+					src = source + 4 * ( glConfig.vidWidth * (int)( (y*3+yy)*yScale ) + (int)( (x*4+xx)*xScale ) );
 					r += src[0];
 					g += src[1];
 					b += src[2];
@@ -236,7 +236,7 @@ void RE_GetScreenShot(byte *buffer, int w, int h)
 	}
 
 	assert(count == w * h);
-	ri.Free(source);*/
+	ri.Free(source);
 }
 
 #endif

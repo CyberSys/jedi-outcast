@@ -820,19 +820,19 @@ const void *RB_RotatePic ( const void *data )
 	image = shader->stages[0]->bundle[0].image[0];
 
 	if ( image ) {
-	/*
+	
 		if ( !backEnd.projection2D ) {
 			RB_SetGL2D();
 		}
 
-		qglColor4ubv( backEnd.color2D );
+	/*	qglColor4ubv( backEnd.color2D );
 		qglPushMatrix();
 
 		qglTranslatef(cmd->x+cmd->w,cmd->y,0);
 		qglRotatef(cmd->a, 0.0, 0.0, 1.0);
-		
+		*/
 		GL_Bind( image );
-		qglBegin (GL_QUADS);
+		/*qglBegin (GL_QUADS);
 		qglTexCoord2f( cmd->s1, cmd->t1);
 		qglVertex2f( -cmd->w, 0 );
 		qglTexCoord2f( cmd->s2, cmd->t1 );
@@ -870,7 +870,7 @@ const void *RB_RotatePic2 ( const void *data )
 
 		if ( image ) 
 		{
-		/*
+		
 			if ( !backEnd.projection2D ) 
 			{
 				RB_SetGL2D();
@@ -879,15 +879,15 @@ const void *RB_RotatePic2 ( const void *data )
 			// Get our current blend mode, etc.
 			GL_State( shader->stages[0]->stateBits );
 
-			qglColor4ubv( backEnd.color2D );
+		/*	qglColor4ubv( backEnd.color2D );
 			qglPushMatrix();
 
 			// rotation point is going to be around the center of the passed in coordinates
 			qglTranslatef( cmd->x, cmd->y, 0 );
-			qglRotatef( cmd->a, 0.0, 0.0, 1.0 );
+			qglRotatef( cmd->a, 0.0, 0.0, 1.0 );*/
 			
 			GL_Bind( image );
-			qglBegin( GL_QUADS );
+			/*qglBegin( GL_QUADS );
 				qglTexCoord2f( cmd->s1, cmd->t1);
 				qglVertex2f( -cmd->w * 0.5f, -cmd->h * 0.5f );
 

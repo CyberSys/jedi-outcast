@@ -253,6 +253,7 @@ static void InitVulkan( void )
 	{
         VKimp_Init();
         vk_initialize();
+        GfxInfo_f();
 	}
 
 	// init command buffers and SMP
@@ -396,9 +397,8 @@ R_TakeScreenshot
 //
 void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 	byte		*buffer;
-	int			i, c, temp;
-	//TODO:Implement vk
-/*
+	int			i, j, c, temp;
+
 	qboolean bSaveAsJPG = !Q_strnicmp(&fileName[strlen(fileName)-4],".jpg",4);
 
 	if (bSaveAsJPG)
@@ -406,8 +406,8 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 		// JPG saver expects to be fed RGBA data, though it presumably ignores 'A'...
 		//
 		buffer = (unsigned char *) ri.Malloc(glConfig.vidWidth*glConfig.vidHeight*4, TAG_TEMP_WORKSPACE, qfalse);
-		qglReadPixels( x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
-
+		//qglReadPixels( x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
+        vk_read_pixels(buffer);
 		// gamma correct
 		if ( tr.overbrightBits>0 && glConfig.deviceSupportsGamma ) {
 			R_GammaCorrect( buffer, glConfig.vidWidth * glConfig.vidHeight * 4 );
@@ -420,6 +420,7 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 		// TGA...
 		//
 		buffer = (unsigned char *) ri.Malloc(glConfig.vidWidth*glConfig.vidHeight*3 + 18, TAG_TEMP_WORKSPACE, qfalse);
+		byte *pixbuffer = (unsigned char *) ri.Malloc(glConfig.vidWidth*glConfig.vidHeight*4, TAG_TEMP_WORKSPACE, qfalse);
 		memset (buffer, 0, 18);
 		buffer[2] = 2;		// uncompressed type
 		buffer[12] = width & 255;
@@ -428,14 +429,14 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 		buffer[15] = height >> 8;
 		buffer[16] = 24;	// pixel size
 
-		qglReadPixels( x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 );
-
+		//qglReadPixels( x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 );
+        vk_read_pixels(pixbuffer);
 		// swap rgb to bgr
 		c = 18 + width * height * 3;
-		for (i=18 ; i<c ; i+=3) {
-			temp = buffer[i];
-			buffer[i] = buffer[i+2];
-			buffer[i+2] = temp;
+		for (i=18, j=0 ; i<c ; i+=3, j+=4) {
+			buffer[i] = pixbuffer[j+2];
+			buffer[i+1] = pixbuffer[j+1];
+			buffer[i+2] = pixbuffer[j];
 		}
 
 		// gamma correct
@@ -443,9 +444,10 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 			R_GammaCorrect( buffer + 18, glConfig.vidWidth * glConfig.vidHeight * 3 );
 		}
 		ri.FS_WriteFile( fileName, buffer, c );
+		ri.Free( pixbuffer );
 	}
 
-	ri.Free( buffer );*/
+	ri.Free( buffer );
 }
 
 /*

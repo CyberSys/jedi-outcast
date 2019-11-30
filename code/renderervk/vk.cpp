@@ -1650,6 +1650,8 @@ static VkPipeline create_pipeline(const Vk_Pipeline_Def& def) {
 		specialization_data.alpha_test_func = 2;
 	else if (def.state_bits & GLS_ATEST_GE_80)
 		specialization_data.alpha_test_func = 3;
+	else if (def.state_bits & GLS_ATEST_GE_C0) //TODO: Implement this alpha test
+		specialization_data.alpha_test_func = 3;
 	else
 		ri.Error(ERR_DROP, "create_pipeline: invalid alpha test state bits\n");
 
@@ -2153,8 +2155,9 @@ static VkRect2D get_scissor_rect() {
 
 static void get_mvp_transform(float* mvp) {
 	if (backEnd.projection2D) {
-		float mvp0 = 2.0f / glConfig.vidWidth;
-		float mvp5 = 2.0f / glConfig.vidHeight;
+        //2D stuff sent by UI is in a 640x480 virtual screen.
+		float mvp0 = 2.0f / 640.0f; //2.0f / glConfig.vidWidth; 
+		float mvp5 = 2.0f / 480.0f; //2.0f / glConfig.vidHeight;
 
 		mvp[0]  =  mvp0; mvp[1]  =  0.0f; mvp[2]  = 0.0f; mvp[3]  = 0.0f;
 		mvp[4]  =  0.0f; mvp[5]  =  mvp5; mvp[6]  = 0.0f; mvp[7]  = 0.0f;
@@ -2367,8 +2370,6 @@ void vk_shade_geometry(VkPipeline pipeline, bool multitexture, Vk_Depth_Range de
 }
 
 void vk_begin_frame() {
-	if (!vk.active)
-		return;
 
 	VK_CHECK(vkAcquireNextImageKHR(vk.device, vk.swapchain, UINT64_MAX, vk.image_acquired, VK_NULL_HANDLE, &vk.swapchain_image_index));
 
@@ -2417,8 +2418,6 @@ void vk_begin_frame() {
 }
 
 void vk_end_frame() {
-	if (!vk.active)
-		return;
 
 	vkCmdEndRenderPass(vk.command_buffer);
 	VK_CHECK(vkEndCommandBuffer(vk.command_buffer));

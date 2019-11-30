@@ -1304,7 +1304,6 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 	glState.currenttextures[glState.currenttmu] = 0;
 	vk_world.images[image->index] = upload_vk_image(upload_data, repeat_texture);	
 	
-	ri.Printf( PRINT_WARNING, "R_CreateImage: %s image, index : %i\n", image->imgName, image->index );
 	GL_Bind(image);
 	
 	if (isLightmap) {
