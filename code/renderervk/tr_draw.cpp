@@ -20,6 +20,7 @@ Used for cinematics.
 void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *data, int iClient, qboolean bDirty ) 
 {
 	R_SyncRenderThread();
+	int		numVerts, numIndexes;
 //===========
 	// Q3Final added this:
 	// we definately want to sync every frame for the cinematics
@@ -97,12 +98,70 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 		}
 	}
 	
+	tr.cinematicShader->stages[0]->bundle[0].image[0] = tr.scratchImage[iClient];
+	//RE_StretchPic(x, y, w, h,  0.5f / cols, 0.5f / rows,  1.0f - 0.5f / cols, 1.0f - 0.5 / rows, tr.cinematicShader->index);
+	
+	
+    if ( tr.cinematicShader != tess.shader ) {
+		if ( tess.numIndexes ) {
+			RB_EndSurface();	//this might change culling and other states
+		}
+		backEnd.currentEntity = &backEnd.entity2D;
+		RB_BeginSurface( tr.cinematicShader, 0 );
+	}
+	
 	GL_Bind( tr.scratchImage[iClient] );
-
-/*
+	
 	extern void	RB_SetGL2D (void);
 	RB_SetGL2D();	
+	
+	RB_CHECKOVERFLOW( 4, 6 );
+	numVerts = tess.numVertexes;
+	numIndexes = tess.numIndexes;
 
+	tess.numVertexes += 4;
+	tess.numIndexes += 6;
+
+	tess.indexes[ numIndexes ] = numVerts + 3;
+	tess.indexes[ numIndexes + 1 ] = numVerts + 0;
+	tess.indexes[ numIndexes + 2 ] = numVerts + 2;
+	tess.indexes[ numIndexes + 3 ] = numVerts + 2;
+	tess.indexes[ numIndexes + 4 ] = numVerts + 0;
+	tess.indexes[ numIndexes + 5 ] = numVerts + 1;
+
+	*(int *)tess.vertexColors[ numVerts ] =
+		*(int *)tess.vertexColors[ numVerts + 1 ] =
+		*(int *)tess.vertexColors[ numVerts + 2 ] =
+		*(int *)tess.vertexColors[ numVerts + 3 ] = tr.identityLight;//*(int *)backEnd.color2D;
+
+	tess.xyz[ numVerts ][0] = x;
+	tess.xyz[ numVerts ][1] = y;
+	tess.xyz[ numVerts ][2] = 0;
+
+	tess.texCoords[ numVerts ][0][0] = 0;
+	tess.texCoords[ numVerts ][0][1] = 0;
+
+	tess.xyz[ numVerts + 1 ][0] = x + w;
+	tess.xyz[ numVerts + 1 ][1] = y;
+	tess.xyz[ numVerts + 1 ][2] = 0;
+
+	tess.texCoords[ numVerts + 1 ][0][0] = 1;
+	tess.texCoords[ numVerts + 1 ][0][1] = 0;
+
+	tess.xyz[ numVerts + 2 ][0] = x + w;
+	tess.xyz[ numVerts + 2 ][1] = y + h;
+	tess.xyz[ numVerts + 2 ][2] = 0;
+
+	tess.texCoords[ numVerts + 2 ][0][0] = 1;
+	tess.texCoords[ numVerts + 2 ][0][1] = 1;
+
+	tess.xyz[ numVerts + 3 ][0] = x;
+	tess.xyz[ numVerts + 3 ][1] = y + h;
+	tess.xyz[ numVerts + 3 ][2] = 0;
+
+	tess.texCoords[ numVerts + 3 ][0][0] = 0;
+	tess.texCoords[ numVerts + 3 ][0][1] = 1;
+/*
 	qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
 
 	qglBegin (GL_QUADS);
