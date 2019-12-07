@@ -22,7 +22,6 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	R_SyncRenderThread();
 	int		numVerts, numIndexes;
 	bool    inverted = false;
-	ri.Printf( PRINT_WARNING, "RE_StretchRaw: x %i y %i w %i h %i cols %i rows %i\n", x, y, w, h, cols, rows );
 	
 	//Upside down bitmap
 	if(h < 0){ 
