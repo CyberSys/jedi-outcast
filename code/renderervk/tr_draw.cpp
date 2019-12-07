@@ -21,6 +21,15 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 {
 	R_SyncRenderThread();
 	int		numVerts, numIndexes;
+	bool    inverted = false;
+	ri.Printf( PRINT_WARNING, "RE_StretchRaw: x %i y %i w %i h %i cols %i rows %i\n", x, y, w, h, cols, rows );
+	
+	//Upside down bitmap
+	if(h < 0){ 
+        h = h * -1;
+        y = y - h;
+        inverted = true;
+	}
 //===========
 	// Q3Final added this:
 	// we definately want to sync every frame for the cinematics
@@ -101,7 +110,6 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	tr.cinematicShader->stages[0]->bundle[0].image[0] = tr.scratchImage[iClient];
 	//RE_StretchPic(x, y, w, h,  0.5f / cols, 0.5f / rows,  1.0f - 0.5f / cols, 1.0f - 0.5 / rows, tr.cinematicShader->index);
 	
-	
     if ( tr.cinematicShader != tess.shader ) {
 		if ( tess.numIndexes ) {
 			RB_EndSurface();	//this might change culling and other states
@@ -139,28 +147,28 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	tess.xyz[ numVerts ][2] = 0;
 
 	tess.texCoords[ numVerts ][0][0] = 0;
-	tess.texCoords[ numVerts ][0][1] = 0;
+	tess.texCoords[ numVerts ][0][1] = inverted ? 1 : 0;
 
 	tess.xyz[ numVerts + 1 ][0] = x + w;
 	tess.xyz[ numVerts + 1 ][1] = y;
 	tess.xyz[ numVerts + 1 ][2] = 0;
 
 	tess.texCoords[ numVerts + 1 ][0][0] = 1;
-	tess.texCoords[ numVerts + 1 ][0][1] = 0;
+	tess.texCoords[ numVerts + 1 ][0][1] = inverted ? 1 : 0;
 
 	tess.xyz[ numVerts + 2 ][0] = x + w;
 	tess.xyz[ numVerts + 2 ][1] = y + h;
 	tess.xyz[ numVerts + 2 ][2] = 0;
 
 	tess.texCoords[ numVerts + 2 ][0][0] = 1;
-	tess.texCoords[ numVerts + 2 ][0][1] = 1;
+	tess.texCoords[ numVerts + 2 ][0][1] = inverted ? 0 : 1;
 
 	tess.xyz[ numVerts + 3 ][0] = x;
 	tess.xyz[ numVerts + 3 ][1] = y + h;
 	tess.xyz[ numVerts + 3 ][2] = 0;
 
 	tess.texCoords[ numVerts + 3 ][0][0] = 0;
-	tess.texCoords[ numVerts + 3 ][0][1] = 1;
+	tess.texCoords[ numVerts + 3 ][0][1] = inverted ? 0 : 1;
 /*
 	qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
 
