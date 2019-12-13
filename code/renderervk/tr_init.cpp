@@ -1327,15 +1327,12 @@ void RE_Shutdown( qboolean destroyWindow ) {
 	if ( tr.registered ) {
 		R_SyncRenderThread();
 		R_ShutdownCommandBuffers();
-		if (destroyWindow)
-		{
-			R_DeleteTextures();	// only do this for vid_restart now, not during things like map load
-		}
+		R_DeleteTextures();
+		vk_release_resources(); //Reset vulkan
 	}
-
+    
 	// shut down platform specific Vulkan stuff
     if (destroyWindow) {
-        vk_release_resources();
         vk_shutdown();
         VKimp_Shutdown();
     }
