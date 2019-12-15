@@ -215,14 +215,13 @@ void R_TransformEachSurface( const mdxmSurface_t *surface, vec3_t scale, CMiniHe
 	int				 j, k;
 	mdxmVertex_t 	*v;
 	float			*TransformedVerts;
-
 	//
 	// deform the vertexes by the lerped bones
 	//
 	int *piBoneReferences = (int*) ((byte*)surface + surface->ofsBoneReferences);
    
 	// alloc some space for the transformed verts to get put in
-	TransformedVerts = (float *)G2VertSpace->MiniHeapAlloc(surface->numVerts * 5 * 4);
+	TransformedVerts = (float *)G2VertSpace->MiniHeapAlloc(surface->numVerts * 5 * sizeof(float));
 	TransformedVertsArray[surface->thisSurfaceIndex] = (size_t)TransformedVerts;
 	if (!TransformedVerts)
 	{
@@ -331,10 +330,8 @@ void G2_TransformSurfaces(int surfaceNum, surfaceInfo_v &rootSList,
 	const mdxmSurface_t			*surface = (mdxmSurface_t *)G2_FindSurface(currentModel, surfaceNum, lod);
 	const mdxmHierarchyOffsets_t	*surfIndexes = (mdxmHierarchyOffsets_t *)((byte *)currentModel->mdxm + sizeof(mdxmHeader_t));
 	const mdxmSurfHierarchy_t		*surfInfo = (mdxmSurfHierarchy_t *)((byte *)surfIndexes + surfIndexes->offsets[surface->thisSurfaceIndex]);
-	
 	// see if we have an override surface in the surface list
 	const surfaceInfo_t	*surfOverride = G2_FindOverrideSurface(surfaceNum, rootSList);
-
 	// really, we should use the default flags for this surface unless it's been overriden
 	int offFlags = surfInfo->flags;
 
@@ -348,7 +345,6 @@ void G2_TransformSurfaces(int surfaceNum, surfaceInfo_v &rootSList,
 
 		R_TransformEachSurface(surface, scale, G2VertSpace, TransformedVertArray, boneCache);
 	}
-
 	// if we are turning off all descendants, then stop this recursion now
 	if (offFlags & G2SURFACEFLAG_NODESCENDANTS)
 	{
@@ -402,13 +398,13 @@ void G2_TransformModel(CGhoul2Info_v &ghoul2, const int frameNum, vec3_t scale, 
 		lod = G2_DecideTraceLod(g, useLod);
 
 		// give us space for the transformed vertex array to be put in
-		ghoul2[i].mTransformedVertsArray = (size_t*)G2VertSpace->MiniHeapAlloc(g.currentModel->mdxm->numSurfaces * 4);
+		ghoul2[i].mTransformedVertsArray = (size_t*)G2VertSpace->MiniHeapAlloc(g.currentModel->mdxm->numSurfaces * sizeof(size_t));
 		if (!g.mTransformedVertsArray)
 		{
 			Com_Error(ERR_DROP, "Ran out of transform space for Ghoul2 Models. Adjust MiniHeapSize in SV_SpawnServer.\n");
 		}
 
-		memset(g.mTransformedVertsArray, 0,(g.currentModel->mdxm->numSurfaces * 4)); 
+		memset(g.mTransformedVertsArray, 0,(g.currentModel->mdxm->numSurfaces * sizeof(size_t))); 
 
 		G2_FindOverrideSurface(-1,g.mSlist); //reset the quick surface override lookup;
 		// recursively call the model surface transform
@@ -468,8 +464,7 @@ qboolean G2_SegmentTriangleTest( const vec3_t start, const vec3_t end,
 {
 	static const float tiny=1E-10f;
 	vec3_t returnedNormalT;
-	vec3_t edgeAC;
-
+	vec3_t edgeAC;    
 	VectorSubtract(C, A, edgeAC);
 	VectorSubtract(B, A, returnedNormalT); 
 
@@ -536,7 +531,6 @@ qboolean G2_SegmentTriangleTest( const vec3_t start, const vec3_t end,
 static bool G2_TracePolys(const mdxmSurface_t *surface, const mdxmSurfHierarchy_t *surfInfo, CTraceSurface &TS)
 {
 	int				j, numTris;
-	
 	// whip through and actually transform each vertex
 	const mdxmTriangle_t *tris = (mdxmTriangle_t *) ((byte *)surface + surface->ofsTriangles);
 	const float *verts = (float *)TS.TransformedVertsArray[surface->thisSurfaceIndex];
@@ -897,7 +891,6 @@ static void G2_TraceSurfaces(CTraceSurface &TS)
 	{
 		offFlags = surfOverride->offFlags;
 	}
-
 	// if this surface is not off, try to hit it
 	if (!offFlags)
 	{
@@ -935,7 +928,6 @@ static void G2_TraceSurfaces(CTraceSurface &TS)
 	{
 		return;
 	}
-
 	// now recursively call for the children
 	for (i=0; i< surfInfo->numChildren && !TS.hitOne; i++)
 	{
@@ -988,7 +980,6 @@ void G2_TraceModels(CGhoul2Info_v &ghoul2, vec3_t rayStart, vec3_t rayEnd, CColl
 
 		//reset the quick surface override lookup
 		G2_FindOverrideSurface(-1, ghoul2[i].mSlist); 
-
 		CTraceSurface TS(ghoul2[i].mSurfaceRoot, ghoul2[i].mSlist,  ghoul2[i].currentModel, lod, rayStart, rayEnd, collRecMap, entNum, i, skin, cust_shader, ghoul2[i].mTransformedVertsArray, eG2TraceType, fRadius);
 		// start the surface recursion loop
 		G2_TraceSurfaces(TS);
