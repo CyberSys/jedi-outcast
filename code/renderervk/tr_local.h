@@ -47,6 +47,7 @@ typedef struct dlight_s {
 	float	radius;
 
 	vec3_t	transformed;		// origin in local coordinate system
+	int		additive;			// texture detail is lost tho when the lightmap is dark
 } dlight_t;
 
 

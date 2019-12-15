@@ -1140,10 +1140,10 @@ static void IN_ProcessEvents( void )
 					Sys_QueEvent( 0, SE_KEY, key, qtrue, 0, NULL );
                 if( character )
                     Sys_QueEvent( 0, SE_CHAR, *character, 0, 0, NULL );
-				/*if( key == A_BACKSPACE )
+				if( key == A_BACKSPACE )
 					Sys_QueEvent( 0, SE_CHAR, CTRL('h'), 0, 0, NULL );
 				else if( kg.keys[A_CTRL].down && key >= 'a' && key <= 'z' )
-					Sys_QueEvent( 0, SE_CHAR, CTRL(key), 0, 0, NULL );*/
+					Sys_QueEvent( 0, SE_CHAR, CTRL(key), 0, 0, NULL );
 
 				lastKeyDown = key;
 				break;
