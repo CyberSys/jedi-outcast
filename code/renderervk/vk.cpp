@@ -599,6 +599,7 @@ static void create_device() {
 		Com_Memset(&features, 0, sizeof(features));
 		features.shaderClipDistance = VK_TRUE;
 		features.fillModeNonSolid = VK_TRUE;
+        features.samplerAnisotropy = VK_TRUE;
 
 		VkDeviceCreateInfo device_desc;
 		device_desc.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -2035,8 +2036,15 @@ VkSampler vk_find_sampler(const Vk_Sampler_Def& def) {
 	desc.addressModeV = address_mode;
 	desc.addressModeW = address_mode;
 	desc.mipLodBias = 0.0f;
-	desc.anisotropyEnable = VK_FALSE;
-	desc.maxAnisotropy = 1;
+	
+	if (r_ext_texture_filter_anisotropic->integer) {
+        desc.anisotropyEnable = VK_TRUE;
+        desc.maxAnisotropy = 16;
+	} else {
+        desc.anisotropyEnable = VK_FALSE;
+        desc.maxAnisotropy = 1;
+	}
+	
 	desc.compareEnable = VK_FALSE;
 	desc.compareOp = VK_COMPARE_OP_ALWAYS;
 	desc.minLod = 0.0f;

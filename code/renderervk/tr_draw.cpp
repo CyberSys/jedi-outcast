@@ -518,8 +518,72 @@ static void RE_Blit(float fX0, float fY0, float fX1, float fY1, float fX2, float
 	//
 	// some junk they had at the top of other StretchRaw code...
 	//
+	int		numVerts, numIndexes;
 	R_SyncRenderThread();
-	//TODO: Implement
+
+    tr.cinematicShader->stages[0]->bundle[0].image[0] = pImage;
+	
+    if ( tr.cinematicShader != tess.shader ) {
+		if ( tess.numIndexes ) {
+			RB_EndSurface();	//this might change culling and other states
+		}
+		backEnd.currentEntity = &backEnd.entity2D;
+		RB_BeginSurface( tr.cinematicShader, 0 );
+	}
+	
+	GL_Bind( pImage );
+	GL_State(iGLState);
+	
+	extern void	RB_SetGL2D (void);
+	RB_SetGL2D();	
+	
+	RB_CHECKOVERFLOW( 4, 6 );
+	numVerts = tess.numVertexes;
+	numIndexes = tess.numIndexes;
+
+	tess.numVertexes += 4;
+	tess.numIndexes += 6;
+
+	tess.indexes[ numIndexes ] = numVerts + 3;
+	tess.indexes[ numIndexes + 1 ] = numVerts + 0;
+	tess.indexes[ numIndexes + 2 ] = numVerts + 2;
+	tess.indexes[ numIndexes + 3 ] = numVerts + 2;
+	tess.indexes[ numIndexes + 4 ] = numVerts + 0;
+	tess.indexes[ numIndexes + 5 ] = numVerts + 1;
+
+	*(int *)tess.vertexColors[ numVerts ] =
+		*(int *)tess.vertexColors[ numVerts + 1 ] =
+		*(int *)tess.vertexColors[ numVerts + 2 ] =
+		*(int *)tess.vertexColors[ numVerts + 3 ] = tr.identityLight;//*(int *)backEnd.color2D;
+
+	tess.xyz[ numVerts ][0] = fX0;
+	tess.xyz[ numVerts ][1] = fY0;
+	tess.xyz[ numVerts ][2] = 0;
+
+	tess.texCoords[ numVerts ][0][0] = 0;
+	tess.texCoords[ numVerts ][0][1] = 0;
+
+	tess.xyz[ numVerts + 1 ][0] = fX1;
+	tess.xyz[ numVerts + 1 ][1] = fY1;
+	tess.xyz[ numVerts + 1 ][2] = 0;
+
+	tess.texCoords[ numVerts + 1 ][0][0] = 1;
+	tess.texCoords[ numVerts + 1 ][0][1] = 0;
+
+	tess.xyz[ numVerts + 2 ][0] = fX2;
+	tess.xyz[ numVerts + 2 ][1] = fY2;
+	tess.xyz[ numVerts + 2 ][2] = 0;
+
+	tess.texCoords[ numVerts + 2 ][0][0] = 1;
+	tess.texCoords[ numVerts + 2 ][0][1] = 1;
+
+	tess.xyz[ numVerts + 3 ][0] = fX3;
+	tess.xyz[ numVerts + 3 ][1] = fY3;
+	tess.xyz[ numVerts + 3 ][2] = 0;
+
+	tess.texCoords[ numVerts + 3 ][0][0] = 0;
+	tess.texCoords[ numVerts + 3 ][0][1] = 1;
+	
 	/*
 	qglFinish();
 
@@ -575,8 +639,6 @@ static void RE_KillDissolve(void)
 #define iSAFETY_SPRITE_OVERLAP 2	// #pixels to overlap blit region by, in case some drivers leave onscreen seams
 qboolean RE_ProcessDissolve(void)
 {
-    return qfalse;
-    //TODO implement in vulkan
 	if (Dissolve.iStartTime)
 	{
 		if (Dissolve.bTouchNeeded)
@@ -865,8 +927,6 @@ qboolean RE_InitDissolve(qboolean bForceCircularExtroWipe)
 {
 //	ri.Printf( PRINT_ALL, "RE_InitDissolve()\n");
 	qboolean bReturn = qfalse;
-	return bReturn;
-	//TODO: implement in vk
 
 	if (//Dissolve.iStartTime == 0	// no point in interruping an existing one
 		//&&
@@ -885,6 +945,7 @@ qboolean RE_InitDissolve(qboolean bForceCircularExtroWipe)
 			// read current screen image...  (GL_RGBA should work even on 3DFX in that the RGB parts will be valid at least)
 			//
 			//qglReadPixels (0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, pBuffer );
+			vk_read_pixels(pBuffer);
 			//
 			// now expand the pic over the top of itself so that it has a stride value of {PowerOf2(glConfig.vidWidth)}
 			//	(for GL power-of-2 rules)
