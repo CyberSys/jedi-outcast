@@ -40,6 +40,44 @@ long myftol( float f );
 #define TEX_ADD         2
 #define TEX_DECAL       3
 
+#define VectorCopy4(a,b)		((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
+#define VectorSet4(v,x,y,z,w)	((v)[0]=(x),(v)[1]=(y),(v)[2]=(z),(v)[3]=(w))
+
+typedef enum
+{
+	IMGTYPE_COLORALPHA, // for color, lightmap, diffuse, and specular
+	IMGTYPE_NORMAL,
+	IMGTYPE_NORMALHEIGHT,
+	IMGTYPE_DELUXE, // normals are swizzled, deluxe are not
+} imgType_t;
+
+
+enum
+{
+	LIGHTDEF_USE_LIGHTMAP        = 0x0001,
+	LIGHTDEF_USE_LIGHT_VECTOR    = 0x0002,
+	LIGHTDEF_USE_LIGHT_VERTEX    = 0x0003,
+	LIGHTDEF_LIGHTTYPE_MASK      = 0x0003,
+	LIGHTDEF_ENTITY_VERTEX_ANIMATION = 0x0004,
+	LIGHTDEF_USE_TCGEN_AND_TCMOD = 0x0008,
+	LIGHTDEF_USE_PARALLAXMAP     = 0x0010,
+	LIGHTDEF_USE_SHADOWMAP       = 0x0020,
+	LIGHTDEF_ENTITY_BONE_ANIMATION = 0x0040,
+	LIGHTDEF_ALL                 = 0x007F,
+	LIGHTDEF_COUNT               = 0x0080
+};
+
+typedef enum
+{
+	IMGFLAG_NONE           = 0x0000,
+	IMGFLAG_MIPMAP         = 0x0001,
+	IMGFLAG_PICMIP         = 0x0002,
+	IMGFLAG_CUBEMAP        = 0x0004,
+	IMGFLAG_NO_COMPRESSION = 0x0010,
+	IMGFLAG_NOLIGHTSCALE   = 0x0020,
+	IMGFLAG_CLAMPTOEDGE    = 0x0040,
+	IMGFLAG_GENNORMALMAP   = 0x0080,
+} imgFlags_t;
 
 typedef struct dlight_s {
 	vec3_t	origin;
@@ -130,6 +168,9 @@ typedef struct image_s {
 	int			wrapClampMode;		// GL_CLAMP or GL_REPEAT
 
     int         index; // this image == tr.images[index]
+    imgType_t   type;
+    imgFlags_t  flags;
+    
 	int			iLastLevelUsedOn;
 } image_t;
 
@@ -227,6 +268,8 @@ typedef enum {
 	CGEN_ONE_MINUS_ENTITY,	// grabbed from 1 - entity.modulate
 	CGEN_EXACT_VERTEX,		// tess.vertexColors
 	CGEN_VERTEX,			// tess.vertexColors * tr.identityLight
+	CGEN_EXACT_VERTEX_LIT,	// like CGEN_EXACT_VERTEX but takes a light direction from the lightgrid
+	CGEN_VERTEX_LIT,		// like CGEN_VERTEX but takes a light direction from the lightgrid
 	CGEN_ONE_MINUS_VERTEX,
 	CGEN_WAVEFORM,			// programmatically generated
 	CGEN_LIGHTING_DIFFUSE,
@@ -359,6 +402,35 @@ typedef struct {
 	int				videoMapHandle;
 } textureBundle_t;
 
+enum
+{
+	TB_COLORMAP    = 0,
+	TB_DIFFUSEMAP  = 0,
+	TB_LIGHTMAP    = 1,
+	TB_LEVELSMAP   = 1,
+	TB_SHADOWMAP3  = 1,
+	TB_NORMALMAP   = 2,
+	TB_DELUXEMAP   = 3,
+	TB_SHADOWMAP2  = 3,
+	TB_SPECULARMAP = 4,
+	TB_SHADOWMAP   = 5,
+	TB_CUBEMAP     = 6,
+	TB_SHADOWMAP4  = 6,
+	NUM_TEXTURE_BUNDLES = 7
+};
+
+typedef enum
+{
+	// material shader stage types
+	ST_COLORMAP = 0,			// vanilla Q3A style shader treatening
+	ST_DIFFUSEMAP = 0,          // treat color and diffusemap the same
+	ST_NORMALMAP,
+	ST_NORMALPARALLAXMAP,
+	ST_SPECULARMAP,
+	ST_GLSL
+} stageType_t;
+
+
 #define NUM_TEXTURE_BUNDLES 2
 
 typedef struct {
@@ -386,7 +458,12 @@ typedef struct {
     VkPipeline		vk_pipeline = VK_NULL_HANDLE;
 	VkPipeline		vk_portal_pipeline = VK_NULL_HANDLE;
 	VkPipeline		vk_mirror_pipeline = VK_NULL_HANDLE;
-
+	
+    stageType_t     type;
+	int glslShaderIndex;
+	
+	vec4_t normalScale;
+	vec4_t specularScale;
 } shaderStage_t;
 
 struct shaderCommands_s;
@@ -1175,6 +1252,16 @@ extern	cvar_t	*r_lodCurveError;
 extern	cvar_t	*r_smp;
 extern	cvar_t	*r_showSmp;
 extern	cvar_t	*r_skipBackEnd;
+
+extern  cvar_t  *r_normalMapping;
+extern  cvar_t  *r_specularMapping;
+extern  cvar_t  *r_deluxeMapping;
+extern  cvar_t  *r_parallaxMapping;
+extern  cvar_t  *r_baseNormalX;
+extern  cvar_t  *r_baseNormalY;
+extern  cvar_t  *r_baseParallax;
+extern  cvar_t  *r_pbr;
+extern  cvar_t  *r_sunlightMode;
 
 extern	cvar_t	*r_ignoreGLErrors;
 
