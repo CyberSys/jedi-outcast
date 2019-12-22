@@ -1169,7 +1169,7 @@ void vk_initialize() {
 	// Shader modules.
 	//
 	{
-		auto create_shader_module = [](uint8_t* bytes, int count) {
+		auto create_shader_module = [](const uint8_t* bytes, const int count) {
 			if (count % 4 != 0) {
 				ri.Error(ERR_FATAL, "Vulkan: SPIR-V binary buffer size is not multiple of 4");
 			}
@@ -1186,32 +1186,32 @@ void vk_initialize() {
 		};
 
 		extern unsigned char single_texture_vert_spv[];
-		extern long long single_texture_vert_spv_size;
-		vk.single_texture_vs = create_shader_module(single_texture_vert_spv, single_texture_vert_spv_size);
+		extern unsigned long single_texture_vert_spv_length;
+		vk.single_texture_vs = create_shader_module(single_texture_vert_spv, single_texture_vert_spv_length);
 
 		extern unsigned char single_texture_clipping_plane_vert_spv[];
-		extern long long single_texture_clipping_plane_vert_spv_size;
-		vk.single_texture_clipping_plane_vs = create_shader_module(single_texture_clipping_plane_vert_spv, single_texture_clipping_plane_vert_spv_size);
+		extern unsigned long single_texture_clipping_plane_vert_spv_length;
+		vk.single_texture_clipping_plane_vs = create_shader_module(single_texture_clipping_plane_vert_spv, single_texture_clipping_plane_vert_spv_length);
 
 		extern unsigned char single_texture_frag_spv[];
-		extern long long single_texture_frag_spv_size;
-		vk.single_texture_fs = create_shader_module(single_texture_frag_spv, single_texture_frag_spv_size);
+		extern unsigned long single_texture_frag_spv_length;
+		vk.single_texture_fs = create_shader_module(single_texture_frag_spv, single_texture_frag_spv_length);
 
 		extern unsigned char multi_texture_vert_spv[];
-		extern long long multi_texture_vert_spv_size;
-		vk.multi_texture_vs = create_shader_module(multi_texture_vert_spv, multi_texture_vert_spv_size);
+		extern unsigned long multi_texture_vert_spv_length;
+		vk.multi_texture_vs = create_shader_module(multi_texture_vert_spv, multi_texture_vert_spv_length);
 
 		extern unsigned char multi_texture_clipping_plane_vert_spv[];
-		extern long long multi_texture_clipping_plane_vert_spv_size;
-		vk.multi_texture_clipping_plane_vs = create_shader_module(multi_texture_clipping_plane_vert_spv, multi_texture_clipping_plane_vert_spv_size);
+		extern unsigned long multi_texture_clipping_plane_vert_spv_length;
+		vk.multi_texture_clipping_plane_vs = create_shader_module(multi_texture_clipping_plane_vert_spv, multi_texture_clipping_plane_vert_spv_length);
 
 		extern unsigned char multi_texture_mul_frag_spv[];
-		extern long long multi_texture_mul_frag_spv_size;
-		vk.multi_texture_mul_fs = create_shader_module(multi_texture_mul_frag_spv, multi_texture_mul_frag_spv_size);
+		extern unsigned long multi_texture_mul_frag_spv_length;
+		vk.multi_texture_mul_fs = create_shader_module(multi_texture_mul_frag_spv, multi_texture_mul_frag_spv_length);
 
 		extern unsigned char multi_texture_add_frag_spv[];
-		extern long long multi_texture_add_frag_spv_size;
-		vk.multi_texture_add_fs = create_shader_module(multi_texture_add_frag_spv, multi_texture_add_frag_spv_size);
+		extern unsigned long multi_texture_add_frag_spv_length;
+		vk.multi_texture_add_fs = create_shader_module(multi_texture_add_frag_spv, multi_texture_add_frag_spv_length);
 	}
 
 	//
@@ -1651,8 +1651,8 @@ static VkPipeline create_pipeline(const Vk_Pipeline_Def& def) {
 		specialization_data.alpha_test_func = 2;
 	else if (def.state_bits & GLS_ATEST_GE_80)
 		specialization_data.alpha_test_func = 3;
-	else if (def.state_bits & GLS_ATEST_GE_C0) //TODO: Implement this alpha test
-		specialization_data.alpha_test_func = 3;
+	else if (def.state_bits & GLS_ATEST_GE_C0)
+		specialization_data.alpha_test_func = 4;
 	else
 		ri.Error(ERR_DROP, "create_pipeline: invalid alpha test state bits\n");
 

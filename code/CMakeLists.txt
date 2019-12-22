@@ -196,8 +196,11 @@ set(src_renderer
 	sdl/sdl_glimp.cpp
 )
 
-aux_source_directory(renderervk/shaders/hlsl_compiled vk_hlsl_compiled)
 aux_source_directory(renderervk/shaders/spirv vk_spirv)
+set (src_renderervk_shaders
+    ${vk_spirv}
+)
+
 set(src_renderervk
 	renderervk/matcomp.c
 	renderervk/tr_worldeffects.cpp
@@ -229,8 +232,6 @@ set(src_renderervk
 	renderervk/tr_world.cpp
 	renderervk/vk.cpp
 	sdl/sdl_vkimp.cpp
-	${vk_hlsl_compiled}
-	${vk_spirv}
 )
 
 
@@ -522,6 +523,7 @@ add_library(renderer_opengl1_${cpu} SHARED
 SET_TARGET_PROPERTIES(renderer_opengl1_${cpu} PROPERTIES PREFIX "")
 
 set(src_vk_renderer
+    ${src_renderervk_shaders}
 	${src_renderervk}
 	${src_ghoul2}
     ${src_renderercommon}

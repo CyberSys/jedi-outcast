@@ -1979,10 +1979,7 @@ This is called at surface tesselation time
 */
 qboolean RB_TestZFlare( vec3_t point, vec3_t color, vec3_t normal) {
 	int				i;
-	vec4_t			eye, clip, normalized, window;
-	//TODO: Implement in vk
-	return qfalse;
-/*
+	vec4_t			eye, clip, normalized, window;	
 	// if the point is off the screen, don't bother adding it
 	// calculate screen coordinates and depth
 	R_TransformModelToClip( point, backEnd.ori.modelMatrix, 
@@ -2001,12 +1998,13 @@ qboolean RB_TestZFlare( vec3_t point, vec3_t color, vec3_t normal) {
 		|| window[1] < 0 || window[1] >= backEnd.viewParms.viewportHeight ) {
 		return qfalse;	// shouldn't happen, since we check the clip[] above, except for FP rounding
 	}
-
+    return qtrue;
+    //TODO: Implement in vk
+    /*
 //do test
 	float			depth;
 	qboolean		visible;
 	float			screenZ;
-
 	// doing a readpixels is as good as doing a glFinish(), so
 	// don't bother with another sync
 	glState.finishCalled = qfalse;

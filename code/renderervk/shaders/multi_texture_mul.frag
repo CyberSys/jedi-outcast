@@ -20,5 +20,7 @@ void main() {
         if (out_color.a >= 0.5f) discard;
     } else if (alpha_test_func == 3) {
         if (out_color.a < 0.5f) discard;
+    } else if (alpha_test_func == 3) {
+        if (out_color.a < 0.75f) discard;
     }
 }

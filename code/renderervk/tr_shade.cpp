@@ -521,7 +521,7 @@ t1 = most downstream according to spec
 ===================
 */
 static void DrawMultitextured( shaderCommands_t *input, int stage ) {
-    //TODO: Implement vk?
+
 	shaderStage_t	*pStage;
 
 	pStage = tess.xstages[stage];
