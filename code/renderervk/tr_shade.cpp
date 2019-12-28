@@ -748,8 +748,9 @@ static void ProjectDlightTexture( void ) {
 		if ( !( tess.dlightBits & ( 1 << l ) ) ) {
 			continue;	// this surface definately doesn't have any of this light
 		}
-		texCoords = texCoordsArray[0];
-		colors = colorArray[0];
+		
+		texCoords = tess.svars.texcoords[0][0];
+		colors = tess.svars.colors[0];
 
 		dl = &backEnd.refdef.dlights[l];
 		VectorCopy( dl->transformed, origin );
@@ -786,7 +787,6 @@ static void ProjectDlightTexture( void ) {
 			} else if ( texCoords[1] > 1 ) {
 				clip |= 8;
 			}
-			clipBits[i] = clip;
 
 			// modulate the strength based on the height and color
 			if ( dist[2] > radius ) {
@@ -805,6 +805,8 @@ static void ProjectDlightTexture( void ) {
 					modulate = 2.0f * (radius - dist[2]) * scale;
 				}
 			}
+			clipBits[i] = clip;
+			
 			colors[0] = myftol(floatColor[0] * modulate);
 			colors[1] = myftol(floatColor[1] * modulate);
 			colors[2] = myftol(floatColor[2] * modulate);
