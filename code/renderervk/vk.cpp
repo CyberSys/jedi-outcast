@@ -11,14 +11,20 @@ const int XYZ_SIZE      = 4 * VERTEX_CHUNK_SIZE;
 const int COLOR_SIZE    = 1 * VERTEX_CHUNK_SIZE;
 const int ST0_SIZE      = 2 * VERTEX_CHUNK_SIZE;
 const int ST1_SIZE      = 2 * VERTEX_CHUNK_SIZE;
+const int NRMLVEC_SIZE  = 4 * VERTEX_CHUNK_SIZE;
+const int TANGENT_SIZE  = 4 * VERTEX_CHUNK_SIZE;
+const int BITAN_SIZE    = 4 * VERTEX_CHUNK_SIZE;
 
 const int XYZ_OFFSET    = 0;
 const int COLOR_OFFSET  = XYZ_OFFSET + XYZ_SIZE;
 const int ST0_OFFSET    = COLOR_OFFSET + COLOR_SIZE;
 const int ST1_OFFSET    = ST0_OFFSET + ST0_SIZE;
+const int NRMLVEC_OFFSET= ST1_OFFSET + ST1_SIZE;
+const int TANGENT_OFFSET= NRMLVEC_OFFSET + NRMLVEC_SIZE;
+const int BITAN_OFFSET  = TANGENT_OFFSET + TANGENT_SIZE;
 
-static const int VERTEX_BUFFER_SIZE = XYZ_SIZE + COLOR_SIZE + ST0_SIZE + ST1_SIZE;
-static const int INDEX_BUFFER_SIZE = 2 * 1024 * 1024;
+static const int VERTEX_BUFFER_SIZE = XYZ_SIZE + COLOR_SIZE + ST0_SIZE + ST1_SIZE + NRMLVEC_SIZE + TANGENT_SIZE;
+static const int INDEX_BUFFER_SIZE = 4 * 1024 * 1024;
 
 //
 // Vulkan API functions used by the renderer.
@@ -1103,13 +1109,13 @@ void vk_initialize() {
 		push_range.offset = 0;
 		push_range.size = 128; // 32 floats
 
-		VkDescriptorSetLayout set_layouts[2] = {vk.set_layout, vk.set_layout};
+		VkDescriptorSetLayout set_layouts[4] = {vk.set_layout, vk.set_layout, vk.set_layout, vk.set_layout};
 
 		VkPipelineLayoutCreateInfo desc;
 		desc.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		desc.pNext = nullptr;
 		desc.flags = 0;
-		desc.setLayoutCount = 2;
+		desc.setLayoutCount = 4;
 		desc.pSetLayouts = set_layouts;
 		desc.pushConstantRangeCount = 1;
 		desc.pPushConstantRanges = &push_range;
@@ -1212,6 +1218,18 @@ void vk_initialize() {
 		extern unsigned char multi_texture_add_frag_spv[];
 		extern unsigned long multi_texture_add_frag_spv_length;
 		vk.multi_texture_add_fs = create_shader_module(multi_texture_add_frag_spv, multi_texture_add_frag_spv_length);
+		
+		extern unsigned char enhanced_mat_vert_spv[];
+		extern unsigned long enhanced_mat_vert_spv_length;
+		vk.enhanced_mat_vs = create_shader_module(enhanced_mat_vert_spv, enhanced_mat_vert_spv_length);
+
+		extern unsigned char enhanced_mat_clipping_plane_vert_spv[];
+		extern unsigned long enhanced_mat_clipping_plane_vert_spv_length;
+		vk.enhanced_mat_clipping_plane_vs = create_shader_module(enhanced_mat_clipping_plane_vert_spv, enhanced_mat_clipping_plane_vert_spv_length);
+
+		extern unsigned char enhanced_mat_frag_spv[];
+		extern unsigned long enhanced_mat_frag_spv_length;
+		vk.enhanced_mat_fs = create_shader_module(enhanced_mat_frag_spv, enhanced_mat_frag_spv_length);
 	}
 
 	//
@@ -1668,6 +1686,8 @@ static VkPipeline create_pipeline(const Vk_Pipeline_Def& def) {
 	specialization_info.pData = &specialization_data;
 
 	std::vector<VkPipelineShaderStageCreateInfo> shader_stages_state;
+	
+	bool enhancedMaterial = def.shader_type == Vk_Shader_Type::enhanced_material;
 
 	VkShaderModule* vs_module, *fs_module;
 	if (def.shader_type == Vk_Shader_Type::single_texture) {
@@ -1679,7 +1699,11 @@ static VkPipeline create_pipeline(const Vk_Pipeline_Def& def) {
 	} else if (def.shader_type == Vk_Shader_Type::multi_texture_add) {
 		vs_module = def.clipping_plane ? &vk.multi_texture_clipping_plane_vs : &vk.multi_texture_vs;
 		fs_module = &vk.multi_texture_add_fs;
+	} else if (enhancedMaterial) {
+		vs_module = def.clipping_plane ? &vk.enhanced_mat_clipping_plane_vs : &vk.enhanced_mat_vs;
+		fs_module = &vk.enhanced_mat_fs;
 	}
+	
 	shader_stages_state.push_back(get_shader_stage_desc(VK_SHADER_STAGE_VERTEX_BIT, *vs_module, "main"));
 	shader_stages_state.push_back(get_shader_stage_desc(VK_SHADER_STAGE_FRAGMENT_BIT, *fs_module, "main"));
 
@@ -1689,7 +1713,10 @@ static VkPipeline create_pipeline(const Vk_Pipeline_Def& def) {
 	//
 	// Vertex input
 	//
-	VkVertexInputBindingDescription bindings[4];
+	int bindingCount = (!enhancedMaterial) ? 4 : 6;
+	
+	VkVertexInputBindingDescription bindings[bindingCount];
+	
 	// xyz array
 	bindings[0].binding = 0;
 	bindings[0].stride = sizeof(vec4_t);
@@ -1710,7 +1737,21 @@ static VkPipeline create_pipeline(const Vk_Pipeline_Def& def) {
 	bindings[3].stride = sizeof(vec2_t);
 	bindings[3].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-	VkVertexInputAttributeDescription attribs[4];
+	if(enhancedMaterial) {
+
+        // Normal
+        bindings[4].binding = 4;
+        bindings[4].stride = sizeof(vec4_t);
+        bindings[4].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+        
+        // Tangent
+        bindings[5].binding = 5;
+        bindings[5].stride = sizeof(vec4_t);
+        bindings[5].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+	}
+	
+	
+	VkVertexInputAttributeDescription attribs[bindingCount];
 	// xyz
 	attribs[0].location = 0;
 	attribs[0].binding = 0;
@@ -1734,14 +1775,29 @@ static VkPipeline create_pipeline(const Vk_Pipeline_Def& def) {
 	attribs[3].binding = 3;
 	attribs[3].format = VK_FORMAT_R32G32_SFLOAT;
 	attribs[3].offset = 0;
-
+	
+	if(enhancedMaterial){
+        
+        //normal
+        attribs[4].location = 4;
+        attribs[4].binding = 4;
+        attribs[4].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attribs[4].offset = 0;
+        
+        //tangent
+        attribs[5].location = 5;
+        attribs[5].binding = 5;
+        attribs[5].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attribs[5].offset = 0;
+	}
+	
 	VkPipelineVertexInputStateCreateInfo vertex_input_state;
 	vertex_input_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertex_input_state.pNext = nullptr;
 	vertex_input_state.flags = 0;
-	vertex_input_state.vertexBindingDescriptionCount = (def.shader_type == Vk_Shader_Type::single_texture) ? 3 : 4;
+	vertex_input_state.vertexBindingDescriptionCount = (def.shader_type == Vk_Shader_Type::single_texture) ? 3 : bindingCount;
 	vertex_input_state.pVertexBindingDescriptions = bindings;
-	vertex_input_state.vertexAttributeDescriptionCount = (def.shader_type == Vk_Shader_Type::single_texture) ? 3 : 4;
+	vertex_input_state.vertexAttributeDescriptionCount = (def.shader_type == Vk_Shader_Type::single_texture) ? 3 : bindingCount;
 	vertex_input_state.pVertexAttributeDescriptions = attribs;
 
 	//
@@ -2312,6 +2368,98 @@ void vk_bind_geometry() {
 		push_constants_size += 64;
 	}
 	vkCmdPushConstants(vk.command_buffer, vk.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, push_constants_size, push_constants);
+}
+
+void vk_enhanced_shade_geometry(VkPipeline pipeline, Vk_Depth_Range depth_range, bool indexed) {
+	// color
+	{
+		if ((vk.color_st_elements + tess.numVertexes) * sizeof(color4ub_t) > COLOR_SIZE)
+			ri.Error(ERR_DROP, "vulkan: vertex buffer overflow (color)\n");
+
+		byte* dst = vk.vertex_buffer_ptr + COLOR_OFFSET + vk.color_st_elements * sizeof(color4ub_t);
+		Com_Memcpy(dst, tess.svars.colors, tess.numVertexes * sizeof(color4ub_t));
+	}
+	// st0
+	{
+		if ((vk.color_st_elements + tess.numVertexes) * sizeof(vec2_t) > ST0_SIZE)
+			ri.Error(ERR_DROP, "vulkan: vertex buffer overflow (st0)\n");
+
+		byte* dst = vk.vertex_buffer_ptr + ST0_OFFSET + vk.color_st_elements * sizeof(vec2_t);
+		Com_Memcpy(dst, tess.svars.texcoords[0], tess.numVertexes * sizeof(vec2_t));
+	}
+	// st1
+	{
+		if ((vk.color_st_elements + tess.numVertexes) * sizeof(vec2_t) > ST1_SIZE)
+			ri.Error(ERR_DROP, "vulkan: vertex buffer overflow (st1)\n");
+
+		byte* dst = vk.vertex_buffer_ptr + ST1_OFFSET + vk.color_st_elements * sizeof(vec2_t);
+		Com_Memcpy(dst, tess.svars.texcoords[1], tess.numVertexes * sizeof(vec2_t));
+	}
+    // vertex normal
+	{
+		if ((vk.color_st_elements + tess.numVertexes) * sizeof(vec4_t) > NRMLVEC_SIZE)
+			ri.Error(ERR_DROP, "vulkan: vertex buffer overflow (normalpervertex)\n");
+
+		byte* dst = vk.vertex_buffer_ptr + NRMLVEC_OFFSET + vk.color_st_elements * sizeof(vec4_t);
+		Com_Memcpy(dst, tess.normal, tess.numVertexes * sizeof(vec4_t));
+	}
+    // vertex tangent , TODO: Actually send tangents
+	{
+		if ((vk.color_st_elements + tess.numVertexes) * sizeof(vec4_t) > TANGENT_SIZE)
+			ri.Error(ERR_DROP, "vulkan: vertex buffer overflow (normalpervertex)\n");
+
+		byte* dst = vk.vertex_buffer_ptr + TANGENT_OFFSET + vk.color_st_elements * sizeof(vec4_t);
+		Com_Memcpy(dst, tess.normal, tess.numVertexes * sizeof(vec4_t));
+	}
+    // vertex tangent , TODO: Actually send bitangents
+	{
+		if ((vk.color_st_elements + tess.numVertexes) * sizeof(vec4_t) > BITAN_SIZE)
+			ri.Error(ERR_DROP, "vulkan: vertex buffer overflow (binormalpervertex)\n");
+
+		byte* dst = vk.vertex_buffer_ptr + BITAN_OFFSET + vk.color_st_elements * sizeof(vec4_t);
+		Com_Memcpy(dst, tess.normal, tess.numVertexes * sizeof(vec4_t));
+	}
+				
+	// configure vertex data stream
+	VkBuffer bufs[6] = { vk.vertex_buffer, vk.vertex_buffer, vk.vertex_buffer, vk.vertex_buffer, vk.vertex_buffer, vk.vertex_buffer };
+	
+	VkDeviceSize offs[6] = {
+		COLOR_OFFSET    + vk.color_st_elements * sizeof(color4ub_t),
+		ST0_OFFSET      + vk.color_st_elements * sizeof(vec2_t),
+		ST1_OFFSET      + vk.color_st_elements * sizeof(vec2_t),
+		NRMLVEC_OFFSET  + vk.color_st_elements * sizeof(vec4_t),
+		TANGENT_OFFSET  + vk.color_st_elements * sizeof(vec4_t),
+		BITAN_OFFSET    + vk.color_st_elements * sizeof(vec4_t)
+	};
+	
+	vkCmdBindVertexBuffers(vk.command_buffer, 1, 3, bufs, offs); //Vertex stuff, we have lightmap and other stuff
+	vk.color_st_elements += tess.numVertexes;
+
+	// bind descriptor sets
+	uint32_t set_count = 3; //0 Diffuse , 1 lightmap, 2 normal map
+	vkCmdBindDescriptorSets(vk.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk.pipeline_layout, 0, set_count, vk_world.current_descriptor_sets, 0, nullptr);
+
+	// bind pipeline
+	vkCmdBindPipeline(vk.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+
+	// configure pipeline's dynamic state
+	VkRect2D scissor_rect = get_scissor_rect();
+	vkCmdSetScissor(vk.command_buffer, 0, 1, &scissor_rect);
+
+	VkViewport viewport = get_viewport(depth_range);
+	vkCmdSetViewport(vk.command_buffer, 0, 1, &viewport);
+
+	if (tess.shader->polygonOffset) {
+		vkCmdSetDepthBias(vk.command_buffer, r_offsetUnits->value, 0.0f, r_offsetFactor->value);
+	}
+
+	// issue draw call
+	if (indexed)
+		vkCmdDrawIndexed(vk.command_buffer, tess.numIndexes, 1, 0, 0, 0);
+	else
+		vkCmdDraw(vk.command_buffer, tess.numVertexes, 1, 0, 0);
+
+	vk_world.dirty_depth_attachment = true;
 }
 
 void vk_shade_geometry(VkPipeline pipeline, bool multitexture, Vk_Depth_Range depth_range, bool indexed) {

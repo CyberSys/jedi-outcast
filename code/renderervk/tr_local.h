@@ -431,7 +431,6 @@ typedef enum
 } stageType_t;
 
 
-#define NUM_TEXTURE_BUNDLES 2
 
 typedef struct {
 	qboolean		active;
@@ -980,10 +979,10 @@ typedef struct {
 
 // the renderer front end should never modify glstate_t
 typedef struct {
-	int			currenttextures[2];
+	int			currenttextures[4];
 	int			currenttmu;
 	qboolean	finishCalled;
-	int			texEnv[2];
+	int			texEnv[4];
 	int			faceCulling;
 	unsigned long	glStateBits;
 } glstate_t;
@@ -1494,6 +1493,7 @@ struct shaderCommands_s
 	glIndex_t	indexes[SHADER_MAX_INDEXES];
 	vec4_t		xyz[SHADER_MAX_VERTEXES];
 	vec4_t		normal[SHADER_MAX_VERTEXES];
+	vec4_t		tangent[SHADER_MAX_VERTEXES];
 	vec2_t		texCoords[SHADER_MAX_VERTEXES][NUM_TEX_COORDS];
 	color4ub_t	vertexColors[SHADER_MAX_VERTEXES];
 	byte		vertexAlphas[SHADER_MAX_VERTEXES][4];

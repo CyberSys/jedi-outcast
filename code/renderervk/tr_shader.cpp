@@ -3598,11 +3598,11 @@ static shader_t *FinishShader( void ) {
 	//
 	
 	//if ( stage > 1 && CollapseMultitexture() ) {
-	if ( stage > 1 && CollapseMultitexture() ) {
+	/*if ( stage > 1 && CollapseMultitexture() ) {
 		stage--;
-	}
+	}*/
 	
-	//stage = CollapseStagesToGLSL();
+	stage = CollapseStagesToGLSL();
 
 	if ( shader.lightmapIndex[0] >= 0 && !hasLightmapStage ) {
 		ri.Printf( PRINT_WARNING, "WARNING: shader '%s' has lightmap but no lightmap stage!\n", shader.name );
@@ -3629,16 +3629,32 @@ static shader_t *FinishShader( void ) {
         shaderStage_t *pStage = &stages[i];
         def.state_bits = pStage->stateBits;
 
-        if (pStage->bundle[1].image[0] == nullptr)
-            def.shader_type = Vk_Shader_Type::single_texture;
-        else if (shader.multitextureEnv == TEX_MODULATE)
-            def.shader_type = Vk_Shader_Type::multi_texture_mul;
-        else if (shader.multitextureEnv == TEX_ADD)
-            def.shader_type = Vk_Shader_Type::multi_texture_add;
-        else if (shader.multitextureEnv == 0)
-            def.shader_type = Vk_Shader_Type::single_texture;
-        else
-            ri.Error(ERR_FATAL, "Vulkan: could not create pipelines for q3 shader '%s' %i\n", shader.name, shader.multitextureEnv);
+        if (pStage->type == ST_COLORMAP){
+            if (pStage->bundle[1].image[0] == nullptr)
+                def.shader_type = Vk_Shader_Type::single_texture;
+            else if (shader.multitextureEnv == TEX_MODULATE)
+                def.shader_type = Vk_Shader_Type::multi_texture_mul;
+            else if (shader.multitextureEnv == TEX_ADD)
+                def.shader_type = Vk_Shader_Type::multi_texture_add;
+            else if (shader.multitextureEnv == 0)
+                def.shader_type = Vk_Shader_Type::single_texture;
+            else
+                ri.Error(ERR_FATAL, "Vulkan: could not create pipelines for q3 shader '%s' %i\n", shader.name, shader.multitextureEnv);
+        } else if (pStage->type == ST_GLSL){
+            ri.Printf(PRINT_WARNING, "Vulkan: GLSL shader found '%s' %i\n", shader.name, shader.multitextureEnv);
+            if (pStage->bundle[1].image[0] == nullptr)
+                def.shader_type = Vk_Shader_Type::single_texture;
+            else if ((pStage->glslShaderIndex & LIGHTDEF_USE_LIGHTMAP) && pStage->bundle[TB_NORMALMAP].image[0] != 0 )
+                def.shader_type = Vk_Shader_Type::enhanced_material;
+            else if (pStage->glslShaderIndex & LIGHTDEF_USE_LIGHTMAP)
+                def.shader_type = Vk_Shader_Type::multi_texture_mul;
+            else if (shader.multitextureEnv == TEX_ADD)
+                def.shader_type = Vk_Shader_Type::multi_texture_add;
+            else if (shader.multitextureEnv == 0)
+                def.shader_type = Vk_Shader_Type::single_texture;
+            else
+                ri.Error(ERR_FATAL, "Vulkan: could not create pipelines for q3 shader '%s' %i\n", shader.name, shader.multitextureEnv);
+        }
 
         def.clipping_plane = false;
         def.mirror = false;

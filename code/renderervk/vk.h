@@ -28,7 +28,8 @@ const int MAX_IMAGE_CHUNKS = 64;
 enum class Vk_Shader_Type {
 	single_texture,
 	multi_texture_mul,
-	multi_texture_add
+	multi_texture_add,
+	enhanced_material
 };
 
 // used with cg_shadows == 2
@@ -101,6 +102,7 @@ VkPipeline vk_find_pipeline(const Vk_Pipeline_Def& def);
 void vk_clear_attachments(bool clear_depth_stencil, bool clear_color, vec4_t color);
 void vk_bind_geometry();
 void vk_shade_geometry(VkPipeline pipeline, bool multitexture, Vk_Depth_Range depth_range, bool indexed = true);
+void vk_enhanced_shade_geometry(VkPipeline pipeline, Vk_Depth_Range depth_range, bool indexed = true);
 void vk_begin_frame();
 void vk_end_frame();
 void vk_clear_images();
@@ -166,7 +168,9 @@ struct Vk_Instance {
 	VkShaderModule multi_texture_clipping_plane_vs = VK_NULL_HANDLE;
 	VkShaderModule multi_texture_mul_fs = VK_NULL_HANDLE;
 	VkShaderModule multi_texture_add_fs = VK_NULL_HANDLE;
-
+	VkShaderModule enhanced_mat_vs = VK_NULL_HANDLE;
+	VkShaderModule enhanced_mat_clipping_plane_vs = VK_NULL_HANDLE;
+	VkShaderModule enhanced_mat_fs = VK_NULL_HANDLE;
 	//
 	// Standard pipelines.
 	//
@@ -240,7 +244,7 @@ struct Vk_World {
 	//
 
 	// Descriptor sets corresponding to bound texture images.
-	VkDescriptorSet current_descriptor_sets[2];
+	VkDescriptorSet current_descriptor_sets[5]; //0 diffuse, 1 lighmap, 2 normalmap, 3 emissive light, 4 stuff
 
 	// This flag is used to decide whether framebuffer's depth attachment should be cleared
 	// with vmCmdClearAttachment (dirty_depth_attachment == true), or it have just been

@@ -748,8 +748,9 @@ static void ProjectDlightTexture( void ) {
 		if ( !( tess.dlightBits & ( 1 << l ) ) ) {
 			continue;	// this surface definately doesn't have any of this light
 		}
-		texCoords = texCoordsArray[0];
-		colors = colorArray[0];
+		
+		texCoords = tess.svars.texcoords[0][0];
+		colors = tess.svars.colors[0];
 
 		dl = &backEnd.refdef.dlights[l];
 		VectorCopy( dl->transformed, origin );
@@ -786,7 +787,6 @@ static void ProjectDlightTexture( void ) {
 			} else if ( texCoords[1] > 1 ) {
 				clip |= 8;
 			}
-			clipBits[i] = clip;
 
 			// modulate the strength based on the height and color
 			if ( dist[2] > radius ) {
@@ -805,6 +805,8 @@ static void ProjectDlightTexture( void ) {
 					modulate = 2.0f * (radius - dist[2]) * scale;
 				}
 			}
+			clipBits[i] = clip;
+			
 			colors[0] = myftol(floatColor[0] * modulate);
 			colors[1] = myftol(floatColor[1] * modulate);
 			colors[2] = myftol(floatColor[2] * modulate);
@@ -1371,14 +1373,57 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		// do multitexture
 		//
 		bool multitexture = (pStage->bundle[1].image[0] != 0);
+		bool enhancedMaterial = false;
 		
-		if ( pStage->bundle[1].image[0] != 0 )
+		if ( pStage->glslShaderIndex & LIGHTDEF_USE_LIGHTMAP )
 		{
-			DrawMultitextured( input, stage );
-		}
-		else
-		{
+            bool multitexture = true;
+			//DrawMultitextured( input, stage );
+            
+            GL_State( pStage->stateBits );
 
+            //
+            // base
+            //
+            GL_SelectTexture( 0 );
+            //qglTexCoordPointer( 2, GL_FLOAT, 0, input->svars.texcoords[0] );
+            R_BindAnimatedImage( &pStage->bundle[0] );
+
+            //
+            // lightmap/secondary pass
+            //
+            GL_SelectTexture( 1 );
+
+            R_BindAnimatedImage( &pStage->bundle[TB_LIGHTMAP] );
+
+            //R_DrawElements( input->numIndexes, input->indexes );
+
+            //
+            // disable texturing on TEXTURE1, then select TEXTURE0
+            //
+            //qglDisable( GL_TEXTURE_2D );
+            GL_SelectTexture( 0 );
+            
+		}
+
+        if ( pStage->bundle[TB_NORMALMAP].image[0] != 0 )
+		{
+            
+		
+            multitexture = true;
+            enhancedMaterial = true;
+		
+            GL_SelectTexture( 2 );
+            GL_Bind(pStage->bundle[TB_NORMALMAP].image[0]);
+            //qglTexCoordPointer( 2, GL_FLOAT, 0, input->svars.texcoords[0] );
+            //R_BindAnimatedImage( &pStage->bundle[TB_NORMALMAP] );
+            GL_SelectTexture( 0 );
+        }		
+        
+		
+		
+		if (!multitexture)
+		{
 			/*if ( !setArraysOnce )
 			{
 				qglTexCoordPointer( 2, GL_FLOAT, 0, input->svars.texcoords[0] );
@@ -1423,7 +1468,11 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
         if (r_lightmap->integer && multitexture)
             GL_Bind(tr.whiteImage); // replace diffuse texture with a white one thus effectively render only lightmap
 
-        vk_shade_geometry(vk_pipeline, multitexture, depth_range);
+        if(enhancedMaterial){
+            vk_enhanced_shade_geometry(vk_pipeline, depth_range);
+        }else{
+            vk_shade_geometry(vk_pipeline, multitexture, depth_range);
+        }
 
 	}
 }
